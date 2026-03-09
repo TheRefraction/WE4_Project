@@ -1,0 +1,14 @@
+# PhpStorm
+.idea/
+!.idea/codeStyles/
+!.idea/inspectionProfiles/
+
+# Docker
+.env
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Dependencies
+/vendor/
