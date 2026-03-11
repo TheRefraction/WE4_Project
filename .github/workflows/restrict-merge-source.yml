@@ -1,0 +1,40 @@
+name: Restrict merge source
+
+on:
+  pull_request:
+    branches:
+      - master
+      - dev
+      - docs
+
+jobs:
+  check-source-branch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check that PR source is 'dev'
+        run: |
+          if [ "${{ github.base_ref }}" == "master" ]; then
+            if [ "${{ github.head_ref }}" != "dev" ] && [ "${{ github.head_ref }}" != "docs" ]; then
+              echo "PRs to master are only allowed from the 'dev' or 'docs' branch."
+              echo "Source branch was: ${{ github.head_ref }}"
+              exit 1
+            fi
+          fi
+
+          if [ "${{ github.base_ref }}" == "dev" ] && [ "${{ github.head_ref }}" == "master" ]; then
+            echo "Merges from 'master' to 'dev' are not allowed."
+            exit 1
+          fi
+
+          if [ "${{ github.base_ref }}" == "docs" ]; then
+            echo "No merges are allowed onto 'docs'."
+            exit 1
+          fi
+
+          if [ "${{ github.head_ref }}" == "docs" ] && [ "${{ github.base_ref }}" != "master" ]; then
+            echo "'docs' can only be merged into 'master'."
+            echo "Target branch was: ${{ github.base_ref }}"
+            exit 1
+          fi
+          
+          echo "Source branch is allowed. Proceeding."
