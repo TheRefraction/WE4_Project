@@ -1,2 +1,2 @@
-CREATE DATABASE IF NOT EXISTS wonka_db;
-USE wonka_db;
+CREATE DATABASE IF NOT EXISTS efes_db;
+/*USE efes_db;*/
