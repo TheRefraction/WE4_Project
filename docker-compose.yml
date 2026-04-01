@@ -8,7 +8,13 @@ services:
       - "3306:3306"
     volumes:
       - mysql_data:/var/lib/mysql
-      - ./db/init:/docker-entrypoint-initdb.d
+      #- ./db/init:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}" ]
+      timeout: 20s
+      retries: 10
+      interval: 5s
+      start_period: 30s
 
   php:
     build: ./php
@@ -20,7 +26,8 @@ services:
     env_file:
       - .env
     depends_on:
-      - mysql
+      mysql:
+        condition: service_healthy
 
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
@@ -30,6 +37,25 @@ services:
     environment:
       PMA_HOST: mysql
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  flyway:
+    image: flyway/flyway:latest
+    restart: no
+    env_file:
+      - .env
+    command: >
+      -url=jdbc:mysql://${MYSQL_HOST}:${MYSQL_PORT}/${MYSQL_DATABASE}
+      -user=${MYSQL_USER}
+      -password=${MYSQL_PASSWORD}
+      migrate
+    volumes:
+      - ./db/migrations:/flyway/sql
+    depends_on:
+      mysql:
+        condition: service_healthy
 
 volumes:
   mysql_data:
