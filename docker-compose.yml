@@ -5,7 +5,7 @@ services:
     env_file:
       - .env
     ports:
-      - "3306:3306"
+      - "${DOCKER_PORT_MYSQL:-3306}:3306"
     volumes:
       - mysql_data:/var/lib/mysql
       #- ./db/init:/docker-entrypoint-initdb.d
@@ -20,7 +20,7 @@ services:
     build: ./php
     restart: always
     ports:
-      - "8080:80"
+      - "${DOCKER_PORT_PHP:-8080}:80"
     volumes:
       - ./src:/var/www/html
     env_file:
@@ -33,7 +33,7 @@ services:
     image: phpmyadmin/phpmyadmin
     restart: always
     ports:
-      - "8081:80"
+      - "${DOCKER_PORT_PMA:-8081}:80"
     environment:
       PMA_HOST: mysql
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
@@ -44,13 +44,11 @@ services:
   flyway:
     image: flyway/flyway:latest
     restart: no
-    env_file:
-      - .env
-    command: >
-      -url=jdbc:mysql://${MYSQL_HOST}:${MYSQL_PORT}/${MYSQL_DATABASE}
-      -user=${MYSQL_USER}
-      -password=${MYSQL_PASSWORD}
-      migrate
+    environment:
+      FLYWAY_URL: jdbc:mysql://${MYSQL_HOST}:${MYSQL_PORT}/${MYSQL_DATABASE}?allowPublicKeyRetrieval=true&useSSL=false
+      FLYWAY_USER: ${MYSQL_USER}
+      FLYWAY_PASSWORD: ${MYSQL_PASSWORD}
+    command: migrate
     volumes:
       - ./db/migrations:/flyway/sql
     depends_on:

@@ -105,7 +105,13 @@ switch ($Action) {
     }
     'backup' {
         Write-Color Green "Database backup in progress..."
-        $backupFile = "backup_$(Get-Date -Format 'yyyyMMdd_HHmmss').sql"
+
+	$backupDir = "db\backups"
+	if (-not (Test-Path $backupDir)) {
+	    New-Item -ItemType Directory -Path $backupDir -Force | Out-Null
+	}
+
+        $backupFile = "$backupDir\backup_$(Get-Date -Format 'yyyyMMdd_HHmmss').sql"
         $mysqlContainer = docker-compose ps -q mysql
         if (-not $mysqlContainer) {
             Write-Color Red "MySQL service has not been found. Please ensure it has been started beforehand."
