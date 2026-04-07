@@ -3,7 +3,7 @@
 [CmdletBinding(DefaultParameterSetName='Action')]
 param(
     [Parameter(Mandatory=$false, Position=0, ParameterSetName='Action')]
-    [ValidateSet('start','stop','destroy','build','force-build','backup','migrate')]
+    [ValidateSet('start','stop','destroy','build','force-build','backup','migrate','repair')]
     [string]$Action,
 
     [Parameter(Mandatory=$false, ParameterSetName='Help')]
@@ -26,6 +26,7 @@ Available actions:
     force-build   Build services images without using the cache
     backup        Back the database up in a .sql file
     migrate       Migrate the current database to a newer schema version
+    repair        Repair the Flyway table
 
 Options:
     -Help         Displays some help
@@ -128,6 +129,10 @@ switch ($Action) {
         Write-Color Green "Migrations are being applied..."
         docker-compose run --rm flyway
     }
+	'repair' {
+		Write-Color Green "Repairing Flyway table"
+		docker-compose run --rm flyway repair
+	}
     default {
         Write-Color Red "Unknown argument. Please use -Help for more info."
         exit 1
