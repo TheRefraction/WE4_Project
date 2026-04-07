@@ -1,2 +1,0 @@
-CREATE DATABASE IF NOT EXISTS efes_db;
-/*USE efes_db;*/
