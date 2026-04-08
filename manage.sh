@@ -31,6 +31,7 @@ Available actions:
     force-build   Build services images without using the cache
     backup        Back the database up in a .sql file
     migrate       Migrate the current database to a newer schema version
+	repair        Repair the Flyway table
 
 Options:
     -h, --help    Displays this help
@@ -142,6 +143,11 @@ do_migrate() {
     $COMPOSE_CMD run --rm flyway
 }
 
+do_repair() {
+	color_echo "$GREEN" "Repairing Flyway table"
+    $COMPOSE_CMD run --rm flyway repair
+}
+
 # ------------------------------------------------------------
 # Main script logic
 # ------------------------------------------------------------
@@ -162,7 +168,7 @@ main() {
 
     # Validate action
     case "$action" in
-        start|stop|destroy|build|force-build|backup|migrate)
+        start|stop|destroy|build|force-build|backup|migrate|repair)
             ;;
         *)
             color_echo "$RED" "Unknown action '$action'. Use -h or --help for usage."
@@ -184,6 +190,7 @@ main() {
         force-build) do_force_build ;;
         backup)      do_backup ;;
         migrate)     do_migrate ;;
+		repair)      do_repair ;;
     esac
 }
 
