@@ -1,9 +1,10 @@
 <?php
 return [
     'GET' => [
-      '/' => ['TestController', 'test'],
-      '/test' => ['TestController', 'test'],
-      '/test2' => ['TestController', 'test2'],
+        '/'             => ['HomeController', 'home'],
+        '/sign-in'      => ['HomeController', 'viewSignIn'],
+        '/sign-up'      => ['HomeController', 'viewSignUp'],
+        '/account'      => ['HomeController', 'viewAccount'],
     ],
     'POST' => [
 
