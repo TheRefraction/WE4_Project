@@ -2,7 +2,8 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title><?= $title ?? "Efes Resto Kebab" ?></title>
-</head>
+    <title><?php echo isset($title) ? $title : "EFES KEBAB"; ?></title></head>
 <body>
-<?php include 'nav.php'; ?>
+<?php include 'navbar.php'; 
+  // [FIXME] Or might be also 'nav.php'
+  ?>

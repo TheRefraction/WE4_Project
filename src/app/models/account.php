@@ -7,7 +7,9 @@ class Account
     public $last_name;
     public $email;
     public $phone;
+    public $password;
     public $date_creation;
-    public $role;
-
+    public $role_id;
 }
+
+?>
