@@ -1,10 +1,10 @@
 <?php
 require __DIR__ . '/../../models/account.php';
 
-if (!isset($_SESSION['user'])) {
-    $user = null;
+if (!isset($_SESSION['account'])) {
+    $account = null;
 } else {
-    $user = $_SESSION['user'];
+    $account = $_SESSION['account'];
 }
 ?>
 
@@ -12,7 +12,7 @@ if (!isset($_SESSION['user'])) {
     <div class="container">
         <ul class="pages-list">
             <li><a href="/">Home</a></li>
-            <?php if ($user) { ?>
+            <?php if ($account) { ?>
                 <li><a href="#">Commander</a></li>
                 <li><a href="/account">Mon compte</a></li>
                 <li><a href="/basket">Mon panier</a></li>
