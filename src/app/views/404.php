@@ -5,3 +5,4 @@
         <p>Page not found</p>
     </div>
 </div>
+<?php include 'partials/footer.php'; ?>

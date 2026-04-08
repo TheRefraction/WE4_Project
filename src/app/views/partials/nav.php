@@ -10,5 +10,5 @@ if (!isset($_SESSION['account'])) {
 }
 ?>
 <nav>
-<!--TODO-->
+<!--TODO : this file may be deleted since it has been implemented in navbar.php-->
 </nav>

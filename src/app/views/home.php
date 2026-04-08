@@ -7,3 +7,5 @@
 
 
 <p>mettre horaire, photos, etc... </p>
+
+<?php include 'partials/footer.php'; ?>
