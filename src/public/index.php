@@ -9,8 +9,7 @@ function normalize_path($path) {
 $method = $_SERVER['REQUEST_METHOD'];
 $uri = $_SERVER['REQUEST_URI'];
 
-$path = parse_url($uri, PHP_URL_PATH);
-$request = normalize_path(isset($path) ? $path : '/');
+$request = normalize_path(parse_url($uri, PHP_URL_PATH) ?? '/');
 
 $viewDir = '/../app/views/';
 $controllerDir = '/../app/controllers/';
