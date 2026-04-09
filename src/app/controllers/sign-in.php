@@ -1,6 +1,6 @@
 <?php
 
-require __DIR__ .'/../models/account.php';
+require __DIR__ . '/../models/Account.php';
 require __DIR__ .'/../../config/database.php';
 
 $email = $_REQUEST["email"];

@@ -1,12 +1,15 @@
 <?php
 return [
     'GET' => [
-        '/'             => ['HomeController', 'home'],
-        '/sign-in'      => ['HomeController', 'viewSignIn'],
-        '/sign-up'      => ['HomeController', 'viewSignUp'],
-        '/account'      => ['HomeController', 'viewAccount'],
+        '/'                 => ['HomeController', 'home'],
+        '/sign-in'          => ['AuthController', 'viewSignIn'],
+        '/sign-up'          => ['AuthController', 'viewSignUp'],
+        '/sign-out'         => ['AuthController', 'signOut'],
+        '/account'          => ['AuthController', 'viewAccount'],
+        '/account-data'     => ['AuthController', 'getAccountData'],
     ],
     'POST' => [
-
+        '/sign-in'          => ['AuthController', 'signIn'],
+        '/sign-up'          => ['AuthController', 'signUp'],
     ],
 ];

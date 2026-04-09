@@ -1,5 +1,11 @@
 <?php
 
+session_start();
+
+require_once __DIR__ . '/../config/database.php';
+$database = new Database();
+$dbConnection = $database->getConnection();
+
 $routes = require_once __DIR__ . "/../routes/web.php";
 
 function normalize_path($path) {
@@ -23,7 +29,7 @@ if (isset($routes[$method][$request])) {
     if (file_exists($controllerFile)) {
         require_once $controllerFile;
 
-        $controller = new $controllerName();
+        $controller = new $controllerName($dbConnection);
         if (method_exists($controller, $controllerAction)) {
             $controller->$controllerAction();
         } else {
