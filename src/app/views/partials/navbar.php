@@ -11,6 +11,7 @@
             <li><a href="/">Home</a></li>
             <?php if ($userId) { ?>
                 <li><a href="#">Order</a></li>
+                <li><a href="/products">Products list</a></li>
                 <li><a href="/account">My account</a></li>
                 <li><a href="/basket">Cart</a></li>
                 <li><a href="/sign-out">Sign out</a></li>
