@@ -9,6 +9,7 @@
     <div class="container">
         <ul class="pages-list">
             <li><a href="/">Home</a></li>
+            <li><a href="/products">Products list</a></li>
             <?php if ($userId) { ?>
                 <li><a href="#">Order</a></li>
                 <li><a href="/account">My account</a></li>
