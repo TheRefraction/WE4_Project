@@ -11,14 +11,22 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Create SSH directory
+        run: mkdir -p ~/.ssh
+
+      - name: Install SSH key
+        run: |
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+
       - name: Deploy to Server
         uses: wlixcc/SFTP-Deploy-Action@v1.2.6
         with:
           server: ${{ secrets.SERVER_HOST }}
           port: ${{ secrets.SERVER_PORT }}
           username: ${{ secrets.SERVER_USERNAME }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          ssh_private_key: ${{ secrets.SSH_PRIVATE_KEY }}
           local_path: './*'
           remote_path: '/var/www/html/'
-          sftpArgs: '-o ConnectTimeout=10'
+          sftpArgs: '-o ConnectTimeout=10 -o StrictHostKeyChecking=accept-new'
           rsyncArgs: '--exclude=.git --exclude=node_modules --exclude=.env'
