@@ -21,7 +21,7 @@ jobs:
         run: |
           # Generate list of files to upload
           cat > sftp_commands.txt << 'EOF'
-          cd /var/www/html
+          cd html
           EOF
           
           # Add commands to upload each file
