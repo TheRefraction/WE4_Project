@@ -11,22 +11,28 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Create SSH directory
-        run: mkdir -p ~/.ssh
-
-      - name: Install SSH key
+      - name: Setup SSH key
         run: |
+          mkdir -p ~/.ssh
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
 
-      - name: Deploy to Server
-        uses: wlixcc/SFTP-Deploy-Action@v1.2.6
-        with:
-          server: ${{ secrets.SERVER_HOST }}
-          port: ${{ secrets.SERVER_PORT }}
-          username: ${{ secrets.SERVER_USERNAME }}
-          ssh_private_key: ${{ secrets.SSH_PRIVATE_KEY }}
-          local_path: './*'
-          remote_path: '/var/www/html/'
-          sftpArgs: '-o ConnectTimeout=10 -o StrictHostKeyChecking=accept-new'
-          rsyncArgs: '--exclude=.git --exclude=node_modules --exclude=.env'
+      - name: Create SFTP batch commands
+        run: |
+          # Generate list of files to upload
+          cat > sftp_commands.txt << 'EOF'
+          cd /var/www/html
+          EOF
+          
+          # Add commands to upload each file
+          find . -type f -not -path "./.git/*" -not -path "./.github/*" -not -path "./node_modules/*" -not -name ".env" | while read file; do
+            echo "put \"$file\" \"${file#./}\"" >> sftp_commands.txt
+          done
+
+      - name: Deploy via SFTP
+        run: |
+          sftp -b sftp_commands.txt \
+            -P ${{ secrets.SERVER_PORT }} \
+            -i ~/.ssh/deploy_key \
+            -o StrictHostKeyChecking=accept-new \
+            ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_HOST }}
