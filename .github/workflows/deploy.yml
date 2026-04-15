@@ -17,13 +17,34 @@ jobs:
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
 
-      - name: Deploy with rsync
+      - name: Generate SFTP commands with directory creation
         run: |
-          rsync -avz --delete \
-            -e "ssh -p ${{ secrets.SERVER_PORT }} -i ~/.ssh/deploy_key -o StrictHostKeyChecking=accept-new" \
-            --exclude '.git' \
-            --exclude '.github' \
-            --exclude 'node_modules' \
-            --exclude '.env' \
-            --exclude '.gitignore' \
-            ./ ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_HOST }}:/var/www/html/
+          # Start with changing to target directory
+          echo "cd html" > sftp_commands.txt
+          
+          # Find all directories that need to be created
+          find . -type d -not -path "./.git*" -not -path "./.github*" | while read dir; do
+            # Remove leading ./ and convert to server path
+            target_dir="${dir#./}"
+            if [ "$target_dir" != "." ]; then
+              echo "-mkdir \"$target_dir\"" >> sftp_commands.txt
+            fi
+          done
+          
+          # Add commands to upload all files
+          find . -type f -not -path "./.git*" -not -path "./.github*" -not -path "./node_modules*" -not -name ".env" | while read file; do
+            target_file="${file#./}"
+            echo "put \"$file\" \"$target_file\"" >> sftp_commands.txt
+          done
+          
+          # Show the commands for debugging
+          echo "=== SFTP Commands ==="
+          cat sftp_commands.txt
+
+      - name: Execute SFTP deployment
+        run: |
+          sftp -b sftp_commands.txt \
+            -P ${{ secrets.SERVER_PORT }} \
+            -i ~/.ssh/deploy_key \
+            -o StrictHostKeyChecking=accept-new \
+            ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_HOST }}
