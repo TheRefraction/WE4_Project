@@ -7,7 +7,8 @@ return [
         '/sign-out'         => ['AuthController', 'signOut'],
         '/account'          => ['AuthController', 'viewAccount'],
         '/account-data'     => ['AuthController', 'getAccountData'],
-        '/products'         => ['ProductController', 'viewProducts']
+        '/products'         => ['ProductController', 'viewProducts'],
+        '/product'          => ['ProductController', 'viewSingleProduct'],
     ],
     'POST' => [
         '/sign-in'          => ['AuthController', 'signIn'],

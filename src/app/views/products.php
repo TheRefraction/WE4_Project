@@ -7,15 +7,7 @@
 
     foreach ($products as $product) {
         echo "<div>
-            <p>" . $product->name . " - " . $product->price . "€</p>
-
-<!--
-            <form method='POST' action='index.php'>
-                <input type='hidden' name='product_id' value='" . $product->id . "'>
-                <button type='submit' name='action' value='add'>Add to Cart</button>
-                <button type='submit' name='action' value='remove'>Remove one</button>
-            </form>
--->
+            <p><a href='/product?id=" . $product->id . "'>" . $product->name . "</a> - " . $product->price . "€</p>
           </div>";
     }
     ?>
