@@ -1,50 +1,55 @@
-name: Deploy to Server via SFTP
+name: Deploy to Apache
 
 on:
   push:
-    branches: [ master ]
+    branches:
+      - master
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-      - name: Setup SSH key
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/deploy_key
-          chmod 600 ~/.ssh/deploy_key
+      - name: Deploy Website
+        uses: burnett01/rsync-deployments@6.0.0
+        with:
+          switches: -avzr --delete
+          path: src/
+          remote_path: /var/www/html/
+          remote_host: ${{ secrets.SERVER_HOST }}
+          remote_port: ${{ secrets.SERVER_PORT }}
+          remote_user: ${{ secrets.SERVER_USERNAME }}
+          remote_key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-      - name: Generate SFTP commands with directory creation
-        run: |
-          # Start with changing to target directory
-          echo "cd html" > sftp_commands.txt
-          
-          # Find all directories that need to be created
-          find . -type d -not -path "./.git*" -not -path "./.github*" | while read dir; do
-            # Remove leading ./ and convert to server path
-            target_dir="${dir#./}"
-            if [ "$target_dir" != "." ]; then
-              echo "-mkdir \"$target_dir\"" >> sftp_commands.txt
-            fi
-          done
-          
-          # Add commands to upload all files
-          find . -type f -not -path "./.git*" -not -path "./.github*" -not -path "./node_modules*" -not -name ".env" | while read file; do
-            target_file="${file#./}"
-            echo "put \"$file\" \"$target_file\"" >> sftp_commands.txt
-          done
-          
-          # Show the commands for debugging
-          echo "=== SFTP Commands ==="
-          cat sftp_commands.txt
+      - name: Deploy database migrations
+        uses: burnett01/rsync-deployments@6.0.0
+        with:
+          switches: -avzr --delete
+          path: db/
+          remote_path: /var/www/html/db/
+          remote_host: ${{ secrets.SERVER_HOST }}
+          remote_port: ${{ secrets.SERVER_PORT }}
+          remote_user: ${{ secrets.SERVER_USERNAME }}
+          remote_key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-      - name: Execute SFTP deployment
-        run: |
-          sftp -b sftp_commands.txt \
-            -P ${{ secrets.SERVER_PORT }} \
-            -i ~/.ssh/deploy_key \
-            -o StrictHostKeyChecking=accept-new \
-            ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_HOST }}
+      - name: Run Flyway migrations
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          port: ${{ secrets.SERVER_PORT }}
+          username: ${{ secrets.SERVER_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            set -e
+
+            flyway \
+              -url='${{ secrets.DB_URL }}' \
+              -user='${{ secrets.DB_USER }}' \
+              -password='${{ secrets.DB_PASS }}' \
+              -locations='filesystem:/var/www/html/db/migrations' \
+              migrate
+
+            echo "Migrations complete"
