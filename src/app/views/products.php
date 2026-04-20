@@ -4,10 +4,10 @@
     <h1>Product list</h1>
     <!--FIXME: fix category table, to organise products by category (those seen on the menu)-->
 
-    <div class="product-grid">
+    <div>
         <?php foreach ($products as $product) { ?>
             <?php $imagePath = !empty($product->image) ? $product->image : '/assets/images/test.jpg'; ?>
-            <article class="product-card">
+            <article>
                 <a href="/product?id=<?php echo htmlspecialchars($product->id); ?>">
                     <img 
                         src="<?php echo htmlspecialchars($imagePath); ?>"
