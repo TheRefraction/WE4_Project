@@ -1,15 +1,27 @@
 <?php include 'partials/header.php'; ?>
 
-<div>
+<main>
     <h1>Product list</h1>
     <!--FIXME: fix category table, to organise products by category (those seen on the menu)-->
-    <?php
 
-    foreach ($products as $product) {
-        echo "<div>
-            <p><a href='/product?id=" . $product->id . "'>" . $product->name . "</a> - " . $product->price . "€</p>
-          </div>";
-    }
-    ?>
-</div>
+    <div class="product-grid">
+        <?php foreach ($products as $product) { ?>
+            <?php $imagePath = !empty($product->image) ? $product->image : '/assets/images/test.jpg'; ?>
+            <article class="product-card">
+                <a href="/product?id=<?php echo htmlspecialchars($product->id); ?>">
+                    <img 
+                        src="<?php echo htmlspecialchars($imagePath); ?>"
+                        alt="<?php echo htmlspecialchars($product->name); ?>"
+                    >
+
+                    <div>
+                        <h2><?php echo htmlspecialchars($product->name); ?></h2>
+                        <p><?php echo htmlspecialchars($product->price); ?>€</p>
+                    </div>
+                </a>
+            </article>
+        <?php } ?>
+    </div>
+</main>
+
 <?php include 'partials/footer.php'; ?>

@@ -4,6 +4,7 @@
     <h1>My account</h1>
 
     <div id="loading">Loading account information...</div>
+    
     <!-- Sensitive information are not displayed until server is sure user is authenticated -->
     <div id="account-content" style="display: none;">
         <div class="account-details">
