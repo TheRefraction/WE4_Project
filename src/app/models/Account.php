@@ -31,4 +31,21 @@ class Account {
 
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
+
+    public function updateInfo($firstName, $lastName, $email, $phone) {
+        $query = "UPDATE account 
+                  SET first_name = :firstName, 
+                      last_name = :lastName, 
+                      phone = :phone 
+                  WHERE email = :email";
+
+        $stmt = $this->conn->prepare($query);
+
+        $stmt->bindValue(':firstName', $firstName);
+        $stmt->bindValue(':lastName', $lastName);
+        $stmt->bindValue(':phone', $phone);
+        $stmt->bindValue(':email', $email);
+
+        return $stmt->execute();
+    }
 }

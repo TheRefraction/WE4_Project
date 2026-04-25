@@ -127,4 +127,30 @@ class AuthController {
         echo json_encode($data);
         exit;
     }
+
+    public function updateAccount() {
+        $firstName = trim($_POST["first_name"] ?? '');
+        $lastName = trim($_POST["last_name"] ?? '');
+        $phone = !empty($_POST["phone"]) ? trim($_POST["phone"]) : null;
+        $email = $_SESSION['user_email'];
+
+        if (empty($firstName) || empty($lastName)) {
+            $_SESSION['errors'] = ["First name and Last name are required."];
+            header('Location: /account');
+            exit;
+        }
+
+        if ($this->accountModel->updateInfo($firstName, $lastName, $email, $phone)) {
+            $_SESSION['user_first_name'] = $firstName;
+            $_SESSION['user_last_name'] = $lastName;
+            $_SESSION['success'] = "Profile updated!";
+        } else {
+            $_SESSION['errors'] = ["Error updating account."];
+        }
+
+        header('Location: /account');
+        exit;
+    }
+
+
 }

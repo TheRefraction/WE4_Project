@@ -22,6 +22,24 @@
             </div>
         </div>
     </div>
+    <h2>Update account</h2>
+    <form action="/update-account" method="POST">
+        <div class="account-details">
+            <div>
+                <label>First name</label>
+                <input type="text" name="first_name">
+            </div>
+            <div>
+                <label>Last name</label>
+                <input type="text" name="last_name">
+            </div>
+            <div>
+                <label>Phone</label>
+                <input type="text" name="phone">
+            </div>
+            <button type="submit">Update</button>
+        </div>
+    </form>
 </main>
 
 <script>

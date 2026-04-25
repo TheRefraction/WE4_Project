@@ -23,6 +23,10 @@
                 </div>
             </div>
         </div>
+        <div class="row">
+            <h3 class="border-bottom pb-2"></h3>
+            <p style="text-align: justify;">Une soirée réussie avec des plats turcs ? – Nos plats sont fraîchement préparés dans une ambiance accueillante. Découvrez le « Efes Resto », et laissez vous séduire par de nombreux plats succulents. Dégustez nos spécialités halal et découvrez la grande diversité de ces plats. Nous voulons vous aider à faire attention à votre santé et vous sensibiliser à l’importance d’une alimentation saine et gourmande. Profitez des rayons du soleil sur notre terrasse très belle. </p>
+        </div>
     </div>
 
 <?php include 'partials/footer.php'; ?>
