@@ -93,6 +93,13 @@ class AuthController {
             $_SESSION['user_first_name'] = $user['first_name'];
             $_SESSION['user_last_name'] = $user['last_name'];
             $_SESSION['user_email'] = $user['email'];
+
+            $role = $this->accountModel->getRole($user['id']); 
+            if ($role === 'admin') {
+                header('Location: /admin');
+                exit;
+            }
+
             header('Location: /account');
             exit;
         }

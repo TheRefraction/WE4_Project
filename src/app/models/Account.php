@@ -23,13 +23,26 @@ class Account {
     }
 
     public function findByEmail($email) {
-        $query = "SELECT * FROM account WHERE email = :email";
+        $query = "SELECT * FROM account
+                  WHERE email = :email";
 
         $stmt = $this->conn->prepare($query);
         $stmt->bindValue(':email', $email);
         $stmt->execute();
 
         return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    public function getRole($id) {
+        $query = "SELECT name FROM account a
+                  INNER JOIN role r ON a.role_id = r.id
+                  WHERE a.id = :id";
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindValue(':id', $id);
+        $stmt->execute();
+
+        return $stmt->fetchColumn();
     }
 
     public function updateInfo($firstName, $lastName, $email, $phone) {
