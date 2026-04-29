@@ -48,21 +48,24 @@ $controllerDir = '/../app/controllers/';
 $matched = false;
 $matchedController = null;
 $matchedAction = null;
+$allowedAccess = [];
 $routeParams = [];
 
 // Try to match exact routes first
 if (isset($routes[$method][$request])) {
     $controllerInfo = $routes[$method][$request];
-    $matchedController = $controllerInfo[0];
-    $matchedAction = $controllerInfo[1];
+    $matchedController = $controllerInfo['controller'];
+    $matchedAction = $controllerInfo['action'];
+    $allowedAccess = $controllerInfo['access'] ?? [];
     $matched = true;
 } else {
     // Try to match dynamic routes
     foreach ($routes[$method] as $routePattern => $controllerInfo) {
         $params = match_route($request, $routePattern);
         if ($params !== false) {
-            $matchedController = $controllerInfo[0];
-            $matchedAction = $controllerInfo[1];
+            $matchedController = $controllerInfo['controller'];
+            $matchedAction = $controllerInfo['action'];
+            $allowedAccess = $controllerInfo['access'] ?? [];
             $routeParams = $params;
             $matched = true;
             break;
@@ -71,6 +74,25 @@ if (isset($routes[$method][$request])) {
 }
 
 if ($matched) {
+    $role = 'guest';
+
+    if (isset($_SESSION['user_id'])) {
+        require_once __DIR__ . '/../app/models/Account.php';
+        $accountModel = new Account($dbConnection);
+        $role = $accountModel->getRole($_SESSION['user_id']);
+    }
+
+    if (!in_array($role, $allowedAccess, true)) {
+        if ($role === 'admin') {
+            header('Location: /admin');
+        } else if ($role === 'client') {
+            header('Location: /account');
+        } else {
+            header('Location: /sign-in');
+        }
+        exit;
+    }
+
     $controllerFile = __DIR__ . $controllerDir . $matchedController . '.php';
     if (file_exists($controllerFile)) {
         require_once $controllerFile;

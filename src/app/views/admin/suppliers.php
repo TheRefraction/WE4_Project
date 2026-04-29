@@ -5,7 +5,7 @@
     <a href="/admin/suppliers/create" class="btn btn-success">Create Supplier</a>
 </div>
 
-<div class="card">
+<article>
     <h3>Suppliers Management</h3>
     <table>
         <thead>
@@ -44,6 +44,6 @@
             <?php endif; ?>
         </tbody>
     </table>
-</div>
+</article>
 
 <?php require_once __DIR__ . '/../partials/admin-footer.php'; ?>

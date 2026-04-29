@@ -10,12 +10,12 @@ body {
     color: #333;
 }
 
-.admin-container {
+main {
     display: flex;
     height: 100vh;
 }
 
-.sidebar {
+aside {
     width: 250px;
     background-color: #2c3e50;
     color: white;
@@ -23,21 +23,29 @@ body {
     overflow-y: auto;
 }
 
-.sidebar h1 {
+aside h1 {
     font-size: 24px;
     margin-bottom: 30px;
 }
 
-.sidebar nav ul {
+aside nav ul {
     list-style: none;
 }
 
-.sidebar nav ul li {
+aside nav ul li {
     margin-bottom: 10px;
 }
 
-.sidebar nav ul li a {
+aside nav ul ul li {
+    position: relative;
+    top: -5px;
+    left: 20px;
+    margin-bottom: 5px;
+}
+
+aside nav ul li a {
     color: white;
+    cursor: pointer;
     text-decoration: none;
     display: block;
     padding: 10px 15px;
@@ -45,12 +53,38 @@ body {
     transition: background-color 0.3s;
 }
 
-.sidebar nav ul li a:hover {
+aside nav ul li a:hover {
     background-color: #34495e;
+    padding-left: 20px;
 }
 
-.sidebar nav ul li a.active {
-    background-color: #3498db;
+.submenu {
+    display: none;
+}
+
+.submenu.active {
+    display: block;
+}
+
+.submenu-trigger {
+    position: relative;
+    padding-left: 18px;
+}
+
+.submenu-trigger::before {
+    content: '+';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.submenu-trigger.active::before {
+    content: '-';
+}
+
+.submenu.active li {
+    border-left: 2px dotted white;
 }
 
 .main-content {
@@ -60,7 +94,7 @@ body {
     overflow: hidden;
 }
 
-.top-bar {
+main header {
     background-color: white;
     padding: 15px 30px;
     border-bottom: 1px solid #e0e0e0;
@@ -69,7 +103,7 @@ body {
     align-items: center;
 }
 
-.top-bar h2 {
+main header h2 {
     font-size: 24px;
 }
 
@@ -217,6 +251,29 @@ table tbody tr:hover {
     font-family: inherit;
 }
 
+.form-options {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 8px;
+}
+
+.form-option {
+    display: flex;
+    align-items: left;
+    gap: 8px;
+}
+
+.form-option label {
+    margin: 0;
+    font-weight: normal;
+}
+
+.form-option input {
+    width: auto;
+    margin: 0;
+}
+
 .form-group textarea {
     resize: vertical;
     min-height: 100px;
@@ -236,7 +293,7 @@ table tbody tr:hover {
     gap: 20px;
 }
 
-.card {
+article {
     background-color: white;
     border-radius: 5px;
     padding: 20px;
@@ -335,11 +392,11 @@ table tbody tr:hover {
 }
 
 @media (max-width: 768px) {
-    .admin-container {
+    main {
         flex-direction: column;
     }
 
-    .sidebar {
+    aside {
         width: 100%;
         height: auto;
     }

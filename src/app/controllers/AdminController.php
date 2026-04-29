@@ -12,7 +12,11 @@ class AdminController {
         $this->accountModel = new Account($dbConnection);
     }
 
-    // Check if user is admin
+    /**
+     * Checks if the current user is logged in and has admin privileges.
+     * If not logged in, redirects to sign-in page.
+     * If logged in but not an admin, shows 403 error page.
+     */
     private function checkAdminAccess() {
         if (!isset($_SESSION['user_id'])) {
             header('Location: /sign-in');
@@ -29,6 +33,10 @@ class AdminController {
         }
     }
 
+    /**
+     * API endpoint to check admin access (used for frontend access control)
+     * URL: /admin/access
+     */
     public function getAdminAccess() {
         header('Content-Type: application/json');
 
@@ -50,6 +58,11 @@ class AdminController {
     }
 
     // ========== DASHBOARD ==========
+
+    /**
+     * Displays the admin dashboard with key stats and quick links.
+     * URL: /admin
+     */
     public function viewAdmin() {
         $this->checkAdminAccess();
         
@@ -60,6 +73,11 @@ class AdminController {
     }
 
     // ========== ACCOUNTS ==========
+
+    /**
+     * Displays the account management page with a list of all user accounts.
+     * URL: /admin/accounts
+     */
     public function viewAccounts() {
         $this->checkAdminAccess();
         
@@ -69,6 +87,10 @@ class AdminController {
         require_once __DIR__ . '/../views/admin/accounts.php';
     }
 
+    /**
+     * Displays the edit account page with a form to update account details.
+     * URL: /admin/accounts/edit/:id
+     */
     public function viewEditAccount($id) {
         $this->checkAdminAccess();
         
@@ -85,14 +107,20 @@ class AdminController {
         require_once __DIR__ . '/../views/admin/edit-account.php';
     }
 
+    /**
+     * Updates an existing account's details.
+     * URL: /admin/accounts/update
+     */
     public function updateAccountAdmin() {
         $this->checkAdminAccess();
         
+        // Only allow POST requests for updates
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             header('Location: /admin/accounts');
             exit;
         }
 
+        // Sanitize and validate input
         $id = intval($_POST['id'] ?? 0);
         $firstName = trim($_POST['first_name'] ?? '');
         $lastName = trim($_POST['last_name'] ?? '');
@@ -100,33 +128,57 @@ class AdminController {
         $phone = !empty($_POST['phone']) ? trim($_POST['phone']) : null;
         $roleId = intval($_POST['role_id'] ?? 1);
 
+        // Validate required fields
         if (empty($id) || empty($firstName) || empty($lastName) || empty($email)) {
             $_SESSION['errors'] = ['All required fields must be filled.'];
             header('Location: /admin/accounts/edit/' . $id);
             exit;
         }
 
+        // Prevent admin from changing their own role or details from the admin panel
+        if ($id === $_SESSION['user_id']) {
+            $_SESSION['errors'] = ['You cannot update your own account from the admin panel. Please use the account settings page.'];
+            header('Location: /admin/accounts/edit/' . $id);
+            exit;
+        }
+
+        // Updates account details and role
         if ($this->adminModel->updateAccount($id, $firstName, $lastName, $email, $phone, $roleId)) {
             $_SESSION['success'] = 'Account updated successfully!';
             header('Location: /admin/accounts');
             exit;
         }
 
+        // If update fails, set error message and redirect back to edit page
         $_SESSION['errors'] = ['Error updating account!'];
         header('Location: /admin/accounts/edit/' . $id);
         exit;
     }
 
+    /**
+     * Deletes an account by ID.
+     * URL: /admin/accounts/delete/:id
+     */
     public function deleteAccount($id) {
+        // Check admin access first
         $this->checkAdminAccess();
         
+        // Only allow POST requests for deletions
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             header('Location: /admin/accounts');
             exit;
         }
 
         $id = intval($id);
+
+        // Prevent admin from deleting their own account from the admin panel
+        if ($id === $_SESSION['user_id']) {
+            $_SESSION['errors'] = ['You cannot delete your own account from the admin panel. Please use the account settings page to deactivate your account if needed.'];
+            header('Location: /admin/accounts');
+            exit;
+        }
         
+        // Deletes the account and redirects back to accounts list with success or error message
         if ($this->adminModel->deleteAccount($id)) {
             $_SESSION['success'] = 'Account deleted successfully!';
         } else {
@@ -138,7 +190,13 @@ class AdminController {
     }
 
     // ========== PRODUCTS ==========
+
+    /**
+     * Displays the product management page with a list of all products.
+     * URL: /admin/products
+     */
     public function viewProducts() {
+        // Check admin access first
         $this->checkAdminAccess();
         
         $title = 'Manage Products';
@@ -147,22 +205,38 @@ class AdminController {
         require_once __DIR__ . '/../views/admin/products.php';
     }
 
+    /**
+     * Displays the create product page with a form to add a new product.
+     * URL: /admin/products/create
+     */
     public function viewCreateProduct() {
+        // Check admin access first
         $this->checkAdminAccess();
         
+        // Get suppliers and categories for dropdowns
         $title = 'Create Product';
         $suppliers = $this->adminModel->getAllSuppliers();
+        $categories = $this->adminModel->getAllCategories();
         
         require_once __DIR__ . '/../views/admin/create-product.php';
     }
 
+    /**
+     * Displays the edit product page with a form to update product details.
+     * URL: /admin/products/edit/:id
+     */
     public function viewEditProduct($id) {
+        // Check admin access first
         $this->checkAdminAccess();
         
+        // Get product details, suppliers, categories, and selected category IDs for the product
         $title = 'Edit Product';
         $product = $this->adminModel->getProductById($id);
         $suppliers = $this->adminModel->getAllSuppliers();
+        $categories = $this->adminModel->getAllCategories();
+        $selectedCategoryIds = $this->adminModel->getProductCategoryIds($id);
         
+        // If product not found, show 404 page
         if (!$product) {
             http_response_code(404);
             require_once __DIR__ . '/../views/404.php';
@@ -172,70 +246,100 @@ class AdminController {
         require_once __DIR__ . '/../views/admin/edit-product.php';
     }
 
+    /**
+     * Creates a new product with the provided details.
+     * URL: /admin/products/create
+     */
     public function createProduct() {
+        // Check admin access first
         $this->checkAdminAccess();
         
+        // Only allow POST requests for creation
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             header('Location: /admin/products/create');
             exit;
         }
 
+        // Sanitize and validate input
         $name = trim($_POST['name'] ?? '');
         $description = trim($_POST['description'] ?? '');
         $price = floatval($_POST['price'] ?? 0);
         $supplierId = !empty($_POST['supplier_id']) ? intval($_POST['supplier_id']) : null;
+        $hidden = intval($_POST['hidden'] ?? 0);
+        $category_ids = isset($_POST['category_ids']) ? array_map('intval', $_POST['category_ids']) : [];
 
+        // Validate required fields
         if (empty($name) || $price <= 0) {
             $_SESSION['errors'] = ['Product name and valid price are required.'];
             header('Location: /admin/products/create');
             exit;
         }
 
-        if ($this->adminModel->createProduct($name, $description, $price, $supplierId)) {
+        // Creates the product and redirects back to products list with success or error message
+        if ($this->adminModel->createProduct($name, $description, $price, $supplierId, $hidden, $category_ids)) {
             $_SESSION['success'] = 'Product created successfully!';
             header('Location: /admin/products');
             exit;
         }
 
+        // If creation fails, set error message and redirect back to create page
         $_SESSION['errors'] = ['Error creating product!'];
         header('Location: /admin/products/create');
         exit;
     }
 
+    /**
+     * Updates an existing product's details.
+     * URL: /admin/products/update
+     */
     public function updateProduct() {
+        // Check admin access first
         $this->checkAdminAccess();
         
+        // Only allow POST requests for updates
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             header('Location: /admin/products');
             exit;
         }
 
+        // Sanitize and validate input
         $id = intval($_POST['id'] ?? 0);
         $name = trim($_POST['name'] ?? '');
         $description = trim($_POST['description'] ?? '');
         $price = floatval($_POST['price'] ?? 0);
         $supplierId = !empty($_POST['supplier_id']) ? intval($_POST['supplier_id']) : null;
+        $hidden = intval($_POST['hidden'] ?? 0);
+        $category_ids = isset($_POST['category_ids']) ? array_map('intval', $_POST['category_ids']) : [];
 
+        // Validate required fields
         if (empty($id) || empty($name) || $price <= 0) {
             $_SESSION['errors'] = ['Product name and valid price are required.'];
             header('Location: /admin/products/edit/' . $id);
             exit;
         }
 
-        if ($this->adminModel->updateProduct($id, $name, $description, $price, $supplierId)) {
+        // Updates the product and redirects back to products list with success or error message
+        if ($this->adminModel->updateProduct($id, $name, $description, $price, $supplierId, $hidden, $category_ids)) {
             $_SESSION['success'] = 'Product updated successfully!';
             header('Location: /admin/products');
             exit;
         }
 
+        // If update fails, set error message and redirect back to edit page
         $_SESSION['errors'] = ['Error updating product!'];
         header('Location: /admin/products/edit/' . $id);
         exit;
     }
 
+    /**
+     * Deletes a product.
+     * URL: /admin/products/delete/:id
+     */
     public function deleteProduct($id) {
+        // Check admin access first
         $this->checkAdminAccess();
         
+        // Only allow POST requests for deletions
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             header('Location: /admin/products');
             exit;
@@ -243,12 +347,14 @@ class AdminController {
 
         $id = intval($id);
         
+        // Deletes the product and redirects back to products list with success or error message
         if ($this->adminModel->deleteProduct($id)) {
             $_SESSION['success'] = 'Product deleted successfully!';
         } else {
             $_SESSION['errors'] = ['Error deleting product!'];
         }
         
+        // Redirect back to products list after deletion attempt
         header('Location: /admin/products');
         exit;
     }

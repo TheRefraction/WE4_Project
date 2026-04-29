@@ -4,7 +4,7 @@
     <a href="/admin" class="btn btn-secondary">Back to Dashboard</a>
 </div>
 
-<div class="card">
+<article>
     <h3>Categories Management</h3>
     
     <div style="margin-bottom: 20px; padding: 20px; background-color: #f9f9f9; border-radius: 5px;">
@@ -51,6 +51,6 @@
             <?php endif; ?>
         </tbody>
     </table>
-</div>
+</article>
 
 <?php require_once __DIR__ . '/../partials/admin-footer.php'; ?>

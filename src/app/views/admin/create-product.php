@@ -1,10 +1,6 @@
 <?php require_once __DIR__ . '/../partials/admin-header.php'; ?>
 
-<div style="margin-bottom: 20px;">
-    <a href="/admin/products" class="btn btn-secondary">Back to Products</a>
-</div>
-
-<div class="card">
+<article>
     <h3>Create Product</h3>
     <form method="POST" action="/admin/products/create">
         <div class="form-group">
@@ -22,6 +18,7 @@
                 <label for="price">Price *</label>
                 <input type="number" id="price" name="price" step="0.01" min="0" required>
             </div>
+
             <div class="form-group">
                 <label for="supplier_id">Supplier</label>
                 <select id="supplier_id" name="supplier_id">
@@ -31,6 +28,25 @@
                     <?php endforeach; ?>
                 </select>
             </div>
+
+            <div class="form-group">
+                <label for="category_ids">Categories *</label>
+                <select id="category_ids" name="category_ids[]" multiple size="6" required>
+                    <?php foreach ($categories as $category): ?>
+                        <option value="<?= $category['id'] ?>"><?= htmlspecialchars($category['name']) ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Misc.</label>
+                <div class="form-options">
+                    <div class="form-option">
+                        <input type="checkbox" id="hidden" name="hidden" value="0">
+                        <label for="hidden">Hidden</label>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <div style="margin-top: 20px;">
@@ -38,6 +54,6 @@
             <a href="/admin/products" class="btn btn-secondary">Cancel</a>
         </div>
     </form>
-</div>
+</article>
 
 <?php require_once __DIR__ . '/../partials/admin-footer.php'; ?>

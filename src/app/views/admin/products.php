@@ -5,7 +5,7 @@
     <a href="/admin/products/create" class="btn btn-success">Create Product</a>
 </div>
 
-<div class="card">
+<article>
     <h3>Products Management</h3>
     <table>
         <thead>
@@ -46,6 +46,6 @@
             <?php endif; ?>
         </tbody>
     </table>
-</div>
+</article>
 
 <?php require_once __DIR__ . '/../partials/admin-footer.php'; ?>

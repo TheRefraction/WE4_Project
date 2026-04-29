@@ -1,43 +1,187 @@
 <?php
 return [
     'GET' => [
-        '/'                             => ['HomeController', 'home'],
-        '/sign-in'                      => ['AuthController', 'viewSignIn'],
-        '/sign-up'                      => ['AuthController', 'viewSignUp'],
-        '/sign-out'                     => ['AuthController', 'signOut'],
-        '/account'                      => ['AuthController', 'viewAccount'],
-        '/account-data'                 => ['AuthController', 'getAccountData'],
-        '/products'                     => ['ProductController', 'viewProducts'],
-        '/product'                      => ['ProductController', 'viewSingleProduct'],
-        '/admin-data'                   => ['AdminController', 'getAdminAccess'],
-        '/admin'                        => ['AdminController', 'viewAdmin'],
-        '/admin/accounts'               => ['AdminController', 'viewAccounts'],
-        '/admin/accounts/edit/:id'      => ['AdminController', 'viewEditAccount'],
-        '/admin/products'               => ['AdminController', 'viewProducts'],
-        '/admin/products/create'        => ['AdminController', 'viewCreateProduct'],
-        '/admin/products/edit/:id'      => ['AdminController', 'viewEditProduct'],
-        '/admin/suppliers'              => ['AdminController', 'viewSuppliers'],
-        '/admin/suppliers/create'       => ['AdminController', 'viewCreateSupplier'],
-        '/admin/suppliers/edit/:id'     => ['AdminController', 'viewEditSupplier'],
-        '/admin/invoices'               => ['AdminController', 'viewInvoices'],
-        '/admin/invoices/details/:id'   => ['AdminController', 'viewInvoiceDetails'],
-        '/admin/categories'             => ['AdminController', 'viewCategories'],
+        '/'                             => [
+            'controller' => 'HomeController',
+            'action' => 'home',
+            'access' => ['guest','client']
+        ],
+        '/sign-in'                      => [
+            'controller' => 'AuthController',
+            'action' => 'viewSignIn',
+            'access' => ['guest']
+        ],
+        '/sign-up'                      => [
+            'controller' => 'AuthController',
+            'action' => 'viewSignUp',
+            'access' => ['guest']
+        ],
+        '/sign-out'                     => [
+            'controller' => 'AuthController',
+            'action' => 'signOut',
+            'access' => ['client', 'admin']
+        ],
+        '/account'                      => [
+            'controller' => 'AuthController',
+            'action' => 'viewAccount',
+            'access' => ['client']
+        ],
+        '/account-data'                 => [
+            'controller' => 'AuthController',
+            'action' => 'getAccountData',
+            'access' => ['client']
+        ],
+        '/products'                     => [
+            'controller' => 'ProductController',
+            'action' => 'viewProducts',
+            'access' => ['guest', 'client']
+        ],
+        '/product'                      => [
+            'controller' => 'ProductController',
+            'action' => 'viewSingleProduct',
+            'access' => ['guest', 'client']
+        ],
+        '/admin'                        => [
+            'controller' => 'AdminController',
+            'action' => 'viewAdmin',
+            'access' => ['admin']
+        ],
+        '/admin/access' => [
+            'controller' => 'AdminController',
+            'action' => 'getAdminAccess',
+            'access' => ['admin']
+        ],
+        '/admin/accounts'               => [
+            'controller' => 'AdminController',
+            'action' => 'viewAccounts',
+            'access' => ['admin']
+        ],
+        '/admin/accounts/edit/:id'      => [
+            'controller' => 'AdminController',
+            'action' => 'viewEditAccount',
+            'access' => ['admin']
+        ],
+        '/admin/products'               => [
+            'controller' => 'AdminController',
+            'action' => 'viewProducts',
+            'access' => ['admin']
+        ],
+        '/admin/products/create'        => [
+            'controller' => 'AdminController',
+            'action' => 'viewCreateProduct',
+            'access' => ['admin']
+        ],
+        '/admin/products/edit/:id'      => [
+            'controller' => 'AdminController',
+            'action' => 'viewEditProduct',
+            'access' => ['admin']
+        ],
+        '/admin/suppliers'              => [
+            'controller' => 'AdminController',
+            'action' => 'viewSuppliers',
+            'access' => ['admin']
+        ],
+        '/admin/suppliers/create'       => [
+            'controller' => 'AdminController',
+            'action' => 'viewCreateSupplier',
+            'access' => ['admin']
+        ],
+        '/admin/suppliers/edit/:id'     => [
+            'controller' => 'AdminController',
+            'action' => 'viewEditSupplier',
+            'access' => ['admin']
+        ],
+        '/admin/invoices'               => [
+            'controller' => 'AdminController',
+            'action' => 'viewInvoices',
+            'access' => ['admin']
+        ],
+        '/admin/invoices/details/:id'   => [
+            'controller' => 'AdminController',
+            'action' => 'viewInvoiceDetails',
+            'access' => ['admin']
+        ],
+        '/admin/categories'             => [
+            'controller' => 'AdminController',
+            'action' => 'viewCategories',
+            'access' => ['admin']
+        ],
     ],
     'POST' => [
-        '/sign-in'                      => ['AuthController', 'signIn'],
-        '/sign-up'                      => ['AuthController', 'signUp'],
-        '/update-account'               => ['AuthController', 'updateAccount'],
-        '/admin/accounts/update'        => ['AdminController', 'updateAccountAdmin'],
-        '/admin/accounts/delete/:id'    => ['AdminController', 'deleteAccount'],
-        '/admin/products/create'        => ['AdminController', 'createProduct'],
-        '/admin/products/update'        => ['AdminController', 'updateProduct'],
-        '/admin/products/delete/:id'    => ['AdminController', 'deleteProduct'],
-        '/admin/suppliers/create'       => ['AdminController', 'createSupplier'],
-        '/admin/suppliers/update'       => ['AdminController', 'updateSupplier'],
-        '/admin/suppliers/delete/:id'   => ['AdminController', 'deleteSupplier'],
-        '/admin/invoices/update-status' => ['AdminController', 'updateInvoiceStatus'],
-        '/admin/categories/create'      => ['AdminController', 'createCategory'],
-        '/admin/categories/update'      => ['AdminController', 'updateCategory'],
-        '/admin/categories/delete/:id'  => ['AdminController', 'deleteCategory'],
+        '/sign-in'                      => [
+            'controller' => 'AuthController',
+            'action' => 'signIn',
+            'access' => ['guest']
+        ],
+        '/sign-up'                      => [
+            'controller' => 'AuthController',
+            'action' => 'signUp',
+            'access' => ['guest']
+        ],
+        '/update-account'               => [
+            'controller' => 'AuthController',
+            'action' => 'updateAccount',
+            'access' => ['client']
+        ],
+        '/admin/accounts/update'        => [
+            'controller' => 'AdminController',
+            'action' => 'updateAccountAdmin',
+            'access' => ['admin']
+        ],
+        '/admin/accounts/delete/:id'    => [
+            'controller' => 'AdminController',
+            'action' => 'deleteAccount',
+            'access' => ['admin']
+        ],
+        '/admin/products/create'        => [
+            'controller' => 'AdminController',
+            'action' => 'createProduct',
+            'access' => ['admin']
+        ],
+        '/admin/products/update'        => [
+            'controller' => 'AdminController',
+            'action' => 'updateProduct',
+            'access' => ['admin']
+        ],
+        '/admin/products/delete/:id'    => [
+            'controller' => 'AdminController',
+            'action' => 'deleteProduct',
+            'access' => ['admin']
+        ],
+        '/admin/suppliers/create'       => [
+            'controller' => 'AdminController',
+            'action' => 'createSupplier',
+            'access' => ['admin']
+        ],
+        '/admin/suppliers/update'       => [
+            'controller' => 'AdminController',
+            'action' => 'updateSupplier',
+            'access' => ['admin']
+        ],
+        '/admin/suppliers/delete/:id'   => [
+            'controller' => 'AdminController',
+            'action' => 'deleteSupplier',
+            'access' => ['admin']
+        ],
+        '/admin/invoices/update-status' => [
+            'controller' => 'AdminController',
+            'action' => 'updateInvoiceStatus',
+            'access' => ['admin']
+        ],
+        '/admin/categories/create'      => [
+            'controller' => 'AdminController',
+            'action' => 'createCategory',
+            'access' => ['admin']
+        ],
+        '/admin/categories/update'      => [
+            'controller' => 'AdminController',
+            'action' => 'updateCategory',
+            'access' => ['admin']
+        ],
+        '/admin/categories/delete/:id'  => [
+            'controller' => 'AdminController',
+            'action' => 'deleteCategory',
+            'access' => ['admin']
+        ],
     ],
 ];

@@ -4,7 +4,7 @@
     <a href="/admin" class="btn btn-secondary">Back to Dashboard</a>
 </div>
 
-<div class="card">
+<article>
     <h3>Invoices Management</h3>
     <table>
         <thead>
@@ -42,6 +42,6 @@
             <?php endif; ?>
         </tbody>
     </table>
-</div>
+</article>
 
 <?php require_once __DIR__ . '/../partials/admin-footer.php'; ?>

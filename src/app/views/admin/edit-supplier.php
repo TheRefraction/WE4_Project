@@ -4,7 +4,7 @@
     <a href="/admin/suppliers" class="btn btn-secondary">Back to Suppliers</a>
 </div>
 
-<div class="card">
+<article>
     <h3>Edit Supplier</h3>
     <form method="POST" action="/admin/suppliers/update">
         <input type="hidden" name="id" value="<?= $supplier['id'] ?>">
@@ -30,6 +30,6 @@
             <a href="/admin/suppliers" class="btn btn-secondary">Cancel</a>
         </div>
     </form>
-</div>
+</article>
 
 <?php require_once __DIR__ . '/../partials/admin-footer.php'; ?>

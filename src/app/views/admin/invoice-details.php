@@ -4,7 +4,7 @@
     <a href="/admin/invoices" class="btn btn-secondary">Back to Invoices</a>
 </div>
 
-<div class="card">
+<article>
     <h3>Invoice #<?= $invoice['id'] ?></h3>
 
     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
@@ -68,6 +68,6 @@
             <button type="submit" class="btn btn-success">Update Status</button>
         </form>
     </div>
-</div>
+</article>
 
 <?php require_once __DIR__ . '/../partials/admin-footer.php'; ?>

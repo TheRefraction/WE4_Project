@@ -4,7 +4,7 @@
     <a href="/admin" class="btn btn-secondary">Back to Dashboard</a>
 </div>
 
-<div class="card">
+<article>
     <h3>Accounts Management</h3>
     <table>
         <thead>
@@ -15,13 +15,15 @@
                 <th>Phone</th>
                 <th>Role</th>
                 <th>Created</th>
+                <th>Last Login</th>
                 <th>Actions</th>
             </tr>
         </thead>
+
         <tbody>
             <?php if (empty($accounts)): ?>
                 <tr>
-                    <td colspan="7" style="text-align: center; padding: 20px;">No accounts found.</td>
+                    <td colspan="8" style="text-align: center; padding: 20px;">No accounts found.</td>
                 </tr>
             <?php else: ?>
                 <?php foreach ($accounts as $account): ?>
@@ -32,19 +34,25 @@
                         <td><?= htmlspecialchars($account['phone'] ?? '-') ?></td>
                         <td><span style="background-color: #3498db; color: white; padding: 5px 10px; border-radius: 3px;"><?= htmlspecialchars($account['role_name'] ?? 'Unknown') ?></span></td>
                         <td><?= date('M d, Y', strtotime($account['date_creation'])) ?></td>
+                        <td><?= date('M d, Y', strtotime($account['last_login'])) ?></td>
                         <td>
-                            <div class="actions">
-                                <a href="/admin/accounts/edit/<?= $account['id'] ?>" class="btn btn-primary" style="padding: 5px 10px; margin: 0;">Edit</a>
-                                <form method="POST" action="/admin/accounts/delete/<?= $account['id'] ?>" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this account?');">
-                                    <button type="submit" class="btn btn-danger" style="padding: 5px 10px; margin: 0;">Delete</button>
-                                </form>
-                            </div>
+                            <?php if ($account['id'] === $_SESSION['user_id']): ?>
+                                <span style="color: #e74c3c; font-weight: bold;">(You)</span>
+                            <?php else: ?>
+                                <div class="actions">
+                                    <a href="/admin/accounts/edit/<?= $account['id'] ?>" class="btn btn-primary" style="padding: 5px 10px; margin: 0;">Edit</a>
+                                    
+                                    <form method="POST" action="/admin/accounts/delete/<?= $account['id'] ?>" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this account?');">
+                                        <button type="submit" class="btn btn-danger" style="padding: 5px 10px; margin: 0;">Delete</button>
+                                    </form>
+                                </div>
+                            <?php endif; ?>
                         </td>
                     </tr>
                 <?php endforeach; ?>
             <?php endif; ?>
         </tbody>
     </table>
-</div>
+</article>
 
 <?php require_once __DIR__ . '/../partials/admin-footer.php'; ?>

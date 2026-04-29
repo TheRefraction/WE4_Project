@@ -4,7 +4,7 @@
     <a href="/admin/accounts" class="btn btn-secondary">Back to Accounts</a>
 </div>
 
-<div class="card">
+<article>
     <h3>Edit Account</h3>
     <form method="POST" action="/admin/accounts/update">
         <input type="hidden" name="id" value="<?= $account['id'] ?>">
@@ -47,6 +47,6 @@
             <a href="/admin/accounts" class="btn btn-secondary">Cancel</a>
         </div>
     </form>
-</div>
+</article>
 
 <?php require_once __DIR__ . '/../partials/admin-footer.php'; ?>

@@ -88,35 +88,91 @@ class Admin {
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    public function createProduct($name, $description, $price, $supplierId) {
-        $query = "INSERT INTO product (name, description, price, supplier_id)
-                  VALUES (:name, :description, :price, :supplierId)";
+    public function createProduct($name, $description, $price, $supplierId, $hidden, array $categoryIds) {
+        $this->conn->beginTransaction();
 
-        $stmt = $this->conn->prepare($query);
-        $stmt->bindValue(':name', $name);
-        $stmt->bindValue(':description', $description);
-        $stmt->bindValue(':price', $price);
-        $stmt->bindValue(':supplierId', $supplierId, PDO::PARAM_INT);
+        try {
+            $query = "INSERT INTO product (name, description, price, supplier_id, hidden)
+                    VALUES (:name, :description, :price, :supplierId, :hidden)";
 
-        return $stmt->execute();
+            $stmt = $this->conn->prepare($query);
+            $stmt->bindValue(':name', $name);
+            $stmt->bindValue(':description', $description);
+            $stmt->bindValue(':price', $price);
+            $stmt->bindValue(':supplierId', $supplierId, PDO::PARAM_INT);
+            $stmt->bindValue(':hidden', (bool) $hidden, PDO::PARAM_BOOL);
+            $stmt->execute();
+
+            $productId = (int) $this->conn->lastInsertId();
+
+            // Link product to categories (Many-to-Many)
+            if (!empty($categoryIds)) {
+                $linkQuery = "INSERT INTO product_to_category (product_id, category_id)
+                            VALUES (:productId, :categoryId)";
+                $linkStmt = $this->conn->prepare($linkQuery);
+
+                foreach ($categoryIds as $categoryId) {
+                    $linkStmt->bindValue(':productId', $productId, PDO::PARAM_INT);
+                    $linkStmt->bindValue(':categoryId', (int) $categoryId, PDO::PARAM_INT);
+                    $linkStmt->execute();
+                }
+            }
+
+            $this->conn->commit();
+            return true;
+        } catch (Throwable $e) {
+            $this->conn->rollBack();
+            return false;
+        }
     }
 
-    public function updateProduct($id, $name, $description, $price, $supplierId) {
-        $query = "UPDATE product 
-                  SET name = :name,
-                      description = :description,
-                      price = :price,
-                      supplier_id = :supplierId
-                  WHERE id = :id";
+    public function updateProduct($id, $name, $description, $price, $supplierId, $hidden, array $categoryIds) {
+        $this->conn->beginTransaction();
 
-        $stmt = $this->conn->prepare($query);
-        $stmt->bindValue(':id', $id, PDO::PARAM_INT);
-        $stmt->bindValue(':name', $name);
-        $stmt->bindValue(':description', $description);
-        $stmt->bindValue(':price', $price);
-        $stmt->bindValue(':supplierId', $supplierId, PDO::PARAM_INT);
+        try {
+            $query = "UPDATE product
+                    SET name = :name,
+                        description = :description,
+                        price = :price,
+                        supplier_id = :supplierId,
+                        hidden = :hidden
+                    WHERE id = :id";
+            
+            // Update product details
+            $stmt = $this->conn->prepare($query);
+            $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+            $stmt->bindValue(':name', $name);
+            $stmt->bindValue(':description', $description);
+            $stmt->bindValue(':price', $price);
+            $stmt->bindValue(':supplierId', $supplierId, PDO::PARAM_INT);
+            $stmt->bindValue(':hidden', (bool) $hidden, PDO::PARAM_BOOL);
+            $stmt->execute();
 
-        return $stmt->execute();
+            // Destroy existing category links
+            $deleteQuery = "DELETE FROM product_to_category WHERE product_id = :productId";
+            $deleteStmt = $this->conn->prepare($deleteQuery);
+            $deleteStmt->bindValue(':productId', $id, PDO::PARAM_INT);
+            $deleteStmt->execute();
+
+            // Link product to categories (Many-to-Many)
+            if (!empty($categoryIds)) {
+                $linkQuery = "INSERT INTO product_to_category (product_id, category_id)
+                            VALUES (:productId, :categoryId)";
+                $linkStmt = $this->conn->prepare($linkQuery);
+
+                foreach ($categoryIds as $categoryId) {
+                    $linkStmt->bindValue(':productId', $id, PDO::PARAM_INT);
+                    $linkStmt->bindValue(':categoryId', (int) $categoryId, PDO::PARAM_INT);
+                    $linkStmt->execute();
+                }
+            }
+
+            $this->conn->commit();
+            return true;
+        } catch (Throwable $e) {
+            $this->conn->rollBack();
+            return false;
+        }
     }
 
     public function deleteProduct($id) {
@@ -254,6 +310,21 @@ class Admin {
         $stmt->execute();
 
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function getProductCategoryIds($productId) {
+        $query = "SELECT category_id
+                FROM product_to_category
+                WHERE product_id = :productId";
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindValue(':productId', $productId, PDO::PARAM_INT);
+        $stmt->execute();
+
+        return array_map(
+            fn($row) => (int) $row['category_id'],
+            $stmt->fetchAll(PDO::FETCH_ASSOC)
+        );
     }
 
     public function createCategory($name) {

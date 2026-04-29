@@ -25,8 +25,8 @@ class Product {
         $query = "SELECT * FROM product;";
 
         $stmt = $this->conn->prepare($query);
-
         $stmt->execute();
+
         return $stmt->fetchAll(PDO::FETCH_OBJ);
     }
 
@@ -38,10 +38,12 @@ class Product {
           INNER JOIN product_to_category ptc ON product.id = ptc.product_id 
           INNER JOIN product_category c ON ptc.category_id = c.id
           INNER JOIN supplier s ON product.supplier_id = s.id 
-          WHERE product.id = :id;";
-        $stmt = $this->conn->prepare($query);
+          WHERE product.id = :id
+          GROUP BY product.id";
 
+        $stmt = $this->conn->prepare($query);
         $stmt->execute(['id' => $id]);
+        
         return $stmt->fetch(PDO::FETCH_OBJ);
     }
 }

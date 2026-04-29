@@ -42,6 +42,7 @@
     </form>
 </main>
 
+<!-- This may be deprecated -->
 <script>
     fetch('/account-data')
         .then(response => {

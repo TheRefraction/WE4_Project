@@ -27,7 +27,7 @@
     </div>
 </div>
 
-<div class="card">
+<article>
     <h3>Quick Access</h3>
     <p>Use the navigation menu on the left to manage your database.</p>
     <div style="margin-top: 20px;">
@@ -37,6 +37,6 @@
         <a href="/admin/invoices" class="btn btn-primary">View Invoices</a>
         <a href="/admin/categories" class="btn btn-primary">Manage Categories</a>
     </div>
-</div>
+</article>
 
 <?php require_once __DIR__ . '/../partials/admin-footer.php'; ?>
