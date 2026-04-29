@@ -1,3 +1,16 @@
 .bg-pourpre {
     background-color: #6D071A !important;
 }
+
+
+.text-pourpre {
+    color: #6D071A !important;
+}
+
+
+.btn-pourpre {
+    background-color: #6D071A !important;
+    border-color: #6D071A !important;
+    color: white !important;
+    transition: all 0.3s ease;
+}
