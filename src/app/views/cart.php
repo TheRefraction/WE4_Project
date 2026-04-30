@@ -1,14 +1,13 @@
-<?php require_once '../controllers/cart.php' ?>
 <?php include 'partials/header.php'; ?>
-<div>
-    <h1>Current order</h1>
-    <?php
-    foreach ($_SESSION['cart'] as $product_id => $quantity) {
-        //TODO: display product name instead of id
-        echo "<div>
-            <p>" . $product_id . "</p>
-            <p>" . $quantity . "</p>
-          </div>";
-    }
-    ?>
-</div>
+
+<h1>Your Cart</h1>
+<ul>
+    <?php foreach ($cart as $item): ?>
+        <li>
+            <?php echo $item['name']; ?>
+            x <?php echo $item['quantity']; ?>,
+            <?php echo $item['price']; ?> €
+        </li>
+    <?php endforeach; ?>
+</ul>
+<p>Total: <?php echo $total; ?> €</p>

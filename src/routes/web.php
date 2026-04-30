@@ -9,9 +9,11 @@ return [
         '/account-data'     => ['AuthController', 'getAccountData'],
         '/products'         => ['ProductController', 'viewProducts'],
         '/product'          => ['ProductController', 'viewSingleProduct'],
+        '/cart'             => ['CartController', 'viewCart'],
     ],
     'POST' => [
         '/sign-in'          => ['AuthController', 'signIn'],
         '/sign-up'          => ['AuthController', 'signUp'],
+        '/cart'             => ['CartController', 'cartAction'],
     ],
 ];

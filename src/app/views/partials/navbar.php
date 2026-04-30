@@ -13,7 +13,7 @@
             <?php if ($userId) { ?>
                 <li><a href="#">Order</a></li>
                 <li><a href="/account">My account</a></li>
-                <li><a href="/basket">Cart</a></li>
+                <li><a href="/cart">Cart</a></li>
                 <li><a href="/sign-out">Sign out</a></li>
             <?php } else { ?>
                 <li><a href="/sign-in">Sign in</a></li>
