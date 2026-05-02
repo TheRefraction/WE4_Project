@@ -1,6 +1,6 @@
 <?php require_once __DIR__ . '/../partials/admin-header.php'; ?>
 
-<div style="margin-bottom: 20px;">
+<div class="toolbar">
     <a href="/admin" class="btn btn-secondary">Back to Dashboard</a>
 </div>
 
@@ -27,23 +27,26 @@
         <tbody>
             <?php if (empty($categories)): ?>
                 <tr>
-                    <td colspan="4" style="text-align: center; padding: 20px;">No categories found.</td>
+                    <td colspan="4" class="empty-table">No categories found.</td>
                 </tr>
             <?php else: ?>
                 <?php foreach ($categories as $category): ?>
                     <tr>
                         <td><?= htmlspecialchars($category['id']) ?></td>
+                        
                         <td>
                             <form method="POST" action="/admin/categories/update" style="display: flex; gap: 10px;">
                                 <input type="hidden" name="id" value="<?= $category['id'] ?>">
                                 <input type="text" name="name" value="<?= htmlspecialchars($category['name']) ?>" style="flex: 1;">
-                                <button type="submit" class="btn btn-primary" style="padding: 5px 10px; margin: 0;">Update</button>
+                                <button type="submit" class="btn btn-primary">Update</button>
                             </form>
                         </td>
+
                         <td><?= $category['product_count'] ?></td>
+
                         <td>
-                            <form method="POST" action="/admin/categories/delete/<?= $category['id'] ?>" style="display: inline;" onsubmit="return confirm('Are you sure? This will remove the category and unlink from products.');">
-                                <button type="submit" class="btn btn-danger" style="padding: 5px 10px; margin: 0;">Delete</button>
+                            <form method="POST" action="/admin/categories/delete/<?= $category['id'] ?>" onsubmit="return deleteConfirmation(this);">
+                                <button type="submit" class="btn btn-danger">Delete</button>
                             </form>
                         </td>
                     </tr>

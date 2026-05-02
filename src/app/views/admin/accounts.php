@@ -1,6 +1,6 @@
 <?php require_once __DIR__ . '/../partials/admin-header.php'; ?>
 
-<div style="margin-bottom: 20px;">
+<div class="toolbar">
     <a href="/admin" class="btn btn-secondary">Back to Dashboard</a>
 </div>
 
@@ -23,7 +23,7 @@
         <tbody>
             <?php if (empty($accounts)): ?>
                 <tr>
-                    <td colspan="8" style="text-align: center; padding: 20px;">No accounts found.</td>
+                    <td colspan="8" class="empty-table">If you see this, I messed up somehow @o@</td>
                 </tr>
             <?php else: ?>
                 <?php foreach ($accounts as $account): ?>
@@ -32,7 +32,7 @@
                         <td><?= htmlspecialchars($account['first_name'] . ' ' . $account['last_name']) ?></td>
                         <td><?= htmlspecialchars($account['email']) ?></td>
                         <td><?= htmlspecialchars($account['phone'] ?? '-') ?></td>
-                        <td><span style="background-color: #3498db; color: white; padding: 5px 10px; border-radius: 3px;"><?= htmlspecialchars($account['role_name'] ?? 'Unknown') ?></span></td>
+                        <td><span class="tag"><?= htmlspecialchars($account['role_name'] ?? 'Unknown') ?></span></td>
                         <td><?= date('M d, Y', strtotime($account['date_creation'])) ?></td>
                         <td><?= date('M d, Y', strtotime($account['last_login'])) ?></td>
                         <td>
@@ -40,10 +40,10 @@
                                 <span style="color: #e74c3c; font-weight: bold;">(You)</span>
                             <?php else: ?>
                                 <div class="actions">
-                                    <a href="/admin/accounts/edit/<?= $account['id'] ?>" class="btn btn-primary" style="padding: 5px 10px; margin: 0;">Edit</a>
+                                    <a href="/admin/accounts/edit/<?= $account['id'] ?>" class="btn btn-primary">Edit</a>
                                     
-                                    <form method="POST" action="/admin/accounts/delete/<?= $account['id'] ?>" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this account?');">
-                                        <button type="submit" class="btn btn-danger" style="padding: 5px 10px; margin: 0;">Delete</button>
+                                    <form method="POST" action="/admin/accounts/delete/<?= $account['id'] ?>" onsubmit="return deleteConfirmation(this);">
+                                        <button type="submit" class="btn btn-danger">Delete</button>
                                     </form>
                                 </div>
                             <?php endif; ?>

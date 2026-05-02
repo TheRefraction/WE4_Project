@@ -11,13 +11,14 @@
                     <ul id="products-submenu" class="submenu">
                         <li><a href="/admin/products">Products</a></li>
                         <li><a href="/admin/categories">Categories</a></li>
+                        <li><a href="/admin/menus">Menus</a></li>
                     </ul>
                     
                     <li><a href="/admin/suppliers">Suppliers</a></li>
                     
-                    <li><a href="/admin/invoices">Invoices</a></li>
-
-                    <li><a href="">Addresses</a></li>
+                    <!--<li><a href="/admin/invoices">Invoices</a></li>
+                    <li><a href="/admin/stock">Stock</a></li>
+                    <li><a href="">Addresses</a></li>-->
                 </ul>
             </nav>
         </aside>

@@ -359,6 +359,382 @@ class AdminController {
         exit;
     }
 
+    // ========== PRODUCT CUSTOMIZATIONS ==========
+    
+    /**
+     * Displays the product customization management page with a list of all customization slots.
+     * URL: /admin/products/edit/:id/customize
+     */
+    public function viewEditProductCustomization($id) {
+        // Check admin access first
+        $this->checkAdminAccess();
+        
+        $title = 'Customize Product';
+        $slots = $this->adminModel->getCustomizationSlots($id);
+        $categories = $this->adminModel->getAllCategories();
+        $product = $this->adminModel->getProductById($id);
+
+        $options = [];
+        foreach ($slots as $slot) {
+            $s_id = $slot['id'];
+            $options[$s_id] = $this->adminModel->getCustomizationOptionsBySlot($s_id);
+        }
+        
+        require_once __DIR__ . '/../views/admin/edit-product-customize.php';
+    }
+
+    /**
+     * Displays the page for editing a specific customization slot.
+     * URL: /admin/products/edit/:id/slot/:slot_id
+     */
+    public function viewEditCustomizationSlot($id, $slot_id) {
+        // Check admin access first
+        $this->checkAdminAccess();
+
+        $title = 'Edit Customization Slot';
+        $slots = $this->adminModel->getCustomizationSlots($id);
+
+        // find slot by id
+        $slot = null;
+        foreach ($slots as $s) { 
+            if ($s['id'] == $slot_id) { 
+                $slot = $s; 
+                break; 
+            }
+        }
+
+        if (!$slot) {
+            http_response_code(404);
+            require_once __DIR__ . '/../views/404.php';
+            exit;
+        }
+
+        $options = $this->adminModel->getCustomizationOptionsBySlot($slot_id);
+        $products = $this->adminModel->getAllProducts();
+
+        require_once __DIR__ . '/../views/admin/edit-customization-slot.php';
+    }
+
+    public function viewEditCustomizationOption($id, $option_id) {
+        // Check admin access first
+        $this->checkAdminAccess();
+
+        $title = 'Edit Customization Option';
+        $option = $this->adminModel->getCustomizationOptionById($option_id);
+
+        if (!$option) {
+            http_response_code(404);
+            require_once __DIR__ . '/../views/404.php';
+            exit;
+        }
+
+        $slot = $this->adminModel->getCustomizationSlotById($option['product_customization_slot_id']);
+        $products = $this->adminModel->getAllProducts();
+
+        require_once __DIR__ . '/../views/admin/edit-customization-option.php';
+    }
+
+    /**
+     * Creates a new customization slot.
+     * URL: /admin/products/:product_id/slot/create
+     */
+    public function createCustomizationSlot($product_id) {
+        // Check admin access first
+        $this->checkAdminAccess();
+
+        // Only allow POST requests for creation
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header('Location: /admin/products/edit/' . $product_id . '/customize');
+            exit;
+        }
+
+        // Sanitize and validate input.
+        $product_id = intval($product_id ?? 0);
+        $category_id = intval($_POST['category_id'] ?? 0);
+        $min_select = intval($_POST['min_select'] ?? 0);
+        $max_select = intval($_POST['max_select'] ?? 1);
+        $display_order = intval($_POST['display_order'] ?? 0);
+
+        $errors = [];
+
+        // Validate required fields
+        if (empty($product_id) || empty($category_id)) {
+            $errors[] = 'Product and category required';
+        }
+
+        if ($min_select < 0 || $max_select < 0 || $max_select < $min_select) {
+            $errors[] = 'Invalid min/max select values';
+        }
+
+        if ($display_order < 0) {
+            $errors[] = 'Display order must be non-negative';
+        }
+
+        // Check if slot already exists
+        if (empty($errors)) {
+            $existingSlot = $this->adminModel->getCustomizationSlotByProductCategory($product_id, $category_id);
+            if ($existingSlot) {
+                $errors[] = 'A customization slot for this product and category already exists. Please edit it instead.';
+            }
+        }
+
+        if (!empty($errors)) {
+            $_SESSION['errors'] = $errors;
+            header('Location: /admin/products/edit/' . $product_id . '/customize');
+            exit;
+        }
+
+        // Creates the customization slot and redirects back to customizations list with success or error message
+        if ($this->adminModel->createCustomizationSlot($product_id, $category_id, $min_select, $max_select, $display_order)) {
+            $_SESSION['success'] = 'Customization slot created';
+            header('Location: /admin/products/edit/' . $product_id . '/customize');
+            exit;
+        }
+
+        $_SESSION['errors'] = ['Error creating slot'];
+        header('Location: /admin/products/edit/' . $product_id . '/customize');
+        exit;
+    }
+
+    /**
+     * Updates a customization slot.
+     * URL: /admin/products/:product_id/slot/update
+     */
+    public function updateCustomizationSlot($product_id) {
+        // Check admin access first
+        $this->checkAdminAccess();
+
+        // Only allow POST requests for updates
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header('Location: /admin/products/edit/' . $product_id . '/customize');
+            exit;
+        }
+
+        // Sanitize and validate input
+        $id = intval($_POST['id'] ?? 0);
+        $min_select = intval($_POST['min_select'] ?? 0);
+        $max_select = intval($_POST['max_select'] ?? 1);
+        $display_order = intval($_POST['display_order'] ?? 0);
+
+        // Validate input
+        $errors = [];
+        if (empty($id)) {
+            $_SESSION['errors'] = ['Invalid slot'];
+            header('Location: /admin/products/edit/' . $product_id . '/customize');
+            exit;
+        }
+
+        // Validate min/max select values
+        if ($min_select < 0 || $max_select < 0 || $max_select < $min_select) {
+            $errors[] = 'Invalid min/max select values';
+        }
+
+        if ($display_order < 0) {
+            $errors[] = 'Display order must be non-negative';
+        }
+
+        if (!empty($errors)) {
+            $_SESSION['errors'] = $errors;
+            header('Location: /admin/products/edit/' . $product_id . '/customize');
+            exit;
+        }
+
+        if ($this->adminModel->updateCustomizationSlot($id, $min_select, $max_select, $display_order)) {
+            $_SESSION['success'] = 'Slot updated';
+        } else {
+            $_SESSION['errors'] = ['Error updating slot'];
+        }
+
+        header('Location: /admin/products/edit/' . $product_id . '/customize');
+        exit;
+    }
+
+    /**
+     * Deletes a customization slot.
+     * URL: /admin/products/:product_id/slot/delete/:id
+     */
+    public function deleteCustomizationSlot($product_id, $id) {
+        // Check admin access first
+        $this->checkAdminAccess();
+
+        // Only allow POST requests for deletions
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header('Location: /admin/products/edit/' . $product_id . '/customize');
+            exit;
+        }
+
+        // Sanitize input
+        $product_id = intval($product_id ?? 0);
+        $id = intval($id ?? 0);
+
+        if (empty($product_id) || empty($id)) {
+            $_SESSION['errors'] = ['Invalid product or slot ID'];
+            header('Location: /admin/products/edit/' . $product_id . '/customize');
+            exit;
+        }
+
+        // Deletes the customization slot and redirects back to customizations list with success or error message
+        if ($this->adminModel->deleteCustomizationSlot($id)) {
+            $_SESSION['success'] = 'Slot deleted';
+        } else {
+            $_SESSION['errors'] = ['Error deleting slot'];
+        }
+
+        header('Location: /admin/products/edit/' . $product_id . '/customize');
+        exit;
+    }
+
+    /**
+     * Creates a new customization option.
+     * URL: /admin/products/:product_id/option/create
+     */
+    public function createCustomizationOption($product_id) {
+        // Check admin access first
+        $this->checkAdminAccess();
+
+        // Only allow POST requests for creation
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header('Location: /admin/products/edit/' . $product_id . '/customize');
+            exit;
+        }
+
+        // Sanitize and validate input
+        $slotId = intval($_POST['slot_id'] ?? 0);
+        $optionProductId = intval($_POST['option_product_id'] ?? 0);
+        $priceDelta = floatval($_POST['price_delta'] ?? 0.0);
+        $isDefault = intval($_POST['is_default'] ?? 0);
+        $displayOrder = intval($_POST['display_order'] ?? 0);
+
+        $errors = [];
+
+        // Validate input
+        if (empty($slotId) || empty($optionProductId)) {
+            $_SESSION['errors'] = ['Invalid option data'];
+            header('Location: /admin/products/edit/' . $product_id . '/slot/' . $slotId);
+            exit;
+        }
+
+        // Validate display order
+        if ($displayOrder < 0) {
+            $errors[] = 'Display order must be non-negative';
+            exit;
+        }
+
+        // Check if slot already exists
+        if (empty($errors)) {
+            $existingSlot = $this->adminModel->getCustomizationOptionByProductSlot($optionProductId, $slotId);
+            if ($existingSlot) {
+                $errors[] = 'This product is already used as an option.';
+            }
+        }
+
+        if (!empty($errors)) {
+            $_SESSION['errors'] = $errors;
+            header('Location: /admin/products/edit/' . $product_id . '/slot/' . $slotId);
+            exit;
+        }
+
+        // Creates the customization option and redirects back to customizations list with success or error message
+        if ($this->adminModel->createCustomizationOption($slotId, $optionProductId, $priceDelta, $isDefault, $displayOrder)) {
+            $_SESSION['success'] = 'Option created';
+        } else {
+            $_SESSION['errors'] = ['Error creating option'];
+        }
+
+        header('Location: /admin/products/edit/' . $product_id . '/slot/' . $slotId);
+        exit;
+    }
+
+    /**
+     * Updates a customization option.
+     * URL: /admin/products/:product_id/option/update
+     */
+    public function updateCustomizationOption($product_id) {
+        // Check admin access first
+        $this->checkAdminAccess();
+
+        // Only allow POST requests for updates
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header('Location: /admin/products/edit/' . $product_id . '/customize');
+            exit;
+        }
+
+        // Sanitize and validate input
+        $slotId = intval($_POST['slot_id'] ?? 0);
+        $optionId = intval($_POST['id'] ?? 0);
+        $optionProductId = intval($_POST['option_product_id'] ?? 0);
+        $priceDelta = floatval($_POST['price_delta'] ?? 0.0);
+        $isDefault = intval($_POST['is_default'] ?? 0);
+        $displayOrder = intval($_POST['display_order'] ?? 0);
+
+        $errors = [];
+
+        // Validate input
+        if (empty($optionId) || empty($optionProductId) || empty($slotId)) {
+            $_SESSION['errors'] = ['Invalid option data'];
+            header('Location: /admin/products/edit/' . $product_id . '/customize');
+            exit;
+        }
+
+        // Validate display order
+        if ($displayOrder < 0) {
+            $errors[] = 'Display order must be non-negative';
+        }
+
+         // Check if slot already exists
+        if (empty($errors)) {
+            $existingSlot = $this->adminModel->getCustomizationOptionByProductSlot($optionProductId, $slotId);
+            if ($existingSlot && $existingSlot['id'] != $optionId) {
+                $errors[] = 'This product is already used as an option.';
+            }
+        }
+
+        if (!empty($errors)) {
+            $_SESSION['errors'] = $errors;
+            header('Location: /admin/products/edit/' . $product_id . '/slot/' . $slotId);
+            exit;
+        }
+
+        // Updates the customization option and redirects back with success or error message
+        if ($this->adminModel->updateCustomizationOption($optionId, $optionProductId, $priceDelta, $isDefault, $displayOrder)) {
+            $_SESSION['success'] = 'Option updated';
+        } else {
+            $_SESSION['errors'] = ['Error updating option'];
+        }
+
+        header('Location: /admin/products/edit/' . $product_id . '/slot/' . $slotId);
+        exit;
+    }
+
+    /**
+     * Deletes a customization option.
+     * URL: /admin/products/:product_id/option/delete/:id
+     */
+    public function deleteCustomizationOption($product_id, $id) {
+        // Check admin access first
+        $this->checkAdminAccess();
+
+        // Only allow POST requests for deletions
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header('Location: /admin/products/edit/' . $product_id . '/customize');
+            exit;
+        }
+
+        // Sanitize input
+        $product_id = intval($product_id ?? 0);
+        $id = intval($id ?? 0);
+
+        // Deletes the customization option and redirects back to customizations list with success or error message
+        if ($this->adminModel->deleteCustomizationOption($id)) {
+            $_SESSION['success'] = 'Option deleted';
+        } else {
+            $_SESSION['errors'] = ['Error deleting option'];
+        }
+
+        header('Location: /admin/products/edit/' . $product_id . '/customize');
+        exit;
+    }
+
     // ========== SUPPLIERS ==========
     public function viewSuppliers() {
         $this->checkAdminAccess();
@@ -472,6 +848,7 @@ class AdminController {
     }
 
     // ========== INVOICES ==========
+    /*
     public function viewInvoices() {
         $this->checkAdminAccess();
         
@@ -523,61 +900,99 @@ class AdminController {
         $_SESSION['errors'] = ['Error updating invoice status!'];
         header('Location: /admin/invoices/details/' . $id);
         exit;
-    }
+    }*/
 
     // ========== CATEGORIES ==========
+
+    /**
+     * Displays all product categories.
+     * URL: /admin/categories
+     */
     public function viewCategories() {
+        // Check admin access first
         $this->checkAdminAccess();
         
+        // Get all categories and display them in the categories management view
         $title = 'Manage Categories';
         $categories = $this->adminModel->getAllCategories();
         
         require_once __DIR__ . '/../views/admin/categories.php';
     }
 
+    /**
+     * Displays the create category page with a form to add a new category.
+     * URL: /admin/categories/create
+     */
     public function createCategory() {
+        // Check admin access first
         $this->checkAdminAccess();
         
+        // Only allow POST requests for creation
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             header('Location: /admin/categories');
             exit;
         }
 
+        // Sanitize and validate input
         $name = trim($_POST['name'] ?? '');
 
+        // Validate required fields
         if (empty($name)) {
             $_SESSION['errors'] = ['Category name is required.'];
             header('Location: /admin/categories');
             exit;
         }
 
+        if ($this->adminModel->categoryExists($name)) {
+            $_SESSION['errors'] = ['Category already exists.'];
+            header('Location: /admin/categories');
+            exit;
+        }
+
+        // Creates the category and redirects back to categories list with success or error message
         if ($this->adminModel->createCategory($name)) {
             $_SESSION['success'] = 'Category created successfully!';
         } else {
             $_SESSION['errors'] = ['Error creating category!'];
         }
 
+        // Redirect back to categories list after creation attempt
         header('Location: /admin/categories');
         exit;
     }
 
+    /**
+     * Updates an existing category's name.
+     * URL: /admin/categories/update
+     */
     public function updateCategory() {
+        // Check admin access first
         $this->checkAdminAccess();
         
+        // Only allow POST requests for updates
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             header('Location: /admin/categories');
             exit;
         }
 
+        // Sanitize and validate input
         $id = intval($_POST['id'] ?? 0);
         $name = trim($_POST['name'] ?? '');
 
+        // Validate required fields
         if (empty($id) || empty($name)) {
             $_SESSION['errors'] = ['Category ID and name are required.'];
             header('Location: /admin/categories');
             exit;
         }
 
+        if ($this->adminModel->categoryExists($name)) {
+            $_SESSION['errors'] = ['Category already exists.'];
+            header('Location: /admin/categories');
+            exit;
+        }
+
+        // Updates the category and redirects back to categories list with success or error message
         if ($this->adminModel->updateCategory($id, $name)) {
             $_SESSION['success'] = 'Category updated successfully!';
         } else {
@@ -588,15 +1003,28 @@ class AdminController {
         exit;
     }
 
+    /**
+     * Deletes a category by ID.
+     * URL: /admin/categories/delete/:id
+     */
     public function deleteCategory($id) {
+        // Check admin access first
         $this->checkAdminAccess();
         
+        // Only allow POST requests for deletions
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             header('Location: /admin/categories');
             exit;
         }
 
+        // Deletes the category and redirects back to categories list with success or error message
         $id = intval($id);
+
+        if ($this->adminModel->categoryHasDependencies($id)) {
+            $_SESSION['errors'] = ['Couldn\'t delete category: The category is used by customization slots or products. Please remove dependencies or change their category first.'];
+            header('Location: /admin/categories');
+            exit;
+        }
         
         if ($this->adminModel->deleteCategory($id)) {
             $_SESSION['success'] = 'Category deleted successfully!';
@@ -607,4 +1035,155 @@ class AdminController {
         header('Location: /admin/categories');
         exit;
     }
+
+    // ========== MENUS ==========
+    public function viewMenus() {
+        $this->checkAdminAccess();
+
+        $title = 'Manage Menus';
+        $menus = $this->adminModel->getAllMenus();
+
+        require_once __DIR__ . '/../views/admin/menus.php';
+    }
+
+    public function viewCreateMenu() {
+        $this->checkAdminAccess();
+
+        $title = 'Create Menu';
+        require_once __DIR__ . '/../views/admin/create-menu.php';
+    }
+
+    /**
+     * Creates a new menu with the provided details.
+     * URL: /admin/menus/create
+     */
+    public function createMenu() {
+        $this->checkAdminAccess();
+
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header('Location: /admin/menus/create');
+            exit;
+        }
+
+        $name = trim($_POST['name'] ?? '');
+        $description = trim($_POST['description'] ?? '') ?: null;
+
+        if (empty($name)) {
+            $_SESSION['errors'] = ['Menu name required'];
+            header('Location: /admin/menus/create');
+            exit;
+        }
+
+        if ($this->adminModel->createMenu($name, $description)) {
+            $_SESSION['success'] = 'Menu created';
+            header('Location: /admin/menus');
+            exit;
+        }
+
+        $_SESSION['errors'] = ['Error creating menu'];
+        header('Location: /admin/menus/create');
+        exit;
+    }
+
+    public function viewEditMenu($id) {
+        $this->checkAdminAccess();
+
+        $title = 'Edit Menu';
+        $menu = $this->adminModel->getMenuById($id);
+
+        if (!$menu) {
+            http_response_code(404);
+            require_once __DIR__ . '/../views/404.php';
+            exit;
+        }
+
+        require_once __DIR__ . '/../views/admin/edit-menu.php';
+    }
+
+    public function updateMenu() {
+        $this->checkAdminAccess();
+
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header('Location: /admin/menus');
+            exit;
+        }
+
+        $id = intval($_POST['id'] ?? 0);
+        $name = trim($_POST['name'] ?? '');
+        $description = trim($_POST['description'] ?? '') ?: null;
+
+        if (empty($id) || empty($name)) {
+            $_SESSION['errors'] = ['Invalid data'];
+            header('Location: /admin/menus');
+            exit;
+        }
+
+        if ($this->adminModel->updateMenu($id, $name, $description)) {
+            $_SESSION['success'] = 'Menu updated';
+        } else {
+            $_SESSION['errors'] = ['Error updating menu'];
+        }
+
+        header('Location: /admin/menus');
+        exit;
+    }
+
+    public function deleteMenu($id) {
+        $this->checkAdminAccess();
+
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header('Location: /admin/menus');
+            exit;
+        }
+
+        $id = intval($id);
+
+        if ($this->adminModel->deleteMenu($id)) {
+            $_SESSION['success'] = 'Menu deleted';
+        } else {
+            $_SESSION['errors'] = ['Error deleting menu'];
+        }
+
+        header('Location: /admin/menus');
+        exit;
+    }
+
+    // ========== STOCK ==========
+    /*public function viewStock() {
+        $this->checkAdminAccess();
+
+        $title = 'Stock Management';
+        $stocks = $this->adminModel->getAllStock();
+
+        require_once __DIR__ . '/../views/admin/stock.php';
+    }
+
+    public function updateStock() {
+        $this->checkAdminAccess();
+
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header('Location: /admin/stock');
+            exit;
+        }
+
+        $id = intval($_POST['id'] ?? 0);
+        $qa = intval($_POST['quantity_available'] ?? 0);
+        $qr = intval($_POST['quantity_reserved'] ?? 0);
+        $rt = intval($_POST['reorder_threshold'] ?? 0);
+
+        if (empty($id)) {
+            $_SESSION['errors'] = ['Invalid stock item'];
+            header('Location: /admin/stock');
+            exit;
+        }
+
+        if ($this->adminModel->updateStock($id, $qa, $qr, $rt)) {
+            $_SESSION['success'] = 'Stock updated successfully!';
+        } else {
+            $_SESSION['errors'] = ['Error updating stock'];
+        }
+
+        header('Location: /admin/stock');
+        exit;
+    }*/
 }

@@ -56,7 +56,7 @@
         </div>
 
         <div style="margin-top: 20px;">
-            <button type="submit" class="btn btn-success">Update Product</button>
+            <button type="submit" class="btn btn-success">Update</button>
             <a href="/admin/products" class="btn btn-secondary">Cancel</a>
         </div>
     </form>

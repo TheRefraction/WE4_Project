@@ -29,12 +29,12 @@
 
 <article>
     <h3>Quick Access</h3>
-    <p>Use the navigation menu on the left to manage your database.</p>
+    <p>Use the navigation menu on the left to manage the database.</p>
     <div style="margin-top: 20px;">
         <a href="/admin/accounts" class="btn btn-primary">Manage Accounts</a>
         <a href="/admin/products" class="btn btn-primary">Manage Products</a>
         <a href="/admin/suppliers" class="btn btn-primary">Manage Suppliers</a>
-        <a href="/admin/invoices" class="btn btn-primary">View Invoices</a>
+        <!--<a href="/admin/invoices" class="btn btn-primary">View Invoices</a>-->
         <a href="/admin/categories" class="btn btn-primary">Manage Categories</a>
     </div>
 </article>

@@ -4,7 +4,7 @@
     <h3>Create Product</h3>
     <form method="POST" action="/admin/products/create">
         <div class="form-group">
-            <label for="name">Product Name *</label>
+            <label for="name">Product Name</label>
             <input type="text" id="name" name="name" required>
         </div>
 
@@ -15,7 +15,7 @@
 
         <div class="form-row">
             <div class="form-group">
-                <label for="price">Price *</label>
+                <label for="price">Price</label>
                 <input type="number" id="price" name="price" step="0.01" min="0" required>
             </div>
 
@@ -30,7 +30,7 @@
             </div>
 
             <div class="form-group">
-                <label for="category_ids">Categories *</label>
+                <label for="category_ids">Categories</label>
                 <select id="category_ids" name="category_ids[]" multiple size="6" required>
                     <?php foreach ($categories as $category): ?>
                         <option value="<?= $category['id'] ?>"><?= htmlspecialchars($category['name']) ?></option>
@@ -49,8 +49,8 @@
             </div>
         </div>
 
-        <div style="margin-top: 20px;">
-            <button type="submit" class="btn btn-success">Create Product</button>
+        <div class="toolbar">
+            <button type="submit" class="btn btn-success">Create</button>
             <a href="/admin/products" class="btn btn-secondary">Cancel</a>
         </div>
     </form>

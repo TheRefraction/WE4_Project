@@ -301,6 +301,16 @@ article {
     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
+article ul {
+    padding-left: 20px;
+    margin-top: 10px;
+}
+
+article ul li {
+    margin: 5px 0;
+    padding: 10px 0;
+}
+
 .stats-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -331,6 +341,15 @@ article {
 .actions {
     display: flex;
     gap: 5px;
+}
+
+.actions .btn {
+    padding: 5px 10px; 
+    margin: 0;
+}
+
+.actions form {
+    display: inline;
 }
 
 .modal {
@@ -389,6 +408,29 @@ article {
     background-color: #3498db;
     color: white;
     border-color: #3498db;
+}
+
+.slot-section {
+    margin-bottom: 20px; 
+    border-bottom: 1px solid #ddd; 
+    padding-bottom: 10px;
+}
+
+.tag {
+    background-color: #3498db; 
+    color: white; 
+    padding: 5px 10px; 
+    border-radius: 3px;
+}
+
+.toolbar {
+    margin-bottom: 20px;
+}
+
+.empty-table {
+    text-align: center;
+    padding: 20px;
+    color: #7f8c8d;
 }
 
 @media (max-width: 768px) {

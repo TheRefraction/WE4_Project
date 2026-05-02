@@ -184,6 +184,188 @@ class Admin {
         return $stmt->execute();
     }
 
+    // ========== PRODUCT CUSTOMIZATIONS ==========
+    public function getCustomizationSlots($id) {
+        $query = "SELECT pcs.*, p.name as product_name, pc.name as category_name
+                  FROM product_customization_slot pcs
+                  LEFT JOIN product p ON pcs.product_id = p.id
+                  LEFT JOIN product_category pc ON pcs.category_id = pc.id
+                  WHERE p.id = :id
+                  ORDER BY pcs.display_order";
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+        $stmt->execute();
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function getCustomizationSlotById($id) {
+        $query = "SELECT pcs.*, p.id as product_id, p.name as product_name, pc.name as category_name
+                  FROM product_customization_slot pcs
+                  LEFT JOIN product p ON pcs.product_id = p.id
+                  LEFT JOIN product_category pc ON pcs.category_id = pc.id
+                  WHERE pcs.id = :id";
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+        $stmt->execute();
+
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * Checks if a customization slot already exists for a product-category pair.
+     * @param int $productId
+     * @param int $categoryId
+     * @return array|null
+     */
+    public function getCustomizationSlotByProductCategory($productId, $categoryId) {
+        $query = "SELECT * FROM product_customization_slot 
+                WHERE product_id = :product_id AND category_id = :category_id";
+        
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindValue(':product_id', $productId, PDO::PARAM_INT);
+        $stmt->bindValue(':category_id', $categoryId, PDO::PARAM_INT);
+        $stmt->execute();
+        
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * Creates a new customization slot.
+     * @param int $productId
+     * @param int $categoryId
+     * @param int $minSelect
+     * @param int $maxSelect
+     * @param int $displayOrder
+     * @return bool
+     */
+    public function createCustomizationSlot($productId, $categoryId, $minSelect = 0, $maxSelect = 1, $displayOrder = 0) {
+        $query = "INSERT INTO product_customization_slot (product_id, category_id, min_select, max_select, display_order) 
+        VALUES (:product_id, :category_id, :min_select, :max_select, :display_order)";
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindValue(':product_id', $productId, PDO::PARAM_INT);
+        $stmt->bindValue(':category_id', $categoryId, PDO::PARAM_INT);
+        $stmt->bindValue(':min_select', $minSelect, PDO::PARAM_INT);
+        $stmt->bindValue(':max_select', $maxSelect, PDO::PARAM_INT);
+        $stmt->bindValue(':display_order', $displayOrder, PDO::PARAM_INT);
+
+        return $stmt->execute();
+    }
+
+    /**
+     * Updates an existing customization slot.
+     * @param int $id
+     * @param int $minSelect
+     * @param int $maxSelect
+     * @param int $displayOrder
+     * @return bool
+     */
+    public function updateCustomizationSlot($id, $minSelect, $maxSelect, $displayOrder) {
+        $query = "UPDATE product_customization_slot 
+                SET min_select = :min_select, max_select = :max_select, display_order = :display_order 
+                WHERE id = :id";
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+        $stmt->bindValue(':min_select', $minSelect, PDO::PARAM_INT);
+        $stmt->bindValue(':max_select', $maxSelect, PDO::PARAM_INT);
+        $stmt->bindValue(':display_order', $displayOrder, PDO::PARAM_INT);
+
+        return $stmt->execute();
+    }
+
+    /**
+     * Deletes a customization slot.
+     * @param int $id
+     * @return bool
+     */
+    public function deleteCustomizationSlot($id) {
+        $query = "DELETE FROM product_customization_slot 
+                WHERE id = :id";
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+
+        return $stmt->execute();
+    }
+
+    public function createCustomizationOption($slotId, $optionProductId, $priceDelta = 0.00, $isDefault = 0, $displayOrder = 0) {
+        $query = "INSERT INTO product_customization_slot_option (product_customization_slot_id, option_product_id, price_delta, is_default, display_order) VALUES (:slotId, :optionProductId, :priceDelta, :isDefault, :displayOrder)";
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindValue(':slotId', $slotId, PDO::PARAM_INT);
+        $stmt->bindValue(':optionProductId', $optionProductId, PDO::PARAM_INT);
+        $stmt->bindValue(':priceDelta', $priceDelta);
+        $stmt->bindValue(':isDefault', $isDefault, PDO::PARAM_INT);
+        $stmt->bindValue(':displayOrder', $displayOrder, PDO::PARAM_INT);
+
+        return $stmt->execute();
+    }
+
+    public function updateCustomizationOption($id, $optionProductId, $priceDelta = 0.00, $isDefault = 0, $displayOrder = 0) {
+        $query = "UPDATE product_customization_slot_option SET option_product_id = :optionProductId, price_delta = :priceDelta, is_default = :isDefault, display_order = :displayOrder WHERE id = :id";
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+        $stmt->bindValue(':optionProductId', $optionProductId, PDO::PARAM_INT);
+        $stmt->bindValue(':priceDelta', $priceDelta);
+        $stmt->bindValue(':isDefault', $isDefault, PDO::PARAM_INT);
+        $stmt->bindValue(':displayOrder', $displayOrder, PDO::PARAM_INT);
+
+        return $stmt->execute();
+    }
+
+    public function deleteCustomizationOption($id) {
+        $query = "DELETE FROM product_customization_slot_option WHERE id = :id";
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+
+        return $stmt->execute();
+    }
+
+    public function getCustomizationOptionById($id) {
+        $query = "SELECT o.*, p.name as option_product_name
+                  FROM product_customization_slot_option o
+                  LEFT JOIN product p ON o.option_product_id = p.id
+                  WHERE o.id = :id";
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+        $stmt->execute();
+
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    public function getCustomizationOptionsBySlot($slotId) {
+        $query = "SELECT o.*, p.name as option_product_name
+                  FROM product_customization_slot_option o
+                  LEFT JOIN product p ON o.option_product_id = p.id
+                  WHERE o.product_customization_slot_id = :slotId
+                  ORDER BY o.display_order";
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindValue(':slotId', $slotId, PDO::PARAM_INT);
+        $stmt->execute();
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function getCustomizationOptionByProductSlot($productId, $slotId) {
+        $query = "SELECT * FROM product_customization_slot_option 
+                WHERE option_product_id = :product_id AND product_customization_slot_id = :slot_id";
+        
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindValue(':product_id', $productId, PDO::PARAM_INT);
+        $stmt->bindValue(':slot_id', $slotId, PDO::PARAM_INT);
+        $stmt->execute();
+        
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
     // ========== SUPPLIERS ==========
     public function getAllSuppliers() {
         $query = "SELECT s.*, COUNT(p.id) as product_count FROM supplier s
@@ -351,6 +533,105 @@ class Admin {
 
         $stmt = $this->conn->prepare($query);
         $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+
+        return $stmt->execute();
+    }
+
+    public function categoryExists(string $name): bool {
+        $query = "SELECT COUNT(*) FROM product_category WHERE name = :name";
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindValue(':name', $name);
+        $stmt->execute();
+
+        return (int)$stmt->fetchColumn() > 0;
+    }
+
+    public function categoryHasDependencies(int $categoryId): bool {
+        $query = "
+        SELECT
+            (SELECT COUNT(*) FROM product_customization_slot WHERE category_id = :id) +
+            (SELECT COUNT(*) FROM product_to_category WHERE category_id = :id)
+        AS cnt";
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindValue(':id', $categoryId, PDO::PARAM_INT);
+        $stmt->execute();
+
+        return (int)$stmt->fetchColumn() > 0;
+    }
+
+    // ========== MENUS ==========
+    public function getAllMenus() {
+        $query = "SELECT * FROM menu ORDER BY name";
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute();
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function getMenuById($id) {
+        $query = "SELECT * FROM menu WHERE id = :id";
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+        $stmt->execute();
+
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    public function createMenu($name, $description = null) {
+        $query = "INSERT INTO menu (name, description) VALUES (:name, :description)";
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindValue(':name', $name);
+        $stmt->bindValue(':description', $description);
+
+        return $stmt->execute();
+    }
+
+    public function updateMenu($id, $name, $description = null) {
+        $query = "UPDATE menu SET name = :name, description = :description WHERE id = :id";
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+        $stmt->bindValue(':name', $name);
+        $stmt->bindValue(':description', $description);
+
+        return $stmt->execute();
+    }
+
+    public function deleteMenu($id) {
+        $query = "DELETE FROM menu WHERE id = :id";
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+
+        return $stmt->execute();
+    }
+
+    // ========== STOCK ==========
+    public function getAllStock() {
+        $query = "SELECT s.*, p.name as product_name
+                  FROM stock s
+                  LEFT JOIN product p ON s.product_id = p.id
+                  ORDER BY p.name";
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute();
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function updateStock($id, $quantityAvailable, $quantityReserved, $reorderThreshold) {
+        $query = "UPDATE stock SET quantity_available = :qa, quantity_reserved = :qr, reorder_threshold = :rt WHERE id = :id";
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+        $stmt->bindValue(':qa', $quantityAvailable, PDO::PARAM_INT);
+        $stmt->bindValue(':qr', $quantityReserved, PDO::PARAM_INT);
+        $stmt->bindValue(':rt', $reorderThreshold, PDO::PARAM_INT);
 
         return $stmt->execute();
     }

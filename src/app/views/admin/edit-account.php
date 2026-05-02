@@ -1,6 +1,6 @@
 <?php require_once __DIR__ . '/../partials/admin-header.php'; ?>
 
-<div style="margin-bottom: 20px;">
+<div class="toolbar">
     <a href="/admin/accounts" class="btn btn-secondary">Back to Accounts</a>
 </div>
 
@@ -42,7 +42,7 @@
             </select>
         </div>
 
-        <div style="margin-top: 20px;">
+        <div class="toolbar">
             <button type="submit" class="btn btn-success">Update Account</button>
             <a href="/admin/accounts" class="btn btn-secondary">Cancel</a>
         </div>

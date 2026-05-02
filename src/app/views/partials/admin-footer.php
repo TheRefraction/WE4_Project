@@ -54,6 +54,10 @@
             }
         }
 
+        function deleteConfirmation(form) {
+            return confirm('Are you sure you want to delete this option?');
+        }
+
         // Call this on page load
         document.addEventListener('DOMContentLoaded', () => {
             restoreSubmenuStates('products-submenu');

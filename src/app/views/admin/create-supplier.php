@@ -1,6 +1,6 @@
 <?php require_once __DIR__ . '/../partials/admin-header.php'; ?>
 
-<div style="margin-bottom: 20px;">
+<div class="toolbar">
     <a href="/admin/suppliers" class="btn btn-secondary">Back to Suppliers</a>
 </div>
 
@@ -23,7 +23,7 @@
             </div>
         </div>
 
-        <div style="margin-top: 20px;">
+        <div class="toolbar">
             <button type="submit" class="btn btn-success">Create Supplier</button>
             <a href="/admin/suppliers" class="btn btn-secondary">Cancel</a>
         </div>

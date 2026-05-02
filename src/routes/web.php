@@ -76,6 +76,48 @@ return [
             'action' => 'viewEditProduct',
             'access' => ['admin']
         ],
+        '/admin/products/edit/:id/customize'      => [
+            'controller' => 'AdminController',
+            'action' => 'viewEditProductCustomization',
+            'access' => ['admin']
+        ],
+        '/admin/products/edit/:id/slot/:slot_id'      => [
+            'controller' => 'AdminController',
+            'action' => 'viewEditCustomizationSlot',
+            'access' => ['admin']
+        ],
+        '/admin/products/edit/:id/option/:option_id'      => [
+            'controller' => 'AdminController',
+            'action' => 'viewEditCustomizationOption',
+            'access' => ['admin']
+        ],
+
+        '/admin/categories'             => [
+            'controller' => 'AdminController',
+            'action' => 'viewCategories',
+            'access' => ['admin']
+        ],
+        '/admin/menus'                  => [
+            'controller' => 'AdminController',
+            'action' => 'viewMenus',
+            'access' => ['admin']
+        ],
+        '/admin/menus/create'           => [
+            'controller' => 'AdminController',
+            'action' => 'viewCreateMenu',
+            'access' => ['admin']
+        ],
+        '/admin/menus/edit/:id'         => [
+            'controller' => 'AdminController',
+            'action' => 'viewEditMenu',
+            'access' => ['admin']
+        ],
+
+        '/admin/stock'                  => [
+            'controller' => 'AdminController',
+            'action' => 'viewStock',
+            'access' => ['admin']
+        ],
         '/admin/suppliers'              => [
             'controller' => 'AdminController',
             'action' => 'viewSuppliers',
@@ -99,11 +141,6 @@ return [
         '/admin/invoices/details/:id'   => [
             'controller' => 'AdminController',
             'action' => 'viewInvoiceDetails',
-            'access' => ['admin']
-        ],
-        '/admin/categories'             => [
-            'controller' => 'AdminController',
-            'action' => 'viewCategories',
             'access' => ['admin']
         ],
     ],
@@ -148,6 +185,70 @@ return [
             'action' => 'deleteProduct',
             'access' => ['admin']
         ],
+        '/admin/products/:product_id/slot/create'  => [
+            'controller' => 'AdminController',
+            'action' => 'createCustomizationSlot',
+            'access' => ['admin']
+        ],
+        '/admin/products/:product_id/slot/update'  => [
+            'controller' => 'AdminController',
+            'action' => 'updateCustomizationSlot',
+            'access' => ['admin']
+        ],
+        '/admin/products/:product_id/slot/delete/:id' => [
+            'controller' => 'AdminController',
+            'action' => 'deleteCustomizationSlot',
+            'access' => ['admin']
+        ],
+        '/admin/products/:product_id/option/create' => [
+            'controller' => 'AdminController',
+            'action' => 'createCustomizationOption',
+            'access' => ['admin']
+        ],
+        '/admin/products/:product_id/option/update' => [
+            'controller' => 'AdminController',
+            'action' => 'updateCustomizationOption',
+            'access' => ['admin']
+        ],
+        '/admin/products/:product_id/option/delete/:id' => [
+            'controller' => 'AdminController',
+            'action' => 'deleteCustomizationOption',
+            'access' => ['admin']
+        ],
+
+
+        '/admin/categories/create'      => [
+            'controller' => 'AdminController',
+            'action' => 'createCategory',
+            'access' => ['admin']
+        ],
+        '/admin/categories/update'      => [
+            'controller' => 'AdminController',
+            'action' => 'updateCategory',
+            'access' => ['admin']
+        ],
+        '/admin/categories/delete/:id'  => [
+            'controller' => 'AdminController',
+            'action' => 'deleteCategory',
+            'access' => ['admin']
+        ],
+
+        '/admin/menus/create'           => [
+            'controller' => 'AdminController',
+            'action' => 'createMenu',
+            'access' => ['admin']
+        ],
+        '/admin/menus/update'           => [
+            'controller' => 'AdminController',
+            'action' => 'updateMenu',
+            'access' => ['admin']
+        ],
+        '/admin/menus/delete/:id'       => [
+            'controller' => 'AdminController',
+            'action' => 'deleteMenu',
+            'access' => ['admin']
+        ],
+
         '/admin/suppliers/create'       => [
             'controller' => 'AdminController',
             'action' => 'createSupplier',
@@ -163,24 +264,16 @@ return [
             'action' => 'deleteSupplier',
             'access' => ['admin']
         ],
+
         '/admin/invoices/update-status' => [
             'controller' => 'AdminController',
             'action' => 'updateInvoiceStatus',
             'access' => ['admin']
         ],
-        '/admin/categories/create'      => [
+
+        '/admin/stock/update'           => [
             'controller' => 'AdminController',
-            'action' => 'createCategory',
-            'access' => ['admin']
-        ],
-        '/admin/categories/update'      => [
-            'controller' => 'AdminController',
-            'action' => 'updateCategory',
-            'access' => ['admin']
-        ],
-        '/admin/categories/delete/:id'  => [
-            'controller' => 'AdminController',
-            'action' => 'deleteCategory',
+            'action' => 'updateStock',
             'access' => ['admin']
         ],
     ],
