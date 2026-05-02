@@ -1,6 +1,6 @@
 <?php require_once __DIR__ . '/../partials/admin-header.php'; ?>
 
-<div style="margin-bottom: 20px;">
+<div class="admin-toolbar">
     <a href="/admin" class="btn btn-secondary">Back to Dashboard</a>
     <a href="/admin/menus/create" class="btn btn-success">Create Menu</a>
 </div>
@@ -19,7 +19,7 @@
         <tbody>
             <?php if (empty($menus)): ?>
                 <tr>
-                    <td colspan="5" style="text-align: center; padding: 20px;">No menus found.</td>
+                    <td colspan="5" class="admin-empty-state">No menus found.</td>
                 </tr>
             <?php else: ?>
                 <?php foreach ($menus as $menu): ?>
@@ -28,10 +28,10 @@
                         <td><?= htmlspecialchars($menu['name']) ?></td>
                         <td><?= htmlspecialchars($menu['description'] ?? '-') ?></td>
                         <td>
-                            <div class="actions">
-                                <a href="/admin/menus/edit/<?= $menu['id'] ?>" class="btn btn-primary" style="padding: 5px 10px; margin: 0;">Edit</a>
-                                <form method="POST" action="/admin/menus/delete/<?= $menu['id'] ?>" style="display: inline;" onsubmit="return confirm('Are you sure?');">
-                                    <button type="submit" class="btn btn-danger" style="padding: 5px 10px; margin: 0;">Delete</button>
+                            <div class="admin-actions-inline">
+                                <a href="/admin/menus/edit/<?= $menu['id'] ?>" class="btn btn-primary">Edit</a>
+                                <form method="POST" action="/admin/menus/delete/<?= $menu['id'] ?>" onsubmit="return confirm('Are you sure?');">
+                                    <button type="submit" class="btn btn-danger">Delete</button>
                                 </form>
                             </div>
                         </td>

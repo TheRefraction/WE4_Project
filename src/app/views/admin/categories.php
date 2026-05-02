@@ -7,10 +7,10 @@
 <article>
     <h3>Categories Management</h3>
     
-    <div style="margin-bottom: 20px; padding: 20px; background-color: #f9f9f9; border-radius: 5px;">
+    <div class="admin-panel">
         <h4>Create New Category</h4>
-        <form method="POST" action="/admin/categories/create" style="display: flex; gap: 10px;">
-            <input type="text" name="name" placeholder="Category name" required style="flex: 1;">
+        <form method="POST" action="/admin/categories/create" class="admin-toolbar-inline">
+            <input type="text" name="name" placeholder="Category name" required class="admin-flex-1">
             <button type="submit" class="btn btn-success">Create Category</button>
         </form>
     </div>
@@ -27,7 +27,7 @@
         <tbody>
             <?php if (empty($categories)): ?>
                 <tr>
-                    <td colspan="4" class="empty-table">No categories found.</td>
+                    <td colspan="4" class="admin-empty-state">No categories found.</td>
                 </tr>
             <?php else: ?>
                 <?php foreach ($categories as $category): ?>
@@ -35,9 +35,9 @@
                         <td><?= htmlspecialchars($category['id']) ?></td>
                         
                         <td>
-                            <form method="POST" action="/admin/categories/update" style="display: flex; gap: 10px;">
+                            <form method="POST" action="/admin/categories/update" class="admin-toolbar-inline">
                                 <input type="hidden" name="id" value="<?= $category['id'] ?>">
-                                <input type="text" name="name" value="<?= htmlspecialchars($category['name']) ?>" style="flex: 1;">
+                                <input type="text" name="name" value="<?= htmlspecialchars($category['name']) ?>" class="admin-flex-1">
                                 <button type="submit" class="btn btn-primary">Update</button>
                             </form>
                         </td>

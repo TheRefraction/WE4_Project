@@ -1,6 +1,6 @@
 <?php require_once __DIR__ . '/../partials/admin-header.php'; ?>
 
-<div style="margin-bottom: 20px;">
+<div class="admin-toolbar">
     <a href="/admin" class="btn btn-secondary">Back to Dashboard</a>
 </div>
 
@@ -21,23 +21,23 @@
         <tbody>
             <?php if (empty($stocks)): ?>
                 <tr>
-                    <td colspan="7" style="text-align: center; padding: 20px;">No stock records found.</td>
+                    <td colspan="7" class="admin-empty-state">No stock records found.</td>
                 </tr>
             <?php else: ?>
-                <?php foreach ($stocks as $s): ?>
+                <?php foreach ($stocks as $stockEntry): ?>
                     <tr>
-                        <td><?= htmlspecialchars($s['id']) ?></td>
-                        <td><?= htmlspecialchars($s['product_name'] ?? '-') ?></td>
-                        <td><?= htmlspecialchars($s['quantity_available']) ?></td>
-                        <td><?= htmlspecialchars($s['quantity_reserved']) ?></td>
-                        <td><?= htmlspecialchars($s['reorder_threshold']) ?></td>
-                        <td><?= htmlspecialchars($s['last_update']) ?></td>
+                        <td><?= htmlspecialchars($stockEntry['id']) ?></td>
+                        <td><?= htmlspecialchars($stockEntry['product_name'] ?? '-') ?></td>
+                        <td><?= htmlspecialchars($stockEntry['quantity_available']) ?></td>
+                        <td><?= htmlspecialchars($stockEntry['quantity_reserved']) ?></td>
+                        <td><?= htmlspecialchars($stockEntry['reorder_threshold']) ?></td>
+                        <td><?= htmlspecialchars($stockEntry['last_update']) ?></td>
                         <td>
-                            <form method="POST" action="/admin/stock/update" style="display:inline-block">
-                                <input type="hidden" name="id" value="<?= $s['id'] ?>">
-                                <input name="quantity_available" type="number" value="<?= $s['quantity_available'] ?>" style="width:80px"> 
-                                <input name="quantity_reserved" type="number" value="<?= $s['quantity_reserved'] ?>" style="width:80px"> 
-                                <input name="reorder_threshold" type="number" value="<?= $s['reorder_threshold'] ?>" style="width:80px"> 
+                            <form method="POST" action="/admin/stock/update" class="admin-inline-fields">
+                                <input type="hidden" name="id" value="<?= $stockEntry['id'] ?>">
+                                <input name="quantity_available" type="number" value="<?= $stockEntry['quantity_available'] ?>" class="admin-small-input"> 
+                                <input name="quantity_reserved" type="number" value="<?= $stockEntry['quantity_reserved'] ?>" class="admin-small-input"> 
+                                <input name="reorder_threshold" type="number" value="<?= $stockEntry['reorder_threshold'] ?>" class="admin-small-input"> 
                                 <button class="btn btn-primary" type="submit">Save</button>
                             </form>
                         </td>

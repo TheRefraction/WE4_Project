@@ -55,7 +55,7 @@
             </div>
         </div>
 
-        <div style="margin-top: 20px;">
+        <div class="admin-form-footer">
             <button type="submit" class="btn btn-success">Update</button>
             <a href="/admin/products" class="btn btn-secondary">Cancel</a>
         </div>

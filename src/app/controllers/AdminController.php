@@ -23,8 +23,8 @@ class AdminController {
             exit;
         }
 
-        $user = $this->accountModel->findByEmail($_SESSION['user_email']);
-        $role = $this->accountModel->getRole($user['id']);
+        $user = $this->accountModel->getAccountByEmail($_SESSION['user_email']);
+        $role = $this->accountModel->getAccountRole($user['id']);
 
         if ($role !== 'admin') {
             http_response_code(403);
@@ -46,7 +46,7 @@ class AdminController {
             exit;
         }
 
-        $role = $this->accountModel->getRole($_SESSION['user_id']);
+        $role = $this->accountModel->getAccountRole($_SESSION['user_id']);
         if ($role !== 'admin') {
             http_response_code(401);
             echo json_encode(['error' => 'Access denied.']);
@@ -55,6 +55,44 @@ class AdminController {
 
         echo json_encode(['success' => 'Access granted.']);
         exit;
+    }
+
+    /**
+     * Groups the denormalized menu-slot rows returned by the model into
+     * a render-friendly structure with nested product lists.
+     *
+     * @param array<int, array<string, mixed>> $rawSlots
+     * @return array<int, array<string, mixed>>
+     */
+    private function groupMenuSlotsWithProducts(array $rawSlots) {
+        $slots = [];
+
+        foreach ($rawSlots as $row) {
+            $slotId = $row['id'];
+
+            if (!isset($slots[$slotId])) {
+                $slots[$slotId] = [
+                    'id' => $row['id'],
+                    'menu_id' => $row['menu_id'],
+                    'name' => $row['name'],
+                    'min_select' => $row['min_select'],
+                    'max_select' => $row['max_select'],
+                    'display_order' => $row['display_order'],
+                    'products' => []
+                ];
+            }
+
+            if (!empty($row['product_name'])) {
+                $slots[$slotId]['products'][] = [
+                    'product_id' => $row['product_id'] ?? null,
+                    'product_name' => $row['product_name'],
+                    'price_delta' => $row['price_delta'] ?? 0,
+                    'is_default' => $row['is_default'] ?? 0
+                ];
+            }
+        }
+
+        return array_values($slots);
     }
 
     // ========== DASHBOARD ==========
@@ -735,173 +773,6 @@ class AdminController {
         exit;
     }
 
-    // ========== SUPPLIERS ==========
-    public function viewSuppliers() {
-        $this->checkAdminAccess();
-        
-        $title = 'Manage Suppliers';
-        $suppliers = $this->adminModel->getAllSuppliers();
-        
-        require_once __DIR__ . '/../views/admin/suppliers.php';
-    }
-
-    public function viewCreateSupplier() {
-        $this->checkAdminAccess();
-        
-        $title = 'Create Supplier';
-        
-        require_once __DIR__ . '/../views/admin/create-supplier.php';
-    }
-
-    public function viewEditSupplier($id) {
-        $this->checkAdminAccess();
-        
-        $title = 'Edit Supplier';
-        $supplier = $this->adminModel->getSupplierById($id);
-        
-        if (!$supplier) {
-            http_response_code(404);
-            require_once __DIR__ . '/../views/404.php';
-            exit;
-        }
-        
-        require_once __DIR__ . '/../views/admin/edit-supplier.php';
-    }
-
-    public function createSupplier() {
-        $this->checkAdminAccess();
-        
-        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            header('Location: /admin/suppliers/create');
-            exit;
-        }
-
-        $name = trim($_POST['name'] ?? '');
-        $email = trim($_POST['email'] ?? '');
-        $phone = !empty($_POST['phone']) ? trim($_POST['phone']) : null;
-
-        if (empty($name)) {
-            $_SESSION['errors'] = ['Supplier name is required.'];
-            header('Location: /admin/suppliers/create');
-            exit;
-        }
-
-        if ($this->adminModel->createSupplier($name, $email, $phone)) {
-            $_SESSION['success'] = 'Supplier created successfully!';
-            header('Location: /admin/suppliers');
-            exit;
-        }
-
-        $_SESSION['errors'] = ['Error creating supplier!'];
-        header('Location: /admin/suppliers/create');
-        exit;
-    }
-
-    public function updateSupplier() {
-        $this->checkAdminAccess();
-        
-        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            header('Location: /admin/suppliers');
-            exit;
-        }
-
-        $id = intval($_POST['id'] ?? 0);
-        $name = trim($_POST['name'] ?? '');
-        $email = trim($_POST['email'] ?? '');
-        $phone = !empty($_POST['phone']) ? trim($_POST['phone']) : null;
-
-        if (empty($id) || empty($name)) {
-            $_SESSION['errors'] = ['Supplier name is required.'];
-            header('Location: /admin/suppliers/edit/' . $id);
-            exit;
-        }
-
-        if ($this->adminModel->updateSupplier($id, $name, $email, $phone)) {
-            $_SESSION['success'] = 'Supplier updated successfully!';
-            header('Location: /admin/suppliers');
-            exit;
-        }
-
-        $_SESSION['errors'] = ['Error updating supplier!'];
-        header('Location: /admin/suppliers/edit/' . $id);
-        exit;
-    }
-
-    public function deleteSupplier($id) {
-        $this->checkAdminAccess();
-        
-        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            header('Location: /admin/suppliers');
-            exit;
-        }
-
-        $id = intval($id);
-        
-        if ($this->adminModel->deleteSupplier($id)) {
-            $_SESSION['success'] = 'Supplier deleted successfully!';
-        } else {
-            $_SESSION['errors'] = ['Error deleting supplier!'];
-        }
-        
-        header('Location: /admin/suppliers');
-        exit;
-    }
-
-    // ========== INVOICES ==========
-    /*
-    public function viewInvoices() {
-        $this->checkAdminAccess();
-        
-        $title = 'Manage Invoices';
-        $invoices = $this->adminModel->getAllInvoices();
-        
-        require_once __DIR__ . '/../views/admin/invoices.php';
-    }
-
-    public function viewInvoiceDetails($id) {
-        $this->checkAdminAccess();
-        
-        $title = 'Invoice Details';
-        $invoice = $this->adminModel->getInvoiceById($id);
-        $invoiceLines = $this->adminModel->getInvoiceLines($id);
-        
-        if (!$invoice) {
-            http_response_code(404);
-            require_once __DIR__ . '/../views/404.php';
-            exit;
-        }
-        
-        require_once __DIR__ . '/../views/admin/invoice-details.php';
-    }
-
-    public function updateInvoiceStatus() {
-        $this->checkAdminAccess();
-        
-        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            header('Location: /admin/invoices');
-            exit;
-        }
-
-        $id = intval($_POST['id'] ?? 0);
-        $statusId = intval($_POST['status_id'] ?? 0);
-
-        if (empty($id) || empty($statusId)) {
-            $_SESSION['errors'] = ['Invalid invoice or status.'];
-            header('Location: /admin/invoices');
-            exit;
-        }
-
-        if ($this->adminModel->updateInvoiceStatus($id, $statusId)) {
-            $_SESSION['success'] = 'Invoice status updated successfully!';
-            header('Location: /admin/invoices/details/' . $id);
-            exit;
-        }
-
-        $_SESSION['errors'] = ['Error updating invoice status!'];
-        header('Location: /admin/invoices/details/' . $id);
-        exit;
-    }*/
-
     // ========== CATEGORIES ==========
 
     /**
@@ -1090,12 +961,15 @@ class AdminController {
 
         $title = 'Edit Menu';
         $menu = $this->adminModel->getMenuById($id);
-
+        
         if (!$menu) {
             http_response_code(404);
             require_once __DIR__ . '/../views/404.php';
             exit;
         }
+
+        $rawSlots = $this->adminModel->getMenuSlotsWithProducts($id);
+        $slots = $this->groupMenuSlotsWithProducts($rawSlots);
 
         require_once __DIR__ . '/../views/admin/edit-menu.php';
     }
@@ -1148,42 +1022,295 @@ class AdminController {
         exit;
     }
 
-    // ========== STOCK ==========
-    /*public function viewStock() {
-        $this->checkAdminAccess();
-
-        $title = 'Stock Management';
-        $stocks = $this->adminModel->getAllStock();
-
-        require_once __DIR__ . '/../views/admin/stock.php';
-    }
-
-    public function updateStock() {
+    /**
+     * Creates a new menu slot for the selected menu.
+     */
+    public function createMenuSlot($menu_id) {
         $this->checkAdminAccess();
 
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            header('Location: /admin/stock');
+            header('Location: /admin/menus/edit/' . $menu_id);
+            exit;
+        }
+
+        $name = trim($_POST['name'] ?? '');
+        $min_select = intval($_POST['min_select'] ?? 0);
+        $max_select = intval($_POST['max_select'] ?? 1);
+        $display_order = intval($_POST['display_order'] ?? 0);
+
+        $errors = [];
+
+        if (empty($name)) {
+            $_SESSION['errors'] = ['Slot name required'];
+            header('Location: /admin/menus/edit/' . $menu_id);
+            exit;
+        }
+
+        if ($min_select < 0 || $max_select < 0 || $max_select < $min_select) {
+            $errors[] = 'Invalid min/max select values';
+        }
+
+        if ($display_order < 0) {
+            $errors[] = 'Display order must be non-negative';
+        }
+
+        if (empty($errors)) {
+            $existingSlot = $this->adminModel->getMenuSlotByName($menu_id, $name);
+            if ($existingSlot) {
+                $errors[] = 'A menu slot with this name already exists in this menu. Please choose a different name or edit the existing one.';
+            }
+        }
+
+        if (!empty($errors)) {
+            $_SESSION['errors'] = $errors;
+            header('Location: /admin/menus/edit/' . $menu_id);
+            exit;
+        }
+
+        if ($this->adminModel->createMenuSlot($menu_id, $name, $min_select, $max_select, $display_order)) {
+            $_SESSION['success'] = 'Menu slot created';
+            header('Location: /admin/menus/edit/' . $menu_id);
+            exit;
+        }
+
+        $_SESSION['errors'] = ['Error creating slot'];
+        header('Location: /admin/menus/edit/' . $menu_id);
+        exit;
+    }
+
+    /**
+     * Deletes a menu slot and returns to the menu edit page.
+     */
+    public function deleteMenuSlot($menu_id, $slot_id) {
+        $this->checkAdminAccess();
+
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header('Location: /admin/menus/edit/' . $menu_id);
+            exit;
+        }
+
+        $slot_id = intval($slot_id);
+
+        if ($this->adminModel->deleteMenuSlot($slot_id)) {
+            $_SESSION['success'] = 'Menu slot deleted';
+        } else {
+            $_SESSION['errors'] = ['Error deleting menu slot'];
+        }
+
+        header('Location: /admin/menus/edit/' . $menu_id);
+        exit;
+    }
+
+    /**
+     * Displays the menu slot product management page.
+     */
+    public function viewEditMenuSlot($menu_id, $slot_id) {
+        $this->checkAdminAccess();
+
+        $title = 'Edit Menu Slot Products';
+        $menu = $this->adminModel->getMenuById($menu_id);
+        
+        if (!$menu) {
+            http_response_code(404);
+            require_once __DIR__ . '/../views/404.php';
+            exit;
+        }
+
+        $slot = $this->adminModel->getMenuSlotById($slot_id);
+        
+        if (!$slot || $slot['menu_id'] != $menu_id) {
+            http_response_code(404);
+            require_once __DIR__ . '/../views/404.php';
+            exit;
+        }
+
+        $slotProducts = $this->adminModel->getMenuSlotProducts($slot_id);
+        $allProducts = $this->adminModel->getAllProducts();
+
+        require_once __DIR__ . '/../views/admin/edit-menu-slot.php';
+    }
+
+    /**
+     * Adds one or more products to a menu slot.
+     */
+    public function addProductToMenuSlot($menu_id, $slot_id) {
+        $this->checkAdminAccess();
+
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header('Location: /admin/menus/edit/' . $menu_id . '/slot/' . $slot_id);
+            exit;
+        }
+
+        $slot_id = intval($slot_id);
+        $products = $_POST['products'] ?? [];
+        $price_delta = floatval($_POST['price_delta'] ?? 0);
+        $is_default = intval($_POST['is_default'] ?? 0);
+        $display_order = intval($_POST['display_order'] ?? 0);
+
+        if (empty($products) || !is_array($products)) {
+            $_SESSION['errors'] = ['Please select at least one product'];
+            header('Location: /admin/menus/edit/' . $menu_id . '/slot/' . $slot_id);
+            exit;
+        }
+
+        $success = true;
+        foreach ($products as $product_id) {
+            $product_id = intval($product_id);
+            if (!$this->adminModel->addProductToMenuSlot($slot_id, $product_id, $price_delta, $is_default, $display_order)) {
+                $success = false;
+                break;
+            }
+        }
+
+        if ($success) {
+            $_SESSION['success'] = 'Products added to slot';
+        } else {
+            $_SESSION['errors'] = ['Error adding products to slot'];
+        }
+
+        header('Location: /admin/menus/edit/' . $menu_id . '/slot/' . $slot_id);
+        exit;
+    }
+
+    /**
+     * Removes a product from a menu slot.
+     */
+    public function removeProductFromMenuSlot($menu_id, $slot_id) {
+        $this->checkAdminAccess();
+
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header('Location: /admin/menus/edit/' . $menu_id . '/slot/' . $slot_id);
+            exit;
+        }
+
+        $slot_id = intval($slot_id);
+        $product_id = intval($_POST['product_id'] ?? 0);
+
+        if (empty($product_id)) {
+            $_SESSION['errors'] = ['Invalid product'];
+            header('Location: /admin/menus/edit/' . $menu_id . '/slot/' . $slot_id);
+            exit;
+        }
+
+        if ($this->adminModel->removeProductFromMenuSlot($slot_id, $product_id)) {
+            $_SESSION['success'] = 'Product removed from slot';
+        } else {
+            $_SESSION['errors'] = ['Error removing product from slot'];
+        }
+
+        header('Location: /admin/menus/edit/' . $menu_id . '/slot/' . $slot_id);
+        exit;
+    }
+
+    // ========== SUPPLIERS ==========
+    public function viewSuppliers() {
+        $this->checkAdminAccess();
+        
+        $title = 'Manage Suppliers';
+        $suppliers = $this->adminModel->getAllSuppliers();
+        
+        require_once __DIR__ . '/../views/admin/suppliers.php';
+    }
+
+    public function viewCreateSupplier() {
+        $this->checkAdminAccess();
+        
+        $title = 'Create Supplier';
+        
+        require_once __DIR__ . '/../views/admin/create-supplier.php';
+    }
+
+    public function viewEditSupplier($id) {
+        $this->checkAdminAccess();
+        
+        $title = 'Edit Supplier';
+        $supplier = $this->adminModel->getSupplierById($id);
+        
+        if (!$supplier) {
+            http_response_code(404);
+            require_once __DIR__ . '/../views/404.php';
+            exit;
+        }
+        
+        require_once __DIR__ . '/../views/admin/edit-supplier.php';
+    }
+
+    public function createSupplier() {
+        $this->checkAdminAccess();
+        
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header('Location: /admin/suppliers/create');
+            exit;
+        }
+
+        $name = trim($_POST['name'] ?? '');
+        $email = trim($_POST['email'] ?? '');
+        $phone = !empty($_POST['phone']) ? trim($_POST['phone']) : null;
+
+        if (empty($name)) {
+            $_SESSION['errors'] = ['Supplier name is required.'];
+            header('Location: /admin/suppliers/create');
+            exit;
+        }
+
+        if ($this->adminModel->createSupplier($name, $email, $phone)) {
+            $_SESSION['success'] = 'Supplier created successfully!';
+            header('Location: /admin/suppliers');
+            exit;
+        }
+
+        $_SESSION['errors'] = ['Error creating supplier!'];
+        header('Location: /admin/suppliers/create');
+        exit;
+    }
+
+    public function updateSupplier() {
+        $this->checkAdminAccess();
+        
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header('Location: /admin/suppliers');
             exit;
         }
 
         $id = intval($_POST['id'] ?? 0);
-        $qa = intval($_POST['quantity_available'] ?? 0);
-        $qr = intval($_POST['quantity_reserved'] ?? 0);
-        $rt = intval($_POST['reorder_threshold'] ?? 0);
+        $name = trim($_POST['name'] ?? '');
+        $email = trim($_POST['email'] ?? '');
+        $phone = !empty($_POST['phone']) ? trim($_POST['phone']) : null;
 
-        if (empty($id)) {
-            $_SESSION['errors'] = ['Invalid stock item'];
-            header('Location: /admin/stock');
+        if (empty($id) || empty($name)) {
+            $_SESSION['errors'] = ['Supplier name is required.'];
+            header('Location: /admin/suppliers/edit/' . $id);
             exit;
         }
 
-        if ($this->adminModel->updateStock($id, $qa, $qr, $rt)) {
-            $_SESSION['success'] = 'Stock updated successfully!';
-        } else {
-            $_SESSION['errors'] = ['Error updating stock'];
+        if ($this->adminModel->updateSupplier($id, $name, $email, $phone)) {
+            $_SESSION['success'] = 'Supplier updated successfully!';
+            header('Location: /admin/suppliers');
+            exit;
         }
 
-        header('Location: /admin/stock');
+        $_SESSION['errors'] = ['Error updating supplier!'];
+        header('Location: /admin/suppliers/edit/' . $id);
         exit;
-    }*/
+    }
+
+    public function deleteSupplier($id) {
+        $this->checkAdminAccess();
+        
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header('Location: /admin/suppliers');
+            exit;
+        }
+
+        $id = intval($id);
+        
+        if ($this->adminModel->deleteSupplier($id)) {
+            $_SESSION['success'] = 'Supplier deleted successfully!';
+        } else {
+            $_SESSION['errors'] = ['Error deleting supplier!'];
+        }
+        
+        header('Location: /admin/suppliers');
+        exit;
+    }
 }

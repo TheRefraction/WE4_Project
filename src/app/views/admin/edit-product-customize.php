@@ -19,7 +19,8 @@
                     <?php foreach ($categories as $c): ?>
                         <option value="<?= $c['id'] ?>"><?= htmlspecialchars($c['name']) ?></option>
                     <?php endforeach; ?>
-            </select>
+                </select>
+            </div>
         </div>
 
         <div class="form-group">
@@ -38,7 +39,7 @@
         </div>
 
         <div class="form-group">
-            <button class="btn btn-success" type="submit" style="float: right;">Create</button>
+            <button class="btn btn-success admin-float-right" type="submit">Create</button>
         </div>
     </form>
 </article>
@@ -50,10 +51,11 @@
     <?php else: ?> 
         <?php foreach ($slots as $slot): ?>
             <section class="slot-section">
-                <h4><?= htmlspecialchars($slot['name'] ?? ('Slot #' . $slot['id'])) ?> 
-                - <?= htmlspecialchars($slot['product_name'] ?? '-') ?>
-                
-                    <span class="actions" style="float: right;">
+                <h4>
+                    <?= htmlspecialchars($slot['name'] ?? ('Slot #' . $slot['id'])) ?>
+                    - <?= htmlspecialchars($slot['product_name'] ?? '-') ?>
+
+                    <span class="actions admin-actions-inline admin-float-right">
                         <a href="/admin/products/edit/<?= $product['id'] ?>/slot/<?= $slot['id'] ?>" class="btn btn-primary">Edit</a>
 
                         <form method="POST" action="/admin/products/<?= $product['id'] ?>/slot/delete/<?= $slot['id'] ?>" onsubmit="return deleteConfirmation(this);">
@@ -62,8 +64,8 @@
                     </span>
                 </h4>
 
-                <p>Category: <?= htmlspecialchars($slot['category_name'] ?? '-') ?> 
-                | Min: <?= $slot['min_select'] ?> 
+                <p>Category: <?= htmlspecialchars($slot['category_name'] ?? '-') ?>
+                | Min: <?= $slot['min_select'] ?>
                 | Max: <?= $slot['max_select'] ?></p>
                 
                 <h5>Options</h5>
@@ -73,10 +75,10 @@
                     <p>No options for this slot.</p>
                 <?php else: ?>
                     <ul>
-                        <?php foreach ($slotOptions as $opt): ?>
-                            <li><?= htmlspecialchars($opt['option_product_name'] ?? ('Option #' . $opt['id'])) ?> 
-                            - Δ <?= number_format($opt['price_delta'], 2) ?> € 
-                            <?= $opt['is_default'] ? '(default)' : '' ?></li>
+                        <?php foreach ($slotOptions as $option): ?>
+                            <li><?= htmlspecialchars($option['option_product_name'] ?? ('Option #' . $option['id'])) ?>
+                            - Δ <?= number_format($option['price_delta'], 2) ?> €
+                            <?= $option['is_default'] ? '(default)' : '' ?></li>
                         <?php endforeach; ?>
                     </ul>
                 <?php endif; ?>

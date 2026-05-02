@@ -28,21 +28,21 @@
             <?php else: ?>
                 <?php foreach ($accounts as $account): ?>
                     <tr>
-                        <td><?= htmlspecialchars($account['id']) ?></td>
-                        <td><?= htmlspecialchars($account['first_name'] . ' ' . $account['last_name']) ?></td>
-                        <td><?= htmlspecialchars($account['email']) ?></td>
-                        <td><?= htmlspecialchars($account['phone'] ?? '-') ?></td>
-                        <td><span class="tag"><?= htmlspecialchars($account['role_name'] ?? 'Unknown') ?></span></td>
-                        <td><?= date('M d, Y', strtotime($account['date_creation'])) ?></td>
-                        <td><?= date('M d, Y', strtotime($account['last_login'])) ?></td>
+                        <td><?= htmlspecialchars($account->id) ?></td>
+                        <td><?= htmlspecialchars($account->first_name . ' ' . $account->last_name) ?></td>
+                        <td><?= htmlspecialchars($account->email) ?></td>
+                        <td><?= htmlspecialchars($account->phone ?? '-') ?></td>
+                        <td><span class="tag"><?= htmlspecialchars($account->role_name ?? 'Unknown') ?></span></td>
+                        <td><?= date('M d, Y', strtotime($account->date_creation)) ?></td>
+                        <td><?= date('M d, Y', strtotime($account->last_login)) ?></td>
                         <td>
-                            <?php if ($account['id'] === $_SESSION['user_id']): ?>
+                            <?php if ($account->id === $_SESSION['user_id']): ?>
                                 <span style="color: #e74c3c; font-weight: bold;">(You)</span>
                             <?php else: ?>
                                 <div class="actions">
-                                    <a href="/admin/accounts/edit/<?= $account['id'] ?>" class="btn btn-primary">Edit</a>
-                                    
-                                    <form method="POST" action="/admin/accounts/delete/<?= $account['id'] ?>" onsubmit="return deleteConfirmation(this);">
+                                    <a href="/admin/accounts/edit/<?= $account->id ?>" class="btn btn-primary">Edit</a>
+
+                                    <form method="POST" action="/admin/accounts/delete/<?= $account->id ?>" onsubmit="return deleteConfirmation(this);">
                                         <button type="submit" class="btn btn-danger">Delete</button>
                                     </form>
                                 </div>

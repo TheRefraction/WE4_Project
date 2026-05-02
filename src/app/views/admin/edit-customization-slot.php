@@ -18,7 +18,7 @@
             <div class="form-group">
                 <label>Category</label>
                 <span><?= htmlspecialchars($slot['category_name'] ?? '-') ?></span>
-            </select>
+            </div>
         </div>
 
         <div class="form-group">
@@ -51,9 +51,9 @@
             <div class="form-group">
                 <label>Product Option</label>
                 <select name="option_product_id" required>
-                    <?php foreach ($products as $p): ?>
-                        <?php if ($p['id'] == $slot['product_id']) continue; // Prevent selecting the same product as an option ?>
-                        <option value="<?= $p['id'] ?>"><?= htmlspecialchars($p['name']) ?></option>
+                    <?php foreach ($products as $productOption): ?>
+                        <?php if ($productOption['id'] == $slot['product_id']) continue; ?>
+                        <option value="<?= $productOption['id'] ?>"><?= htmlspecialchars($productOption['name']) ?></option>
                     <?php endforeach; ?>
                 </select>
             </div>
@@ -91,16 +91,16 @@
         <p>No options yet.</p>
     <?php else: ?>
         <ul>
-            <?php foreach ($options as $opt): ?>
+            <?php foreach ($options as $option): ?>
                 <li>
-                    <?= htmlspecialchars($opt['option_product_name'] ?? ('Option #' . $opt['id'])) ?> 
-                    - Δ <?= number_format($opt['price_delta'], 2) ?> € 
-                    <?= $opt['is_default'] ? '(default)' : '' ?>
+                    <?= htmlspecialchars($option['option_product_name'] ?? ('Option #' . $option['id'])) ?>
+                    - Δ <?= number_format($option['price_delta'], 2) ?> €
+                    <?= $option['is_default'] ? '(default)' : '' ?>
 
-                    <span class="actions" style="float: right;">
-                        <a href="/admin/products/edit/<?= $slot['product_id'] ?>/option/<?= $opt['id'] ?>" class="btn btn-primary">Edit</a>
+                    <span class="actions admin-actions-inline admin-float-right">
+                        <a href="/admin/products/edit/<?= $slot['product_id'] ?>/option/<?= $option['id'] ?>" class="btn btn-primary">Edit</a>
 
-                        <form method="POST" action="/admin/products/<?= $slot['product_id'] ?>/option/delete/<?= $opt['id'] ?>" onsubmit="return deleteConfirmation(this);">
+                        <form method="POST" action="/admin/products/<?= $slot['product_id'] ?>/option/delete/<?= $option['id'] ?>" onsubmit="return deleteConfirmation(this);">
                             <button type="submit" class="btn btn-danger">Delete</button>
                         </form>
                     </span>

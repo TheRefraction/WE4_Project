@@ -79,7 +79,7 @@ if ($matched) {
     if (isset($_SESSION['user_id'])) {
         require_once __DIR__ . '/../app/models/Account.php';
         $accountModel = new Account($dbConnection);
-        $role = $accountModel->getRole($_SESSION['user_id']);
+        $role = $accountModel->getAccountRole($_SESSION['user_id']);
     }
 
     if (!in_array($role, $allowedAccess, true)) {
