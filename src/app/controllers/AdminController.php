@@ -3,6 +3,9 @@
 require_once __DIR__ . '/../models/Admin.php';
 require_once __DIR__ . '/../models/Account.php';
 
+/**
+ * Controller for handling admin-specific requests and logic.
+ */
 class AdminController {
     private $adminModel;
     private $accountModel;
@@ -18,13 +21,18 @@ class AdminController {
      * If logged in but not an admin, shows 403 error page.
      */
     private function checkAdminAccess() {
-        if (!isset($_SESSION['user_id'])) {
+        if (empty($_SESSION['user_id'])) {
             header('Location: /sign-in');
             exit;
         }
 
-        $user = $this->accountModel->getAccountByEmail($_SESSION['user_email']);
-        $role = $this->accountModel->getAccountRole($user['id']);
+        $userId = (int) $_SESSION['user_id'];
+        $role = $this->accountModel->getAccountRole($userId);
+
+        if (empty($role)) {
+            header('Location: /sign-in');
+            exit;
+        }
 
         if ($role !== 'admin') {
             http_response_code(403);
@@ -46,7 +54,8 @@ class AdminController {
             exit;
         }
 
-        $role = $this->accountModel->getAccountRole($_SESSION['user_id']);
+        $role = $this->accountModel->getAccountRole((int) $_SESSION['user_id']);
+
         if ($role !== 'admin') {
             http_response_code(401);
             echo json_encode(['error' => 'Access denied.']);
@@ -57,71 +66,45 @@ class AdminController {
         exit;
     }
 
-    /**
-     * Groups the denormalized menu-slot rows returned by the model into
-     * a render-friendly structure with nested product lists.
-     *
-     * @param array<int, array<string, mixed>> $rawSlots
-     * @return array<int, array<string, mixed>>
+    /*
+     * ===============================
+     * ========== DASHBOARD ==========
+     * ===============================
      */
-    private function groupMenuSlotsWithProducts(array $rawSlots) {
-        $slots = [];
-
-        foreach ($rawSlots as $row) {
-            $slotId = $row['id'];
-
-            if (!isset($slots[$slotId])) {
-                $slots[$slotId] = [
-                    'id' => $row['id'],
-                    'menu_id' => $row['menu_id'],
-                    'name' => $row['name'],
-                    'min_select' => $row['min_select'],
-                    'max_select' => $row['max_select'],
-                    'display_order' => $row['display_order'],
-                    'products' => []
-                ];
-            }
-
-            if (!empty($row['product_name'])) {
-                $slots[$slotId]['products'][] = [
-                    'product_id' => $row['product_id'] ?? null,
-                    'product_name' => $row['product_name'],
-                    'price_delta' => $row['price_delta'] ?? 0,
-                    'is_default' => $row['is_default'] ?? 0
-                ];
-            }
-        }
-
-        return array_values($slots);
-    }
-
-    // ========== DASHBOARD ==========
 
     /**
      * Displays the admin dashboard with key stats and quick links.
      * URL: /admin
      */
     public function viewAdmin() {
+        // Check admin access first
         $this->checkAdminAccess();
         
         $title = 'Admin Dashboard';
         $stats = $this->adminModel->getDashboardStats();
         
+        // Render the dashboard view
         require_once __DIR__ . '/../views/admin/dashboard.php';
     }
 
-    // ========== ACCOUNTS ==========
+    /*
+     * ===============================
+     * ========== ACCOUNTS ===========
+     * ===============================
+     */
 
     /**
      * Displays the account management page with a list of all user accounts.
      * URL: /admin/accounts
      */
     public function viewAccounts() {
+        // Check admin access first
         $this->checkAdminAccess();
         
         $title = 'Manage Accounts';
         $accounts = $this->adminModel->getAllAccounts();
         
+        // Render the accounts management view
         require_once __DIR__ . '/../views/admin/accounts.php';
     }
 
@@ -130,6 +113,7 @@ class AdminController {
      * URL: /admin/accounts/edit/:id
      */
     public function viewEditAccount($id) {
+        // Check admin access first
         $this->checkAdminAccess();
         
         $title = 'Edit Account';
@@ -142,6 +126,7 @@ class AdminController {
             exit;
         }
         
+        // Render the edit account view
         require_once __DIR__ . '/../views/admin/edit-account.php';
     }
 
@@ -150,6 +135,7 @@ class AdminController {
      * URL: /admin/accounts/update
      */
     public function updateAccountAdmin() {
+        // Check admin access first
         $this->checkAdminAccess();
         
         // Only allow POST requests for updates
@@ -158,7 +144,7 @@ class AdminController {
             exit;
         }
 
-        // Sanitize and validate input
+        // Sanitize input
         $id = intval($_POST['id'] ?? 0);
         $firstName = trim($_POST['first_name'] ?? '');
         $lastName = trim($_POST['last_name'] ?? '');
@@ -173,23 +159,36 @@ class AdminController {
             exit;
         }
 
-        // Prevent admin from changing their own role or details from the admin panel
-        if ($id === $_SESSION['user_id']) {
-            $_SESSION['errors'] = ['You cannot update your own account from the admin panel. Please use the account settings page.'];
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $_SESSION['errors'] = ['Valid email is required.'];
             header('Location: /admin/accounts/edit/' . $id);
             exit;
         }
 
-        // Updates account details and role
-        if ($this->adminModel->updateAccount($id, $firstName, $lastName, $email, $phone, $roleId)) {
-            $_SESSION['success'] = 'Account updated successfully!';
+        // Prevent admin from changing their own role or details from the admin panel
+        if ($id === $_SESSION['user_id']) {
+            $_SESSION['errors'] = ['You cannot update your own account from the admin panel. Please use the account settings page.'];
             header('Location: /admin/accounts');
             exit;
         }
 
-        // If update fails, set error message and redirect back to edit page
-        $_SESSION['errors'] = ['Error updating account!'];
-        header('Location: /admin/accounts/edit/' . $id);
+        // Updates account details and role
+        try {
+            $result = $this->adminModel->updateAccount($id, $firstName, $lastName, $email, $phone, $roleId);
+
+            if (!$result) {
+                $_SESSION['errors'] = ['Error updating account!'];
+                header('Location: /admin/accounts/edit/' . $id);
+                exit;
+            }
+        } catch (Exception $e) {
+            $_SESSION['errors'] = ['Error updating account: ' . $e->getMessage()];
+            header('Location: /admin/accounts/edit/' . $id);
+            exit;
+        }
+
+        $_SESSION['success'] = 'Account updated successfully!';
+        header('Location: /admin/accounts');
         exit;
     }
 
@@ -207,7 +206,7 @@ class AdminController {
             exit;
         }
 
-        $id = intval($id);
+        $id = intval($id); 
 
         // Prevent admin from deleting their own account from the admin panel
         if ($id === $_SESSION['user_id']) {
@@ -215,19 +214,32 @@ class AdminController {
             header('Location: /admin/accounts');
             exit;
         }
-        
+
         // Deletes the account and redirects back to accounts list with success or error message
-        if ($this->adminModel->deleteAccount($id)) {
-            $_SESSION['success'] = 'Account deleted successfully!';
-        } else {
-            $_SESSION['errors'] = ['Error deleting account!'];
+        try{
+            $result = $this->adminModel->deleteAccount($id);
+
+            if (!$result) {
+                $_SESSION['errors'] = ['Error deleting account!'];
+                header('Location: /admin/accounts');
+                exit;
+            }
+        } catch (Exception $e) {
+            $_SESSION['errors'] = ['Error deleting account: ' . $e->getMessage()];
+            header('Location: /admin/accounts');
+            exit;
         }
         
+        $_SESSION['success'] = 'Account deleted successfully!';
         header('Location: /admin/accounts');
         exit;
     }
 
-    // ========== PRODUCTS ==========
+    /*
+     * ===============================
+     * ========== PRODUCTS ===========
+     * ===============================
+     */
 
     /**
      * Displays the product management page with a list of all products.
@@ -238,7 +250,7 @@ class AdminController {
         $this->checkAdminAccess();
         
         $title = 'Manage Products';
-        $products = $this->adminModel->getAllProducts();
+        $products = $this->adminModel->getAllProductsWithSupplierAndCategories();
         
         require_once __DIR__ . '/../views/admin/products.php';
     }
@@ -298,31 +310,48 @@ class AdminController {
             exit;
         }
 
-        // Sanitize and validate input
+        // Sanitize input
         $name = trim($_POST['name'] ?? '');
-        $description = trim($_POST['description'] ?? '');
+        $description = trim($_POST['description'] ?? '') ?: null;
         $price = floatval($_POST['price'] ?? 0);
         $supplierId = !empty($_POST['supplier_id']) ? intval($_POST['supplier_id']) : null;
-        $hidden = intval($_POST['hidden'] ?? 0);
-        $category_ids = isset($_POST['category_ids']) ? array_map('intval', $_POST['category_ids']) : [];
+        $hidden = boolval($_POST['hidden'] ?? false);
+        $categoryIds = isset($_POST['category_ids']) ? array_map('intval', $_POST['category_ids']) : [];
+
+        $errors = [];
 
         // Validate required fields
         if (empty($name) || $price <= 0) {
-            $_SESSION['errors'] = ['Product name and valid price are required.'];
+            $errors[] = 'Product name and valid price are required.';
+        }
+
+        if (empty($categoryIds)) {
+            $errors[] = 'At least one category must be selected.';
+        }
+
+        if (!empty($errors)) {
+            $_SESSION['errors'] = $errors;
             header('Location: /admin/products/create');
             exit;
         }
 
         // Creates the product and redirects back to products list with success or error message
-        if ($this->adminModel->createProduct($name, $description, $price, $supplierId, $hidden, $category_ids)) {
-            $_SESSION['success'] = 'Product created successfully!';
-            header('Location: /admin/products');
+        try{
+            $result = $this->adminModel->createProductWithCategories($name, $description, $price, $supplierId, $hidden, $categoryIds);
+    
+            if (!$result) {
+                $_SESSION['errors'] = ['Error creating product!'];
+                header('Location: /admin/products/create');
+                exit;
+            }
+        } catch (Exception $e) {
+            $_SESSION['errors'] = ['Error creating product: ' . $e->getMessage()];
+            header('Location: /admin/products/create');
             exit;
         }
 
-        // If creation fails, set error message and redirect back to create page
-        $_SESSION['errors'] = ['Error creating product!'];
-        header('Location: /admin/products/create');
+        $_SESSION['success'] = 'Product created successfully!';
+        header('Location: /admin/products');
         exit;
     }
 
@@ -340,14 +369,14 @@ class AdminController {
             exit;
         }
 
-        // Sanitize and validate input
+        // Sanitize input
         $id = intval($_POST['id'] ?? 0);
         $name = trim($_POST['name'] ?? '');
-        $description = trim($_POST['description'] ?? '');
+        $description = trim($_POST['description'] ?? '') ?: null;
         $price = floatval($_POST['price'] ?? 0);
         $supplierId = !empty($_POST['supplier_id']) ? intval($_POST['supplier_id']) : null;
-        $hidden = intval($_POST['hidden'] ?? 0);
-        $category_ids = isset($_POST['category_ids']) ? array_map('intval', $_POST['category_ids']) : [];
+        $hidden = boolval($_POST['hidden'] ?? false);
+        $categoryIds = isset($_POST['category_ids']) ? array_map('intval', $_POST['category_ids']) : [];
 
         // Validate required fields
         if (empty($id) || empty($name) || $price <= 0) {
@@ -357,15 +386,22 @@ class AdminController {
         }
 
         // Updates the product and redirects back to products list with success or error message
-        if ($this->adminModel->updateProduct($id, $name, $description, $price, $supplierId, $hidden, $category_ids)) {
-            $_SESSION['success'] = 'Product updated successfully!';
-            header('Location: /admin/products');
+        try{
+             $result = $this->adminModel->updateProductWithCategories($id, $name, $description, $price, $supplierId, $hidden, $categoryIds);
+
+             if (!$result) {
+                $_SESSION['errors'] = ['Error updating product!'];
+                header('Location: /admin/products/edit/' . $id);
+                exit;
+             }
+        } catch (Exception $e) {
+            $_SESSION['errors'] = ['Error updating product: ' . $e->getMessage()];
+            header('Location: /admin/products/edit/' . $id);
             exit;
         }
 
-        // If update fails, set error message and redirect back to edit page
-        $_SESSION['errors'] = ['Error updating product!'];
-        header('Location: /admin/products/edit/' . $id);
+        $_SESSION['success'] = 'Product updated successfully!';
+        header('Location: /admin/products');
         exit;
     }
 
@@ -386,13 +422,21 @@ class AdminController {
         $id = intval($id);
         
         // Deletes the product and redirects back to products list with success or error message
-        if ($this->adminModel->deleteProduct($id)) {
-            $_SESSION['success'] = 'Product deleted successfully!';
-        } else {
-            $_SESSION['errors'] = ['Error deleting product!'];
+        try{
+            $result = $this->adminModel->deleteProduct($id);
+
+            if (!$result) {
+                $_SESSION['errors'] = ['Error deleting product!'];
+                header('Location: /admin/products');
+                exit;
+            }
+        } catch (Exception $e) {
+            $_SESSION['errors'] = ['Error deleting product: ' . $e->getMessage()];
+            header('Location: /admin/products');
+            exit;
         }
-        
-        // Redirect back to products list after deletion attempt
+
+        $_SESSION['success'] = 'Product deleted successfully!';
         header('Location: /admin/products');
         exit;
     }
@@ -408,14 +452,21 @@ class AdminController {
         $this->checkAdminAccess();
         
         $title = 'Customize Product';
-        $slots = $this->adminModel->getCustomizationSlots($id);
+        $slots = $this->adminModel->getCustomizationSlotsByProductId($id);
         $categories = $this->adminModel->getAllCategories();
         $product = $this->adminModel->getProductById($id);
 
+        // If product not found, show 404 page
+        if (!$product) {
+            http_response_code(404);
+            require_once __DIR__ . '/../views/404.php';
+            exit;
+        }
+
+        // Get options for each slot
         $options = [];
         foreach ($slots as $slot) {
-            $s_id = $slot['id'];
-            $options[$s_id] = $this->adminModel->getCustomizationOptionsBySlot($s_id);
+            $options[$slot->id] = $this->adminModel->getCustomizationOptionsBySlot($slot->id);
         }
         
         require_once __DIR__ . '/../views/admin/edit-product-customize.php';
@@ -430,17 +481,18 @@ class AdminController {
         $this->checkAdminAccess();
 
         $title = 'Edit Customization Slot';
-        $slots = $this->adminModel->getCustomizationSlots($id);
+        $slots = $this->adminModel->getCustomizationSlotsByProductId($id);
 
         // find slot by id
         $slot = null;
         foreach ($slots as $s) { 
-            if ($s['id'] == $slot_id) { 
+            if ($s->id === $slot_id) { 
                 $slot = $s; 
                 break; 
             }
         }
 
+        // If slot not found, show 404 page
         if (!$slot) {
             http_response_code(404);
             require_once __DIR__ . '/../views/404.php';
@@ -453,6 +505,10 @@ class AdminController {
         require_once __DIR__ . '/../views/admin/edit-customization-slot.php';
     }
 
+    /**
+     * Displays the page for editing a specific customization option.
+     * URL: /admin/products/edit/:id/option/:option_id
+     */
     public function viewEditCustomizationOption($id, $option_id) {
         // Check admin access first
         $this->checkAdminAccess();
@@ -466,7 +522,7 @@ class AdminController {
             exit;
         }
 
-        $slot = $this->adminModel->getCustomizationSlotById($option['product_customization_slot_id']);
+        $slot = $this->adminModel->getCustomizationSlotById($option->product_customization_slot_id);
         $products = $this->adminModel->getAllProducts();
 
         require_once __DIR__ . '/../views/admin/edit-customization-option.php';
@@ -523,13 +579,21 @@ class AdminController {
         }
 
         // Creates the customization slot and redirects back to customizations list with success or error message
-        if ($this->adminModel->createCustomizationSlot($product_id, $category_id, $min_select, $max_select, $display_order)) {
-            $_SESSION['success'] = 'Customization slot created';
+        try {
+             $result = $this->adminModel->createCustomizationSlot($product_id, $category_id, $min_select, $max_select, $display_order);
+
+             if (!$result) {
+                $_SESSION['errors'] = ['Error creating slot!'];
+                header('Location: /admin/products/edit/' . $product_id . '/customize');
+                exit;
+             }
+        } catch (Exception $e) {
+            $_SESSION['errors'] = ['Error creating slot: ' . $e->getMessage()];
             header('Location: /admin/products/edit/' . $product_id . '/customize');
             exit;
         }
 
-        $_SESSION['errors'] = ['Error creating slot'];
+        $_SESSION['success'] = 'Customization slot created';
         header('Location: /admin/products/edit/' . $product_id . '/customize');
         exit;
     }
@@ -556,6 +620,7 @@ class AdminController {
 
         // Validate input
         $errors = [];
+
         if (empty($id)) {
             $_SESSION['errors'] = ['Invalid slot'];
             header('Location: /admin/products/edit/' . $product_id . '/customize');
@@ -577,12 +642,22 @@ class AdminController {
             exit;
         }
 
-        if ($this->adminModel->updateCustomizationSlot($id, $min_select, $max_select, $display_order)) {
-            $_SESSION['success'] = 'Slot updated';
-        } else {
-            $_SESSION['errors'] = ['Error updating slot'];
+        // Updates the customization slot and redirects back to customizations list with success or error message
+        try{
+            $result = $this->adminModel->updateCustomizationSlot($id, $min_select, $max_select, $display_order);
+
+            if (!$result) {
+                $_SESSION['errors'] = ['Error updating slot!'];
+                header('Location: /admin/products/edit/' . $product_id . '/customize');
+                exit;
+            }
+        } catch (Exception $e) {
+            $_SESSION['errors'] = ['Error updating slot: ' . $e->getMessage()];
+            header('Location: /admin/products/edit/' . $product_id . '/customize');
+            exit;
         }
 
+        $_SESSION['success'] = 'Slot updated';
         header('Location: /admin/products/edit/' . $product_id . '/customize');
         exit;
     }
@@ -612,12 +687,21 @@ class AdminController {
         }
 
         // Deletes the customization slot and redirects back to customizations list with success or error message
-        if ($this->adminModel->deleteCustomizationSlot($id)) {
-            $_SESSION['success'] = 'Slot deleted';
-        } else {
-            $_SESSION['errors'] = ['Error deleting slot'];
+        try {
+            $result = $this->adminModel->deleteCustomizationSlot($id);
+
+            if (!$result) {
+                $_SESSION['errors'] = ['Error deleting slot!'];
+                header('Location: /admin/products/edit/' . $product_id . '/customize');
+                exit;
+            }
+        } catch (Exception $e) {
+            $_SESSION['errors'] = ['Error deleting slot: ' . $e->getMessage()];
+            header('Location: /admin/products/edit/' . $product_id . '/customize');
+            exit;
         }
 
+        $_SESSION['success'] = 'Slot deleted';
         header('Location: /admin/products/edit/' . $product_id . '/customize');
         exit;
     }
@@ -636,11 +720,11 @@ class AdminController {
             exit;
         }
 
-        // Sanitize and validate input
+        // Sanitize input
         $slotId = intval($_POST['slot_id'] ?? 0);
         $optionProductId = intval($_POST['option_product_id'] ?? 0);
         $priceDelta = floatval($_POST['price_delta'] ?? 0.0);
-        $isDefault = intval($_POST['is_default'] ?? 0);
+        $isDefault = boolval($_POST['is_default'] ?? false);
         $displayOrder = intval($_POST['display_order'] ?? 0);
 
         $errors = [];
@@ -655,7 +739,6 @@ class AdminController {
         // Validate display order
         if ($displayOrder < 0) {
             $errors[] = 'Display order must be non-negative';
-            exit;
         }
 
         // Check if slot already exists
@@ -673,12 +756,21 @@ class AdminController {
         }
 
         // Creates the customization option and redirects back to customizations list with success or error message
-        if ($this->adminModel->createCustomizationOption($slotId, $optionProductId, $priceDelta, $isDefault, $displayOrder)) {
-            $_SESSION['success'] = 'Option created';
-        } else {
-            $_SESSION['errors'] = ['Error creating option'];
-        }
+        try {
+            $result = $this->adminModel->createCustomizationOption($slotId, $optionProductId, $priceDelta, $isDefault, $displayOrder);
 
+            if (!$result) {
+                $_SESSION['errors'] = ['Error creating option!'];
+                header('Location: /admin/products/edit/' . $product_id . '/slot/' . $slotId);
+                exit;
+            }
+        } catch (Exception $e) {
+            $_SESSION['errors'] = ['Error creating option: ' . $e->getMessage()];
+            header('Location: /admin/products/edit/' . $product_id . '/slot/' . $slotId);
+            exit;
+        }
+        
+        $_SESSION['success'] = 'Option created';
         header('Location: /admin/products/edit/' . $product_id . '/slot/' . $slotId);
         exit;
     }
@@ -697,12 +789,12 @@ class AdminController {
             exit;
         }
 
-        // Sanitize and validate input
+        // Sanitize input
         $slotId = intval($_POST['slot_id'] ?? 0);
         $optionId = intval($_POST['id'] ?? 0);
         $optionProductId = intval($_POST['option_product_id'] ?? 0);
         $priceDelta = floatval($_POST['price_delta'] ?? 0.0);
-        $isDefault = intval($_POST['is_default'] ?? 0);
+        $isDefault = boolval($_POST['is_default'] ?? false);
         $displayOrder = intval($_POST['display_order'] ?? 0);
 
         $errors = [];
@@ -722,7 +814,7 @@ class AdminController {
          // Check if slot already exists
         if (empty($errors)) {
             $existingSlot = $this->adminModel->getCustomizationOptionByProductSlot($optionProductId, $slotId);
-            if ($existingSlot && $existingSlot['id'] != $optionId) {
+            if ($existingSlot && $existingSlot->id != $optionId) {
                 $errors[] = 'This product is already used as an option.';
             }
         }
@@ -734,12 +826,21 @@ class AdminController {
         }
 
         // Updates the customization option and redirects back with success or error message
-        if ($this->adminModel->updateCustomizationOption($optionId, $optionProductId, $priceDelta, $isDefault, $displayOrder)) {
-            $_SESSION['success'] = 'Option updated';
-        } else {
-            $_SESSION['errors'] = ['Error updating option'];
-        }
+        try{            
+            $result = $this->adminModel->updateCustomizationOption($optionId, $optionProductId, $priceDelta, $isDefault, $displayOrder);
 
+            if (!$result) {
+                $_SESSION['errors'] = ['Error updating option!'];
+                header('Location: /admin/products/edit/' . $product_id . '/slot/' . $slotId);
+                exit;
+            }
+        } catch (Exception $e) {
+            $_SESSION['errors'] = ['Error updating option: ' . $e->getMessage()];
+            header('Location: /admin/products/edit/' . $product_id . '/slot/' . $slotId);
+            exit;
+        }
+        
+        $_SESSION['success'] = 'Option updated';
         header('Location: /admin/products/edit/' . $product_id . '/slot/' . $slotId);
         exit;
     }
@@ -763,17 +864,26 @@ class AdminController {
         $id = intval($id ?? 0);
 
         // Deletes the customization option and redirects back to customizations list with success or error message
-        if ($this->adminModel->deleteCustomizationOption($id)) {
-            $_SESSION['success'] = 'Option deleted';
-        } else {
-            $_SESSION['errors'] = ['Error deleting option'];
+        try {
+            $result = $this->adminModel->deleteCustomizationOption($id);
+            if ($result) {
+                $_SESSION['success'] = 'Option deleted';
+            } else {
+                $_SESSION['errors'] = ['Error deleting option'];
+            }
+        } catch (Exception $e) {
+            $_SESSION['errors'] = ['Error deleting option: ' . $e->getMessage()];
         }
 
         header('Location: /admin/products/edit/' . $product_id . '/customize');
         exit;
     }
 
-    // ========== CATEGORIES ==========
+    /*
+     * ===============================
+     * ========= CATEGORIES ==========
+     * ===============================
+     */
 
     /**
      * Displays all product categories.
@@ -804,7 +914,7 @@ class AdminController {
             exit;
         }
 
-        // Sanitize and validate input
+        // Sanitize input
         $name = trim($_POST['name'] ?? '');
 
         // Validate required fields
@@ -821,13 +931,21 @@ class AdminController {
         }
 
         // Creates the category and redirects back to categories list with success or error message
-        if ($this->adminModel->createCategory($name)) {
-            $_SESSION['success'] = 'Category created successfully!';
-        } else {
-            $_SESSION['errors'] = ['Error creating category!'];
-        }
+        try {
+            $result = $this->adminModel->createCategory($name);
 
-        // Redirect back to categories list after creation attempt
+            if (!$result) {
+                $_SESSION['errors'] = ['Error creating category!'];
+                header('Location: /admin/categories');
+                exit;
+            }
+        } catch (Exception $e) {
+            $_SESSION['errors'] = ['Error creating category: ' . $e->getMessage()];
+            header('Location: /admin/categories');
+            exit;
+        }
+        
+        $_SESSION['success'] = 'Category created successfully!';
         header('Location: /admin/categories');
         exit;
     }
@@ -846,7 +964,7 @@ class AdminController {
             exit;
         }
 
-        // Sanitize and validate input
+        // Sanitize input
         $id = intval($_POST['id'] ?? 0);
         $name = trim($_POST['name'] ?? '');
 
@@ -857,17 +975,22 @@ class AdminController {
             exit;
         }
 
-        if ($this->adminModel->categoryExists($name)) {
+        if ($this->adminModel->categoryExists($name, $id)) {
             $_SESSION['errors'] = ['Category already exists.'];
             header('Location: /admin/categories');
             exit;
         }
 
         // Updates the category and redirects back to categories list with success or error message
-        if ($this->adminModel->updateCategory($id, $name)) {
-            $_SESSION['success'] = 'Category updated successfully!';
-        } else {
-            $_SESSION['errors'] = ['Error updating category!'];
+        try {
+            $result = $this->adminModel->updateCategory($id, $name);
+            if ($result) {
+                $_SESSION['success'] = 'Category updated successfully!';
+            } else {
+                $_SESSION['errors'] = ['Error updating category!'];
+            }
+        } catch (Exception $e) {
+            $_SESSION['errors'] = ['Error updating category: ' . $e->getMessage()];
         }
 
         header('Location: /admin/categories');
@@ -897,17 +1020,35 @@ class AdminController {
             exit;
         }
         
-        if ($this->adminModel->deleteCategory($id)) {
-            $_SESSION['success'] = 'Category deleted successfully!';
-        } else {
-            $_SESSION['errors'] = ['Error deleting category!'];
+        try{
+            $result = $this->adminModel->deleteCategory($id);
+
+             if (!$result) {
+                $_SESSION['errors'] = ['Error deleting category!'];
+                header('Location: /admin/categories');
+                exit;
+             }
+        } catch (Exception $e) {
+            $_SESSION['errors'] = ['Error deleting category: ' . $e->getMessage()];
+            header('Location: /admin/categories');
+            exit;
         }
-        
+
+        $_SESSION['success'] = 'Category deleted successfully!';
         header('Location: /admin/categories');
         exit;
     }
 
-    // ========== MENUS ==========
+    /*
+     * ===============================
+     * ============ MENUS ============
+     * ===============================
+     */
+
+    /**
+     * Displays the menu management page with a list of all menus.
+     * URL: /admin/menus
+     */
     public function viewMenus() {
         $this->checkAdminAccess();
 
@@ -917,11 +1058,108 @@ class AdminController {
         require_once __DIR__ . '/../views/admin/menus.php';
     }
 
+    /**
+     * Displays the menu creation page.
+     * URL: /admin/menus/create
+     */
     public function viewCreateMenu() {
         $this->checkAdminAccess();
 
         $title = 'Create Menu';
         require_once __DIR__ . '/../views/admin/create-menu.php';
+    }
+
+    /**
+     * Displays the menu edit page.
+     * URL: /admin/menus/edit/:id
+     */
+    public function viewEditMenu($id) {
+        $this->checkAdminAccess();
+
+        $title = 'Edit Menu';
+        $menu = $this->adminModel->getMenuById($id);
+        
+        if (!$menu) {
+            http_response_code(404);
+            require_once __DIR__ . '/../views/404.php';
+            exit;
+        }
+
+        $rawSlots = $this->adminModel->getMenuSlotsWithProducts($id);
+        $slots = $this->groupMenuSlotsWithProducts($rawSlots);
+
+        require_once __DIR__ . '/../views/admin/edit-menu.php';
+    }
+
+    /**
+     * Displays the menu slot product management page.
+     * URL: /admin/menus/edit/:menu_id/slot/:slot_id
+     */
+    public function viewEditMenuSlot($menu_id, $slot_id) {
+        $this->checkAdminAccess();
+
+        $title = 'Edit Menu Slot Products';
+        $menu = $this->adminModel->getMenuById($menu_id);
+        
+        if (!$menu) {
+            http_response_code(404);
+            require_once __DIR__ . '/../views/404.php';
+            exit;
+        }
+
+        $slot = $this->adminModel->getMenuSlotById($slot_id);
+        
+        if (!$slot || $slot->menu_id !== $menu_id) {
+            http_response_code(404);
+            require_once __DIR__ . '/../views/404.php';
+            exit;
+        }
+
+        $slotProducts = $this->adminModel->getMenuSlotProducts($slot_id);
+        $allProducts = $this->adminModel->getAllProducts();
+
+        require_once __DIR__ . '/../views/admin/edit-menu-slot.php';
+    }
+
+    /**
+     * Groups the denormalized menu-slot rows returned by the model into
+     * a render-friendly structure with nested product lists.
+     *
+     * @param array<int, array<string, mixed>> $rawSlots
+     * @return array<int, array<string, mixed>>
+     */
+    private function groupMenuSlotsWithProducts(array $rawSlots) {
+        $slots = [];
+
+        // Iterate through each row and group products under their respective slots
+        foreach ($rawSlots as $row) {
+            $slotId = $row->id;
+
+            // If the slot hasn't been added to the result array yet, initialize it
+            if (!isset($slots[$slotId])) {
+                $slots[$slotId] = [
+                    'id'                => $row->id,
+                    'menu_id'           => $row->menu_id,
+                    'name'              => $row->name,
+                    'min_select'        => $row->min_select,
+                    'max_select'        => $row->max_select,
+                    'display_order'     => $row->display_order,
+                    'products'          => []
+                ];
+            }
+
+            // If the row contains product information, add it to the products array of the corresponding slot
+            if (!empty($row->product_name)) {
+                $slots[$slotId]['products'][] = [
+                    'product_id'        => $row->product_id ?? null,
+                    'product_name'      => $row->product_name,
+                    'price_delta'       => $row->price_delta ?? 0,
+                    'is_default'        => $row->is_default ?? 0
+                ];
+            }
+        }
+
+        return array_values($slots);
     }
 
     /**
@@ -945,35 +1183,29 @@ class AdminController {
             exit;
         }
 
-        if ($this->adminModel->createMenu($name, $description)) {
-            $_SESSION['success'] = 'Menu created';
-            header('Location: /admin/menus');
+        try{
+            $result = $this->adminModel->createMenu($name, $description);
+
+            if (!$result) {
+                $_SESSION['errors'] = ['Menu already exists.'];
+                header('Location: /admin/menus/create');
+                exit;
+            }
+        } catch (Exception $e) {
+            $_SESSION['errors'] = ['Error checking menu existence: ' . $e->getMessage()];
+            header('Location: /admin/menus/create');
             exit;
         }
-
-        $_SESSION['errors'] = ['Error creating menu'];
-        header('Location: /admin/menus/create');
+        
+        $_SESSION['success'] = 'Menu created';
+        header('Location: /admin/menus');
         exit;
     }
 
-    public function viewEditMenu($id) {
-        $this->checkAdminAccess();
-
-        $title = 'Edit Menu';
-        $menu = $this->adminModel->getMenuById($id);
-        
-        if (!$menu) {
-            http_response_code(404);
-            require_once __DIR__ . '/../views/404.php';
-            exit;
-        }
-
-        $rawSlots = $this->adminModel->getMenuSlotsWithProducts($id);
-        $slots = $this->groupMenuSlotsWithProducts($rawSlots);
-
-        require_once __DIR__ . '/../views/admin/edit-menu.php';
-    }
-
+    /**
+     * Updates an existing menu's details.
+     * URL: /admin/menus/update
+     */
     public function updateMenu() {
         $this->checkAdminAccess();
 
@@ -992,16 +1224,29 @@ class AdminController {
             exit;
         }
 
-        if ($this->adminModel->updateMenu($id, $name, $description)) {
-            $_SESSION['success'] = 'Menu updated';
-        } else {
-            $_SESSION['errors'] = ['Error updating menu'];
-        }
+        try {
+            $result = $this->adminModel->updateMenu($id, $name, $description);
 
+            if (!$result) {
+                $_SESSION['errors'] = ['Menu already exists.'];
+                header('Location: /admin/menus');
+                exit;
+            }
+        } catch (Exception $e) {
+            $_SESSION['errors'] = ['Error checking menu existence: ' . $e->getMessage()];
+            header('Location: /admin/menus');
+            exit;
+        }
+        
+        $_SESSION['success'] = 'Menu updated';
         header('Location: /admin/menus');
         exit;
     }
 
+    /**
+     * Deletes a menu by ID after checking for dependencies.
+     * URL: /admin/menus/delete/:id
+     */
     public function deleteMenu($id) {
         $this->checkAdminAccess();
 
@@ -1012,18 +1257,34 @@ class AdminController {
 
         $id = intval($id);
 
-        if ($this->adminModel->deleteMenu($id)) {
-            $_SESSION['success'] = 'Menu deleted';
-        } else {
-            $_SESSION['errors'] = ['Error deleting menu'];
+        if ($this->adminModel->menuHasDependencies($id)) {
+            $_SESSION['errors'] = ['Couldn\'t delete menu: The menu is used by menu slots. Please remove dependencies first.'];
+            header('Location: /admin/menus');
+            exit;
         }
 
+        try {
+            $result = $this->adminModel->deleteMenu($id);
+
+            if (!$result) {
+                $_SESSION['errors'] = ['Error deleting menu!'];
+                header('Location: /admin/menus');
+                exit;
+            }
+        } catch (Exception $e) {
+            $_SESSION['errors'] = ['Error checking menu dependencies: ' . $e->getMessage()];
+            header('Location: /admin/menus');
+            exit;
+        }
+
+        $_SESSION['success'] = 'Menu deleted';
         header('Location: /admin/menus');
         exit;
     }
 
     /**
      * Creates a new menu slot for the selected menu.
+     * URL: /admin/menus/:menu_id/slot/create
      */
     public function createMenuSlot($menu_id) {
         $this->checkAdminAccess();
@@ -1067,19 +1328,28 @@ class AdminController {
             exit;
         }
 
-        if ($this->adminModel->createMenuSlot($menu_id, $name, $min_select, $max_select, $display_order)) {
-            $_SESSION['success'] = 'Menu slot created';
+        try{
+            $result = $this->adminModel->createMenuSlot($menu_id, $name, $min_select, $max_select, $display_order);
+
+            if (!$result) {
+                $_SESSION['errors'] = ['Error creating menu slot!'];
+                header('Location: /admin/menus/edit/' . $menu_id);
+                exit;
+            }
+        } catch (Exception $e) {
+            $_SESSION['errors'] = ['Error creating menu slot: ' . $e->getMessage()];
             header('Location: /admin/menus/edit/' . $menu_id);
             exit;
         }
-
-        $_SESSION['errors'] = ['Error creating slot'];
+        
+        $_SESSION['success'] = 'Menu slot created';
         header('Location: /admin/menus/edit/' . $menu_id);
         exit;
     }
 
     /**
      * Deletes a menu slot and returns to the menu edit page.
+     * URL: /admin/menus/:menu_id/slot/delete/:slot_id
      */
     public function deleteMenuSlot($menu_id, $slot_id) {
         $this->checkAdminAccess();
@@ -1089,49 +1359,31 @@ class AdminController {
             exit;
         }
 
+        $menu_id = intval($menu_id);
         $slot_id = intval($slot_id);
 
-        if ($this->adminModel->deleteMenuSlot($slot_id)) {
-            $_SESSION['success'] = 'Menu slot deleted';
-        } else {
-            $_SESSION['errors'] = ['Error deleting menu slot'];
-        }
+        try {
+            $result = $this->adminModel->deleteMenuSlot($slot_id);
 
+            if (!$result) {
+                $_SESSION['errors'] = ['Error deleting menu slot!'];
+                header('Location: /admin/menus/edit/' . $menu_id);
+                exit;
+            }
+        } catch (Exception $e) {
+            $_SESSION['errors'] = ['Error checking menu slot dependencies: ' . $e->getMessage()];
+            header('Location: /admin/menus/edit/' . $menu_id);
+            exit;
+        }
+        
+        $_SESSION['success'] = 'Menu slot deleted';
         header('Location: /admin/menus/edit/' . $menu_id);
         exit;
     }
 
     /**
-     * Displays the menu slot product management page.
-     */
-    public function viewEditMenuSlot($menu_id, $slot_id) {
-        $this->checkAdminAccess();
-
-        $title = 'Edit Menu Slot Products';
-        $menu = $this->adminModel->getMenuById($menu_id);
-        
-        if (!$menu) {
-            http_response_code(404);
-            require_once __DIR__ . '/../views/404.php';
-            exit;
-        }
-
-        $slot = $this->adminModel->getMenuSlotById($slot_id);
-        
-        if (!$slot || $slot['menu_id'] != $menu_id) {
-            http_response_code(404);
-            require_once __DIR__ . '/../views/404.php';
-            exit;
-        }
-
-        $slotProducts = $this->adminModel->getMenuSlotProducts($slot_id);
-        $allProducts = $this->adminModel->getAllProducts();
-
-        require_once __DIR__ . '/../views/admin/edit-menu-slot.php';
-    }
-
-    /**
      * Adds one or more products to a menu slot.
+     * URL: /admin/menus/:menu_id/slot/:slot_id/product/add
      */
     public function addProductToMenuSlot($menu_id, $slot_id) {
         $this->checkAdminAccess();
@@ -1141,39 +1393,39 @@ class AdminController {
             exit;
         }
 
-        $slot_id = intval($slot_id);
-        $products = $_POST['products'] ?? [];
-        $price_delta = floatval($_POST['price_delta'] ?? 0);
-        $is_default = intval($_POST['is_default'] ?? 0);
-        $display_order = intval($_POST['display_order'] ?? 0);
+        $productId = intval($_POST['product_id'] ?? 0);
+        $priceDelta = floatval($_POST['price_delta'] ?? 0);
+        $isDefault = intval($_POST['is_default'] ?? 0);
+        $displayOrder = intval($_POST['display_order'] ?? 0);
 
-        if (empty($products) || !is_array($products)) {
-            $_SESSION['errors'] = ['Please select at least one product'];
+        if (empty($productId)) {
+            $_SESSION['errors'] = ['Please select a product'];
             header('Location: /admin/menus/edit/' . $menu_id . '/slot/' . $slot_id);
             exit;
         }
 
-        $success = true;
-        foreach ($products as $product_id) {
-            $product_id = intval($product_id);
-            if (!$this->adminModel->addProductToMenuSlot($slot_id, $product_id, $price_delta, $is_default, $display_order)) {
-                $success = false;
-                break;
+        try {
+            $result = $this->adminModel->addProductToMenuSlot($slot_id, $productId, $priceDelta, $isDefault, $displayOrder);
+
+            if (!$result) {
+                $_SESSION['errors'] = ['Error adding product to slot!'];
+                header('Location: /admin/menus/edit/' . $menu_id . '/slot/' . $slot_id);
+                exit;
             }
+        } catch (Exception $e) {
+            $_SESSION['errors'] = ['Error adding product to slot: ' . $e->getMessage()];
+            header('Location: /admin/menus/edit/' . $menu_id . '/slot/' . $slot_id);
+            exit;
         }
-
-        if ($success) {
-            $_SESSION['success'] = 'Products added to slot';
-        } else {
-            $_SESSION['errors'] = ['Error adding products to slot'];
-        }
-
+        
+        $_SESSION['success'] = 'Products added to slot';
         header('Location: /admin/menus/edit/' . $menu_id . '/slot/' . $slot_id);
         exit;
     }
 
     /**
      * Removes a product from a menu slot.
+     * URL: /admin/menus/:menu_id/slot/:slot_id/product/remove
      */
     public function removeProductFromMenuSlot($menu_id, $slot_id) {
         $this->checkAdminAccess();
@@ -1183,6 +1435,7 @@ class AdminController {
             exit;
         }
 
+        $menu_id = intval($menu_id);
         $slot_id = intval($slot_id);
         $product_id = intval($_POST['product_id'] ?? 0);
 
@@ -1192,17 +1445,32 @@ class AdminController {
             exit;
         }
 
-        if ($this->adminModel->removeProductFromMenuSlot($slot_id, $product_id)) {
-            $_SESSION['success'] = 'Product removed from slot';
-        } else {
-            $_SESSION['errors'] = ['Error removing product from slot'];
+        try {
+            $result = $this->adminModel->removeProductFromMenuSlot($slot_id, $product_id);
+
+            if ($result) {
+                $_SESSION['success'] = 'Product removed from slot';
+            } else {
+                $_SESSION['errors'] = ['Error removing product from slot'];
+            }
+        } catch (Exception $e) {
+            $_SESSION['errors'] = ['Error removing product from slot: ' . $e->getMessage()];
         }
 
         header('Location: /admin/menus/edit/' . $menu_id . '/slot/' . $slot_id);
         exit;
     }
 
-    // ========== SUPPLIERS ==========
+    /*
+     * ===============================
+     * ========= SUPPLIERS ==========
+     * ===============================
+     */
+
+    /**
+     * Displays the supplier management page with a list of all suppliers.
+     * URL: /admin/suppliers
+     */
     public function viewSuppliers() {
         $this->checkAdminAccess();
         
@@ -1212,6 +1480,10 @@ class AdminController {
         require_once __DIR__ . '/../views/admin/suppliers.php';
     }
 
+    /**
+     * Displays the create supplier page with a form to add a new supplier.
+     * URL: /admin/suppliers/create
+     */
     public function viewCreateSupplier() {
         $this->checkAdminAccess();
         
@@ -1220,6 +1492,10 @@ class AdminController {
         require_once __DIR__ . '/../views/admin/create-supplier.php';
     }
 
+    /**
+     * Displays the edit supplier page with a form to update supplier details.
+     * URL: /admin/suppliers/edit/:id
+     */
     public function viewEditSupplier($id) {
         $this->checkAdminAccess();
         
@@ -1235,6 +1511,10 @@ class AdminController {
         require_once __DIR__ . '/../views/admin/edit-supplier.php';
     }
 
+    /**
+     * Creates a new supplier with the provided details.
+     * URL: /admin/suppliers/create
+     */
     public function createSupplier() {
         $this->checkAdminAccess();
         
@@ -1253,17 +1533,35 @@ class AdminController {
             exit;
         }
 
-        if ($this->adminModel->createSupplier($name, $email, $phone)) {
-            $_SESSION['success'] = 'Supplier created successfully!';
-            header('Location: /admin/suppliers');
+        if ($this->adminModel->supplierExists($name)) {
+            $_SESSION['errors'] = ['Supplier already exists.'];
+            header('Location: /admin/suppliers/create');
             exit;
         }
 
-        $_SESSION['errors'] = ['Error creating supplier!'];
-        header('Location: /admin/suppliers/create');
+        try{
+            $result = $this->adminModel->createSupplier($name, $email, $phone);
+
+            if (!$result) {
+                $_SESSION['errors'] = ['Error creating supplier!'];
+                header('Location: /admin/suppliers/create');
+                exit;
+            }
+        } catch (Exception $e) {
+            $_SESSION['errors'] = ['Error creating supplier: ' . $e->getMessage()];
+            header('Location: /admin/suppliers/create');
+            exit;
+        }
+        
+        $_SESSION['success'] = 'Supplier created successfully!';
+        header('Location: /admin/suppliers');
         exit;
     }
 
+    /**
+     * Update a supplier
+     * URL: /admin/suppliers/update
+     */
     public function updateSupplier() {
         $this->checkAdminAccess();
         
@@ -1283,17 +1581,41 @@ class AdminController {
             exit;
         }
 
-        if ($this->adminModel->updateSupplier($id, $name, $email, $phone)) {
-            $_SESSION['success'] = 'Supplier updated successfully!';
-            header('Location: /admin/suppliers');
+        if (!empty($email) && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $_SESSION['errors'] = ['Valid email is required.'];
+            header('Location: /admin/suppliers/edit/' . $id);
             exit;
         }
 
-        $_SESSION['errors'] = ['Error updating supplier!'];
-        header('Location: /admin/suppliers/edit/' . $id);
+        if ($this->adminModel->supplierExists($name, $id)) {
+            $_SESSION['errors'] = ['Supplier already exists.'];
+            header('Location: /admin/suppliers/edit/' . $id);
+            exit;
+        }
+
+        try{
+            $result = $this->adminModel->updateSupplier($id, $name, $email, $phone);
+
+            if (!$result) {
+                $_SESSION['errors'] = ['Error updating supplier!'];
+                header('Location: /admin/suppliers/edit/' . $id);
+                exit;
+            }
+        } catch (Exception $e) {
+            $_SESSION['errors'] = ['Error updating supplier: ' . $e->getMessage()];
+            header('Location: /admin/suppliers/edit/' . $id);
+            exit;
+        }
+
+        $_SESSION['success'] = 'Supplier updated successfully!';
+        header('Location: /admin/suppliers');
         exit;
     }
 
+    /**
+     * Delete a supplier
+     * URL: /admin/suppliers/delete/:id
+     */
     public function deleteSupplier($id) {
         $this->checkAdminAccess();
         
@@ -1304,12 +1626,21 @@ class AdminController {
 
         $id = intval($id);
         
-        if ($this->adminModel->deleteSupplier($id)) {
-            $_SESSION['success'] = 'Supplier deleted successfully!';
-        } else {
-            $_SESSION['errors'] = ['Error deleting supplier!'];
+        try{
+            $result = $this->adminModel->deleteSupplier($id);
+
+            if (!$result) {
+                $_SESSION['errors'] = ['Error deleting supplier!'];
+                header('Location: /admin/suppliers');
+                exit;
+            }
+        } catch (Exception $e) {
+            $_SESSION['errors'] = ['Error checking supplier dependencies: ' . $e->getMessage()];
+            header('Location: /admin/suppliers');
+            exit;
         }
         
+        $_SESSION['success'] = 'Supplier deleted successfully!';
         header('Location: /admin/suppliers');
         exit;
     }

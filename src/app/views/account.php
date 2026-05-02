@@ -27,15 +27,15 @@
         <div class="account-details">
             <div>
                 <label>First name</label>
-                <input type="text" name="first_name">
+                <input type="text" name="first_name"/>
             </div>
             <div>
                 <label>Last name</label>
-                <input type="text" name="last_name">
+                <input type="text" name="last_name"/>
             </div>
             <div>
                 <label>Phone</label>
-                <input type="text" name="phone">
+                <input type="text" name="phone"/>
             </div>
             <button type="submit">Update</button>
         </div>

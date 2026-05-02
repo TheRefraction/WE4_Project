@@ -7,16 +7,16 @@
 <article>
     <h3>Edit Menu</h3>
     <form method="POST" action="/admin/menus/update">
-        <input type="hidden" name="id" value="<?= htmlspecialchars($menu['id']) ?>">
+        <input type="hidden" name="id" value="<?= htmlspecialchars($menu->id) ?>">
 
         <div class="form-group">
             <label for="name">Menu Name</label>
-            <input type="text" id="name" name="name" required value="<?= htmlspecialchars($menu['name']) ?>">
+            <input type="text" id="name" name="name" required value="<?= htmlspecialchars($menu->name) ?>">
         </div>
 
         <div class="form-group">
             <label for="description">Description</label>
-            <textarea id="description" name="description"><?= htmlspecialchars($menu['description'] ?? '') ?></textarea>
+            <textarea id="description" name="description"><?= htmlspecialchars($menu->description ?? '') ?></textarea>
         </div>
 
         <div class="toolbar">
@@ -27,8 +27,8 @@
 
 <article>
     <h3>Create Menu Slot</h3>
-    <form method="POST" action="/admin/menus/<?= $menu['id'] ?>/slot/create">
-        <input type="hidden" name="menu_id" value="<?= htmlspecialchars($menu['id']) ?>">
+    <form method="POST" action="/admin/menus/<?= $menu->id ?>/slot/create">
+        <input type="hidden" name="menu_id" value="<?= htmlspecialchars($menu->id) ?>">
 
         <div class="form-group">
             <label for="name">Slot Name</label>
@@ -67,9 +67,9 @@
                 <h4>
                     <?= htmlspecialchars($slot['name'] ?? ('Slot #' . $slot['id'])) ?>
                     <span class="actions admin-actions-inline admin-float-right">
-                        <a href="/admin/menus/edit/<?= $menu['id'] ?>/slot/<?= $slot['id'] ?>" class="btn btn-primary">Edit</a>
+                        <a href="/admin/menus/edit/<?= $menu->id ?>/slot/<?= $slot['id'] ?>" class="btn btn-primary">Edit</a>
 
-                        <form method="POST" action="/admin/menus/<?= $menu['id'] ?>/slot/delete/<?= $slot['id'] ?>" onsubmit="return deleteConfirmation(this);">
+                        <form method="POST" action="/admin/menus/<?= $menu->id ?>/slot/delete/<?= $slot['id'] ?>" onsubmit="return deleteConfirmation(this);">
                             <button type="submit" class="btn btn-danger">Delete</button>
                         </form>
                     </span>

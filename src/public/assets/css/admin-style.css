@@ -520,9 +520,9 @@ article ul li {
 }
 
 .tag {
-    background-color: #3498db; 
+    background-color: #c4b000; 
     color: white; 
-    padding: 5px 10px; 
+    padding: 0.05em 0.5em; 
     border-radius: 3px;
 }
 

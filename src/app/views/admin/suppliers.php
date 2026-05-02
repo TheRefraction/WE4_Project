@@ -27,15 +27,15 @@
             <?php else: ?>
                 <?php foreach ($suppliers as $supplier): ?>
                     <tr>
-                        <td><?= htmlspecialchars($supplier['id']) ?></td>
-                        <td><?= htmlspecialchars($supplier['name']) ?></td>
-                        <td><?= htmlspecialchars($supplier['email'] ?? '-') ?></td>
-                        <td><?= htmlspecialchars($supplier['phone'] ?? '-') ?></td>
-                        <td><?= $supplier['product_count'] ?></td>
+                        <td><?= htmlspecialchars($supplier->id) ?></td>
+                        <td><?= htmlspecialchars($supplier->name) ?></td>
+                        <td><?= htmlspecialchars($supplier->email ?? '-') ?></td>
+                        <td><?= htmlspecialchars($supplier->phone ?? '-') ?></td>
+                        <td><?= $supplier->product_count ?></td>
                         <td>
                             <div class="actions">
-                                <a href="/admin/suppliers/edit/<?= $supplier['id'] ?>" class="btn btn-primary">Edit</a>
-                                <form method="POST" action="/admin/suppliers/delete/<?= $supplier['id'] ?>" onsubmit="return deleteConfirmation(this);">
+                                <a href="/admin/suppliers/edit/<?= $supplier->id ?>" class="btn btn-primary">Edit</a>
+                                <form method="POST" action="/admin/suppliers/delete/<?= $supplier->id ?>" onsubmit="return deleteConfirmation(this);">
                                     <button type="submit" class="btn btn-danger">Delete</button>
                                 </form>
                             </div>

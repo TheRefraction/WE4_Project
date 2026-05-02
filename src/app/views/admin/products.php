@@ -23,22 +23,27 @@
         <tbody>
             <?php if (empty($products)): ?>
                 <tr>
-                    <td colspan="7" style=>No products found. <a href="/admin/products/create">Create one</a></td>
+                    <td colspan="7" class="empty-table">No products found. <a href="/admin/products/create">Create one</a></td>
                 </tr>
             <?php else: ?>
                 <?php foreach ($products as $product): ?>
                     <tr>
-                        <td><?= htmlspecialchars($product['id']) ?></td>
-                        <td><?= htmlspecialchars($product['name']) ?></td>
-                        <td><?= htmlspecialchars(substr($product['description'], 0, 50)) . (strlen($product['description']) > 50 ? '...' : '') ?></td>
-                        <td><?= number_format($product['price'], 2) ?> €</td>
-                        <td><?= htmlspecialchars($product['supplier_name'] ?? '-') ?></td>
-                        <td><?= htmlspecialchars($product['categories'] ?? '-') ?></td>
+                        <td><?= htmlspecialchars($product->id) ?></td>
+                        <td><?= htmlspecialchars($product->name) ?></td>
+                        <td><?php 
+                                $desc = $product->description ?? '-';
+                                $truncated = strlen($desc) > 50 ? substr($desc, 0, 50) . '...' : $desc;
+                            ?>
+                            <?= htmlspecialchars($truncated) ?>
+                        </td>
+                        <td><?= number_format($product->price, 2) ?> €</td>
+                        <td><?= htmlspecialchars($product->supplier_name ?? '-') ?></td>
+                        <td><?= htmlspecialchars($product->categories ?? '-') ?></td>
                         <td>
                             <div class="actions">
-                                <a href="/admin/products/edit/<?= $product['id'] ?>" class="btn btn-primary">Edit</a>
-                                <a href="/admin/products/edit/<?= $product['id'] ?>/customize" class="btn btn-primary">Customize</a>
-                                <form method="POST" action="/admin/products/delete/<?= $product['id'] ?>" onsubmit="return deleteConfirmation(this);">
+                                <a href="/admin/products/edit/<?= $product->id ?>" class="btn btn-primary">Edit</a>
+                                <a href="/admin/products/edit/<?= $product->id ?>/customize" class="btn btn-primary">Customize</a>
+                                <form method="POST" action="/admin/products/delete/<?= $product->id ?>" onsubmit="return deleteConfirmation(this);">
                                     <button type="submit" class="btn btn-danger">Delete</button>
                                 </form>
                             </div>

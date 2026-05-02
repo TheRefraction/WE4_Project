@@ -1,9 +1,5 @@
 <?php require_once __DIR__ . '/../partials/admin-header.php'; ?>
 
-<div class="toolbar">
-    <a href="/admin/suppliers" class="btn btn-secondary">Back to Suppliers</a>
-</div>
-
 <article>
     <h3>Create Supplier</h3>
     <form method="POST" action="/admin/suppliers/create">
@@ -24,7 +20,7 @@
         </div>
 
         <div class="toolbar">
-            <button type="submit" class="btn btn-success">Create Supplier</button>
+            <button type="submit" class="btn btn-success">Create</button>
             <a href="/admin/suppliers" class="btn btn-secondary">Cancel</a>
         </div>
     </form>

@@ -26,7 +26,7 @@ class Product extends BaseModel {
         $stmt->bindValue(":id",             $id,            PDO::PARAM_INT);
         $stmt->bindValue(":name",           $name,          PDO::PARAM_STR);
         $stmt->bindValue(":description",    $description,   PDO::PARAM_STR);
-        $stmt->bindValue(":price",          $price,         PDO::PARAM_DECIMAL);
+        $stmt->bindValue(":price",          $price);
         $stmt->bindValue(":supplier_id",    $supplier_id,   PDO::PARAM_INT);
 
         return $stmt->execute();
@@ -76,16 +76,13 @@ class Product extends BaseModel {
      * @return object|false The product object if found, or false if not found.
      */
     public function getProductById($id) {
-        $query = "SELECT product.*, c.name              AS category_name,
-                                    s.name              AS supplier_name, 
-                                    s.email             AS supplier_email,
-                                    s.phone             AS supplier_phone
-                  FROM product 
-                  INNER JOIN product_to_category ptc    ON product.id = ptc.product_id 
-                  INNER JOIN product_category c         ON ptc.category_id = c.id
-                  INNER JOIN supplier s                 ON product.supplier_id = s.id 
-                  WHERE product.id = :id
-                  GROUP BY product.id";
+        $query = "SELECT p.*, 
+                         s.name             AS supplier_name, 
+                         s.email            AS supplier_email,
+                         s.phone            AS supplier_phone
+                  FROM product p
+                  LEFT JOIN supplier s      ON p.supplier_id = s.id
+                  WHERE p.id = :id";;
 
         $stmt = $this->conn->prepare($query);
 
@@ -136,7 +133,7 @@ class Product extends BaseModel {
 
             $stmt->bindValue(':name',           $name,              PDO::PARAM_STR);
             $stmt->bindValue(':description',    $description,       PDO::PARAM_STR);
-            $stmt->bindValue(':price',          $price,             PDO::PARAM_DECIMAL);
+            $stmt->bindValue(':price',          $price);
             $stmt->bindValue(':supplierId',     $supplierId,        PDO::PARAM_INT);
             $stmt->bindValue(':hidden',         (bool) $hidden,     PDO::PARAM_BOOL);
             $stmt->execute();
@@ -163,8 +160,8 @@ class Product extends BaseModel {
             $this->conn->commit();
             return true;
         } catch (Throwable $e) {
-            // Rollback the transaction if any error occurred
             $this->conn->rollBack();
+            error_log('Product creation failed: ' . $e->getMessage()); 
             return false;
         }
     }
@@ -200,7 +197,7 @@ class Product extends BaseModel {
             $stmt->bindValue(':id',             $id,                PDO::PARAM_INT);
             $stmt->bindValue(':name',           $name,              PDO::PARAM_STR);
             $stmt->bindValue(':description',    $description,       PDO::PARAM_STR);
-            $stmt->bindValue(':price',          $price,             PDO::PARAM_DECIMAL);
+            $stmt->bindValue(':price',          $price);
             $stmt->bindValue(':supplierId',     $supplierId,        PDO::PARAM_INT);
             $stmt->bindValue(':hidden',         (bool) $hidden,     PDO::PARAM_BOOL);
             $stmt->execute();
@@ -235,6 +232,7 @@ class Product extends BaseModel {
         } catch (Throwable $e) {
             // Rollback the transaction if any error occurred
             $this->conn->rollBack();
+            error_log('Product update failed: ' . $e->getMessage());
             return false;
         }
     }
@@ -245,7 +243,7 @@ class Product extends BaseModel {
      * @param int $id The ID of the product to delete.
      * @return bool True if the product was deleted successfully, false otherwise.
      */
-    public function deleteById($id) {
+    public function deleteProduct($id) {
         $query = "DELETE FROM product 
                   WHERE id = :id";
 

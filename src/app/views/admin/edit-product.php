@@ -3,22 +3,22 @@
 <article>
     <h3>Edit Product</h3>
     <form method="POST" action="/admin/products/update">
-        <input type="hidden" name="id" value="<?= $product['id'] ?>">
+        <input type="hidden" name="id" value="<?= $product->id ?>">
 
         <div class="form-group">
             <label for="name">Product Name *</label>
-            <input type="text" id="name" name="name" value="<?= htmlspecialchars($product['name']) ?>" required>
+            <input type="text" id="name" name="name" value="<?= htmlspecialchars($product->name) ?>" required>
         </div>
 
         <div class="form-group">
             <label for="description">Description</label>
-            <textarea id="description" name="description"><?= htmlspecialchars($product['description'] ?? '') ?></textarea>
+            <textarea id="description" name="description"><?= htmlspecialchars($product->description ?? '') ?></textarea>
         </div>
 
         <div class="form-row">
             <div class="form-group">
                 <label for="price">Price *</label>
-                <input type="number" id="price" name="price" step="0.01" min="0" value="<?= $product['price'] ?>" required>
+                <input type="number" id="price" name="price" step="0.01" min="0" value="<?= $product->price ?>" required>
             </div>
 
             <div class="form-group">
@@ -26,8 +26,8 @@
                 <select id="supplier_id" name="supplier_id">
                     <option value="">-- Select a supplier --</option>
                     <?php foreach ($suppliers as $supplier): ?>
-                        <option value="<?= $supplier['id'] ?>" <?= $supplier['id'] == $product['supplier_id'] ? 'selected' : '' ?>>
-                            <?= htmlspecialchars($supplier['name']) ?>
+                        <option value="<?= $supplier->id ?>" <?= $supplier->id == $product->supplier_id ? 'selected' : '' ?>>
+                            <?= htmlspecialchars($supplier->name) ?>
                         </option>
                     <?php endforeach; ?>
                 </select>
@@ -37,8 +37,8 @@
                 <label for="category_ids">Categories *</label>
                 <select id="category_ids" name="category_ids[]" multiple size="6" required>
                     <?php foreach ($categories as $category): ?>
-                        <option value="<?= $category['id'] ?>" <?= in_array($category['id'], $selectedCategoryIds) ? 'selected' : '' ?>>
-                            <?= htmlspecialchars($category['name']) ?>
+                        <option value="<?= $category->id ?>" <?= in_array($category->id, $selectedCategoryIds) ? 'selected' : '' ?>>
+                            <?= htmlspecialchars($category->name) ?>
                         </option>
                     <?php endforeach; ?>
                 </select>
@@ -48,7 +48,7 @@
                 <label>Misc.</label>
                 <div class="form-options">
                     <div class="form-option">
-                        <input type="checkbox" id="hidden" name="hidden" value="1" <?= $product['hidden'] ? 'checked' : '' ?>>
+                        <input type="checkbox" id="hidden" name="hidden" value="1" <?= $product->hidden ? 'checked' : '' ?>>
                         <label for="hidden">Hidden</label>
                     </div>
                 </div>

@@ -118,20 +118,28 @@ class Category extends BaseModel {
     /**
      * Checks if a category with the given name already exists.
      * @param string $name The name of the category to check.
+     * @param int|null $excludeId An optional category ID to exclude from the check (useful when updating).
      * @return bool True if the category exists, false otherwise.
      */
-    public function categoryExists(string $name): bool {
-        $query = "SELECT COUNT(*) 
-                  FROM product_category 
-                  WHERE name = :name";
-
-        $stmt = $this->conn->prepare($query);
-
-        $stmt->bindValue(':name', $name, PDO::PARAM_STR);
-        $stmt->execute();
-
-        return (int) $stmt->fetchColumn() > 0;
+   public function categoryExists(string $name, $excludeId = null) {
+    $query = "SELECT COUNT(*) 
+              FROM product_category 
+              WHERE name = :name";
+    
+    if ($excludeId !== null) {
+        $query .= " AND id != :excludeId";
     }
+
+    $stmt = $this->conn->prepare($query);
+
+    $stmt->bindValue(':name', $name, PDO::PARAM_STR);
+    if ($excludeId !== null) {
+        $stmt->bindValue(':excludeId', $excludeId, PDO::PARAM_INT);
+    }
+    $stmt->execute();
+
+    return (int) $stmt->fetchColumn() > 0;
+}
 
     /**
      * Checks if a category has any dependencies (e.g., associated products or customization slots).
@@ -139,7 +147,7 @@ class Category extends BaseModel {
      * @param int $categoryId The ID of the category to check for dependencies.
      * @return bool True if the category has dependencies, false otherwise.
      */
-    public function categoryHasDependencies(int $categoryId): bool {
+    public function categoryHasDependencies($categoryId) {
         $query = "SELECT
                     (SELECT COUNT(*) FROM product_customization_slot WHERE category_id = :id) +
                     (SELECT COUNT(*) FROM product_to_category WHERE category_id = :id)

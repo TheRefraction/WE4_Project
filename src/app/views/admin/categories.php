@@ -10,7 +10,7 @@
     <div class="admin-panel">
         <h4>Create New Category</h4>
         <form method="POST" action="/admin/categories/create" class="admin-toolbar-inline">
-            <input type="text" name="name" placeholder="Category name" required class="admin-flex-1">
+            <input type="text" name="name" placeholder="Category name" required class="admin-flex-1"/>
             <button type="submit" class="btn btn-success">Create Category</button>
         </form>
     </div>
@@ -24,6 +24,7 @@
                 <th>Actions</th>
             </tr>
         </thead>
+
         <tbody>
             <?php if (empty($categories)): ?>
                 <tr>
@@ -32,20 +33,20 @@
             <?php else: ?>
                 <?php foreach ($categories as $category): ?>
                     <tr>
-                        <td><?= htmlspecialchars($category['id']) ?></td>
+                        <td><?= htmlspecialchars($category->id) ?></td>
                         
                         <td>
                             <form method="POST" action="/admin/categories/update" class="admin-toolbar-inline">
-                                <input type="hidden" name="id" value="<?= $category['id'] ?>">
-                                <input type="text" name="name" value="<?= htmlspecialchars($category['name']) ?>" class="admin-flex-1">
+                                <input type="hidden" name="id" value="<?= $category->id ?>">
+                                <input type="text" name="name" value="<?= htmlspecialchars($category->name) ?>" class="admin-flex-1">
                                 <button type="submit" class="btn btn-primary">Update</button>
                             </form>
                         </td>
 
-                        <td><?= $category['product_count'] ?></td>
+                        <td><?= $category->product_count ?></td>
 
                         <td>
-                            <form method="POST" action="/admin/categories/delete/<?= $category['id'] ?>" onsubmit="return deleteConfirmation(this);">
+                            <form method="POST" action="/admin/categories/delete/<?= $category->id ?>" onsubmit="return deleteConfirmation(this);">
                                 <button type="submit" class="btn btn-danger">Delete</button>
                             </form>
                         </td>

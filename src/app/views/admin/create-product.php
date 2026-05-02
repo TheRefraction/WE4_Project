@@ -4,7 +4,7 @@
     <h3>Create Product</h3>
     <form method="POST" action="/admin/products/create">
         <div class="form-group">
-            <label for="name">Product Name</label>
+            <label for="name">Product Name *</label>
             <input type="text" id="name" name="name" required>
         </div>
 
@@ -15,8 +15,8 @@
 
         <div class="form-row">
             <div class="form-group">
-                <label for="price">Price</label>
-                <input type="number" id="price" name="price" step="0.01" min="0" required>
+                <label for="price">Price *</label>
+                <input type="number" id="price" name="price" step="0.01" min="0" value="0.00" required>
             </div>
 
             <div class="form-group">
@@ -24,16 +24,16 @@
                 <select id="supplier_id" name="supplier_id">
                     <option value="">-- Select a supplier --</option>
                     <?php foreach ($suppliers as $supplier): ?>
-                        <option value="<?= $supplier['id'] ?>"><?= htmlspecialchars($supplier['name']) ?></option>
+                        <option value="<?= $supplier->id ?>"><?= htmlspecialchars($supplier->name) ?></option>
                     <?php endforeach; ?>
                 </select>
             </div>
 
             <div class="form-group">
-                <label for="category_ids">Categories</label>
+                <label for="category_ids">Categories *</label>
                 <select id="category_ids" name="category_ids[]" multiple size="6" required>
                     <?php foreach ($categories as $category): ?>
-                        <option value="<?= $category['id'] ?>"><?= htmlspecialchars($category['name']) ?></option>
+                        <option value="<?= $category->id ?>"><?= htmlspecialchars($category->name) ?></option>
                     <?php endforeach; ?>
                 </select>
             </div>

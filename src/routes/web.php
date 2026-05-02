@@ -49,7 +49,7 @@ return [
         '/admin/access' => [
             'controller' => 'AdminController',
             'action' => 'getAdminAccess',
-            'access' => ['admin']
+            'access' => ['guest', 'client', 'admin']
         ],
         '/admin/accounts'               => [
             'controller' => 'AdminController',
@@ -96,7 +96,6 @@ return [
             'action' => 'viewCategories',
             'access' => ['admin']
         ],
-
         '/admin/menus'                  => [
             'controller' => 'AdminController',
             'action' => 'viewMenus',
@@ -117,12 +116,6 @@ return [
             'action' => 'viewEditMenuSlot',
             'access' => ['admin']
         ],
-
-        '/admin/stock'                  => [
-            'controller' => 'AdminController',
-            'action' => 'viewStock',
-            'access' => ['admin']
-        ],
         '/admin/suppliers'              => [
             'controller' => 'AdminController',
             'action' => 'viewSuppliers',
@@ -136,16 +129,6 @@ return [
         '/admin/suppliers/edit/:id'     => [
             'controller' => 'AdminController',
             'action' => 'viewEditSupplier',
-            'access' => ['admin']
-        ],
-        '/admin/invoices'               => [
-            'controller' => 'AdminController',
-            'action' => 'viewInvoices',
-            'access' => ['admin']
-        ],
-        '/admin/invoices/details/:id'   => [
-            'controller' => 'AdminController',
-            'action' => 'viewInvoiceDetails',
             'access' => ['admin']
         ],
     ],
@@ -235,7 +218,6 @@ return [
             'action' => 'deleteCategory',
             'access' => ['admin']
         ],
-
         '/admin/menus/create'           => [
             'controller' => 'AdminController',
             'action' => 'createMenu',
@@ -251,15 +233,9 @@ return [
             'action' => 'deleteMenu',
             'access' => ['admin']
         ],
-
         '/admin/menus/:menu_id/slot/create'           => [
             'controller' => 'AdminController',
             'action' => 'createMenuSlot',
-            'access' => ['admin']
-        ],
-        '/admin/menus/:menu_id/slot/update'           => [
-            'controller' => 'AdminController',
-            'action' => 'updateMenuSlot',
             'access' => ['admin']
         ],
         '/admin/menus/:menu_id/slot/delete/:id'       => [
@@ -267,19 +243,16 @@ return [
             'action' => 'deleteMenuSlot',
             'access' => ['admin']
         ],
-        
         '/admin/menus/:menu_id/slot/:slot_id/product/add' => [
             'controller' => 'AdminController',
             'action' => 'addProductToMenuSlot',
             'access' => ['admin']
         ],
-        
         '/admin/menus/:menu_id/slot/:slot_id/product/remove' => [
             'controller' => 'AdminController',
             'action' => 'removeProductFromMenuSlot',
             'access' => ['admin']
         ],
-
         '/admin/suppliers/create'       => [
             'controller' => 'AdminController',
             'action' => 'createSupplier',
@@ -293,18 +266,6 @@ return [
         '/admin/suppliers/delete/:id'   => [
             'controller' => 'AdminController',
             'action' => 'deleteSupplier',
-            'access' => ['admin']
-        ],
-
-
-        '/admin/invoices/update-status' => [
-            'controller' => 'AdminController',
-            'action' => 'updateInvoiceStatus',
-            'access' => ['admin']
-        ],
-        '/admin/stock/update'           => [
-            'controller' => 'AdminController',
-            'action' => 'updateStock',
             'access' => ['admin']
         ],
     ],

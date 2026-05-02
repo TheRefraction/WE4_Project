@@ -10,20 +10,8 @@
         <div class="value"><?= $stats['total_products'] ?></div>
     </div>
     <div class="stat-card">
-        <h3>Total Invoices</h3>
-        <div class="value"><?= $stats['total_invoices'] ?></div>
-    </div>
-    <div class="stat-card">
-        <h3>Total Revenue</h3>
-        <div class="value">$<?= number_format($stats['total_revenue'], 2) ?></div>
-    </div>
-    <div class="stat-card">
         <h3>Total Suppliers</h3>
         <div class="value"><?= $stats['total_suppliers'] ?></div>
-    </div>
-    <div class="stat-card">
-        <h3>Low Stock Items</h3>
-        <div class="value"><?= $stats['low_stock_count'] ?></div>
     </div>
 </div>
 

@@ -174,7 +174,7 @@ class ProductCustomization extends BaseModel {
 
         $stmt->bindValue(':slotId',             $slotId,            PDO::PARAM_INT);
         $stmt->bindValue(':optionProductId',    $optionProductId,   PDO::PARAM_INT);
-        $stmt->bindValue(':priceDelta',         $priceDelta,        PDO::PARAM_DECIMAL);
+        $stmt->bindValue(':priceDelta',         $priceDelta);
         $stmt->bindValue(':isDefault',          (bool) $isDefault,  PDO::PARAM_BOOL);
         $stmt->bindValue(':displayOrder',       $displayOrder,      PDO::PARAM_INT);
 
@@ -202,7 +202,7 @@ class ProductCustomization extends BaseModel {
 
         $stmt->bindValue(':id',                 $id,                PDO::PARAM_INT);
         $stmt->bindValue(':optionProductId',    $optionProductId,   PDO::PARAM_INT);
-        $stmt->bindValue(':priceDelta',         $priceDelta,        PDO::PARAM_DECIMAL);
+        $stmt->bindValue(':priceDelta',         $priceDelta);
         $stmt->bindValue(':isDefault',          (bool) $isDefault,  PDO::PARAM_BOOL);
         $stmt->bindValue(':displayOrder',       $displayOrder,      PDO::PARAM_INT);
 

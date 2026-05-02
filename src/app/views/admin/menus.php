@@ -24,13 +24,18 @@
             <?php else: ?>
                 <?php foreach ($menus as $menu): ?>
                     <tr>
-                        <td><?= htmlspecialchars($menu['id']) ?></td>
-                        <td><?= htmlspecialchars($menu['name']) ?></td>
-                        <td><?= htmlspecialchars($menu['description'] ?? '-') ?></td>
+                        <td><?= htmlspecialchars($menu->id) ?></td>
+                        <td><?= htmlspecialchars($menu->name) ?></td>
+                        <td><?php 
+                                $desc = $menu->description ?? '-';
+                                $truncated = strlen($desc) > 50 ? substr($desc, 0, 50) . '...' : $desc;
+                            ?>
+                            <?= htmlspecialchars($truncated) ?>
+                        </td>
                         <td>
                             <div class="admin-actions-inline">
-                                <a href="/admin/menus/edit/<?= $menu['id'] ?>" class="btn btn-primary">Edit</a>
-                                <form method="POST" action="/admin/menus/delete/<?= $menu['id'] ?>" onsubmit="return confirm('Are you sure?');">
+                                <a href="/admin/menus/edit/<?= $menu->id ?>" class="btn btn-primary">Edit</a>
+                                <form method="POST" action="/admin/menus/delete/<?= $menu->id ?>" onsubmit="return confirm('Are you sure?');">
                                     <button type="submit" class="btn btn-danger">Delete</button>
                                 </form>
                             </div>

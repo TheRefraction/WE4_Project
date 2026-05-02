@@ -24,12 +24,12 @@
     <form method="POST" action="/sign-in">
         <div>
             <label for="email">Email address</label>
-            <input type="email" id="email" name="email" placeholder="you@example.com" required>
+            <input type="email" id="email" name="email" placeholder="you@example.com" required/>
         </div>
 
         <div>
             <label for="password">Password</label>
-            <input type="password" id="password" name="password" placeholder="Enter your password" required>
+            <input type="password" id="password" name="password" placeholder="Enter your password" required/>
         </div>
 
         <button type="submit">Sign in</button>
