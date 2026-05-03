@@ -100,6 +100,7 @@ class AuthController {
                 exit;
             }
 
+            $_SESSION['user_phone'] = $user['phone'];
             header('Location: /account');
             exit;
         }
@@ -128,7 +129,8 @@ class AuthController {
         $data = [
             'first_name' => $_SESSION['user_first_name'] ?? '',
             'last_name'  => $_SESSION['user_last_name'] ?? '',
-            'email'      => $_SESSION['user_email'] ?? ''
+            'email'      => $_SESSION['user_email'] ?? '',
+            'phone'      => $_SESSION['user_phone'] ?? ''
         ];
 
         echo json_encode($data);
@@ -138,7 +140,7 @@ class AuthController {
     public function updateAccount() {
         $firstName = trim($_POST["first_name"] ?? '');
         $lastName = trim($_POST["last_name"] ?? '');
-        $phone = !empty($_POST["phone"]) ? trim($_POST["phone"]) : null;
+        $phone = trim($_POST["phone"] ?? '');
         $email = $_SESSION['user_email'];
 
         if (empty($firstName) || empty($lastName)) {
@@ -150,6 +152,7 @@ class AuthController {
         if ($this->accountModel->updateAccountInfo($firstName, $lastName, $email, $phone)) {
             $_SESSION['user_first_name'] = $firstName;
             $_SESSION['user_last_name'] = $lastName;
+            $_SESSION['user_phone'] = $phone;
             $_SESSION['success'] = "Profile updated!";
         } else {
             $_SESSION['errors'] = ["Error updating account."];
