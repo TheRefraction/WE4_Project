@@ -191,4 +191,20 @@ class Account extends BaseModel {
 
         return $stmt->execute();
     }
+
+
+    /**
+     * Deletes all account that havn't logged for more than 2 years.
+     * @return int Number of deleted account.
+     */
+    public function deleteInactiveAccounts() {
+        $query = "DELETE FROM account 
+              WHERE last_login < DATE_SUB(NOW(), INTERVAL 2 YEAR) 
+              AND role_id = 1";
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute();
+
+        return $stmt->rowCount();
+    }
 }

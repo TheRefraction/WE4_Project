@@ -131,6 +131,11 @@ return [
             'action' => 'viewEditSupplier',
             'access' => ['admin']
         ],
+        '/gdpr' => [
+            'controller' => 'HomeController',
+            'action' => 'gdpr',
+            'access' => ['guest', 'client', 'admin']
+        ],
     ],
     'POST' => [
         '/sign-in'                      => [
