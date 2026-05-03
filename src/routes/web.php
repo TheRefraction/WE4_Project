@@ -13,5 +13,6 @@ return [
     'POST' => [
         '/sign-in'          => ['AuthController', 'signIn'],
         '/sign-up'          => ['AuthController', 'signUp'],
+        '/update-account'   => ['AuthController', 'updateAccount'],
     ],
 ];

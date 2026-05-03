@@ -1,6 +1,6 @@
 <?php include 'partials/header.php'; ?>
 
-<div>
+<main>
     <?php
         echo "<h1>". $product->name . "</h1>";
         echo "<p>Price: " . $product->price . "€</p>";
@@ -18,5 +18,6 @@
             . "</p>";
         }
     ?>
-</div>
+</main>
+
 <?php include 'partials/footer.php'; ?>

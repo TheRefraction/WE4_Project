@@ -1,8 +1,6 @@
 <?php
 
-class Product
-{
-
+class Product {
     private $conn;
 
     public function __construct(PDO $dbConnection) {

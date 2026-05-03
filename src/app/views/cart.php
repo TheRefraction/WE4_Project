@@ -1,6 +1,6 @@
-<?php require_once '../controllers/cart.php' ?>
 <?php include 'partials/header.php'; ?>
-<div>
+
+<main>
     <h1>Current order</h1>
     <?php
     foreach ($_SESSION['cart'] as $product_id => $quantity) {
@@ -11,4 +11,6 @@
           </div>";
     }
     ?>
-</div>
+</main>
+
+<?php include 'partials/footer.php'; ?>
