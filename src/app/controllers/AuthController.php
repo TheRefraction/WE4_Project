@@ -50,7 +50,7 @@ class AuthController {
             exit;
         }
 
-        if ($this->accountModel->findByEmail($email)) {
+        if ($this->accountModel->getAccountByEmail($email)) {
             $_SESSION['errors'] = ["Email already exists."];
             header('Location: /sign-up');
             exit;
@@ -66,7 +66,7 @@ class AuthController {
             exit;
         }
 
-        if ($this->accountModel->create($firstName, $lastName, $email, $phone, $password)) {
+        if ($this->accountModel->createAccount($firstName, $lastName, $email, $phone, $password)) {
             $_SESSION['success'] = "Account created successfully!";
             header('Location: /sign-in');
             exit;
@@ -86,13 +86,20 @@ class AuthController {
         $email = trim($_POST['email'] ?? '');
         $password = trim($_POST['password'] ?? '');
 
-        $user = $this->accountModel->findByEmail($email);
+        $user = $this->accountModel->getAccountByEmail($email);
 
         if ($user && password_verify($password, $user['password'])) {
             $_SESSION['user_id'] = $user['id'];
             $_SESSION['user_first_name'] = $user['first_name'];
             $_SESSION['user_last_name'] = $user['last_name'];
             $_SESSION['user_email'] = $user['email'];
+
+            $role = $this->accountModel->getAccountRole($user['id']); 
+            if ($role === 'admin') {
+                header('Location: /admin');
+                exit;
+            }
+
             $_SESSION['user_phone'] = $user['phone'];
             header('Location: /account');
             exit;
@@ -142,7 +149,7 @@ class AuthController {
             exit;
         }
 
-        if ($this->accountModel->updateInfo($firstName, $lastName, $email, $phone)) {
+        if ($this->accountModel->updateAccountInfo($firstName, $lastName, $email, $phone)) {
             $_SESSION['user_first_name'] = $firstName;
             $_SESSION['user_last_name'] = $lastName;
             $_SESSION['user_phone'] = $phone;
