@@ -10,8 +10,8 @@
             <h2 class="h4 border-bottom pb-2 text-pourpre">1. Responsable du traitement des données</h2>
             <p style="text-align: justify;">Le responsable du traitement des données personnelles est l'entreprise :</p>
             <address class="p-3">
-                <strong class="text-pourpre">EFES RESTO</strong><br>
-                [Adresse établissement]<br>
+                <strong class="text-pourpre">EFES KEBAB</strong><br>
+                Adresse établissement<br>
                 90000, Belfort<br>
                 Email : <a href="mailto:efesRestoBelfort@gmail.com" class="text-decoration-none">efesRestoBelfort@gmail.com</a>
             </address>
@@ -65,12 +65,7 @@
                 <li>Droit à l'effacement de vos données.</li>
                 <li>Droit de retirer votre consentement à tout moment.</li>
             </ul>
-            <p>Pour exercer ces droits, contactez-nous : <strong>efesRestoBelfort@gmail.com</strong>.</p>
-        </section>
-
-        <section class="mb-4">
-            <h2 class="h4 border-bottom pb-2 text-pourpre">7. Cookies</h2>
-            <p style="text-align: justify;">Ce site utilise des cookies pour améliorer votre expérience d'achat. Vous pouvez configurer votre navigateur pour refuser les cookies, mais cela pourrait empêcher le bon fonctionnement du panier de commande.</p>
+            <p>Pour exercer ces droits, contactez-nous : <strong>temp@gmail.com</strong>.</p>
         </section>
 
         <div class="mt-5">
