@@ -15,6 +15,18 @@ class ProductController {
         require_once __DIR__ . "/../views/products.php";
     }
 
+
+    public function filterProducts() {
+        $data = json_decode(file_get_contents("php://input"), true);
+
+        $search = $data['search'] ?? '';
+        $sort = $data['sort'] ?? '';
+
+        $products = $this->productModel->getFiltered($search, $sort);
+
+        require __DIR__ . "/../views/partials/product_list.php";
+    }
+
     public function viewSingleProduct() {
         if($_SERVER['REQUEST_METHOD'] !== 'GET') {
             header('Location: /products');

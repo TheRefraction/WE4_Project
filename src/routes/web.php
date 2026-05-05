@@ -153,6 +153,11 @@ return [
             'action' => 'updateAccount',
             'access' => ['client']
 	],
+        '/products/filter'              => [
+            'controller' => 'ProductController',
+            'action' => 'filterProducts',
+            'access' => ['guest', 'client']
+        ],
 	'/cart'				=> [
 	    'controller' => 'CartController',
 	    'action' => 'cartAction',
