@@ -1,6 +1,6 @@
 <?php include 'partials/header.php'; ?>
 
-<div>
+<main>
     <?php
         echo "<h1>". $product->name . "</h1>";
         echo "<p>Price: " . $product->price . "€</p>";
@@ -26,5 +26,6 @@
             it greyed out or hidden when the add button is clicked ? -->
             </form>"
     ?>
-</div>
+</main>
+
 <?php include 'partials/footer.php'; ?>
