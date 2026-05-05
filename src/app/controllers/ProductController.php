@@ -11,7 +11,7 @@ class ProductController {
 
     public function viewProducts() {
         $title = "View Products";
-        $products = $this->productModel->getAll();
+        $products = $this->productModel->getAllProducts();
         require_once __DIR__ . "/../views/products.php";
     }
 
@@ -28,7 +28,7 @@ class ProductController {
             exit;
         }
 
-        $product = $this->productModel->getById($id);
+        $product = $this->productModel->getProductById($id);
 
         if(!$product) {
             header('Location: /products');
