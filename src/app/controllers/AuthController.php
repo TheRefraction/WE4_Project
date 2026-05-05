@@ -88,19 +88,19 @@ class AuthController {
 
         $user = $this->accountModel->getAccountByEmail($email);
 
-        if ($user && password_verify($password, $user['password'])) {
-            $_SESSION['user_id'] = $user['id'];
-            $_SESSION['user_first_name'] = $user['first_name'];
-            $_SESSION['user_last_name'] = $user['last_name'];
-            $_SESSION['user_email'] = $user['email'];
+        if ($user && password_verify($password, $user->password)) {
+            $_SESSION['user_id'] = $user->id;
+            $_SESSION['user_first_name'] = $user->first_name;
+            $_SESSION['user_last_name'] = $user->last_name;
+	    $_SESSION['user_email'] = $user->email;
+	    $_SESSION['user_phone'] = $user->phone;
 
-            $role = $this->accountModel->getAccountRole($user['id']); 
+            $role = $this->accountModel->getAccountRole($user->id); 
             if ($role === 'admin') {
                 header('Location: /admin');
                 exit;
             }
 
-            $_SESSION['user_phone'] = $user['phone'];
             header('Location: /account');
             exit;
         }
@@ -161,6 +161,4 @@ class AuthController {
         header('Location: /account');
         exit;
     }
-
-
 }
