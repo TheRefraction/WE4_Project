@@ -17,6 +17,19 @@ class Cart
                 'quantity' => 1,
                 'price' => $price
             ];
+        if (!isset($_SESSION['cart'])) {
+
+        }
+
+            if (isset($_SESSION['cart'][$product_id])) {
+                $_SESSION['cart'][$product_id]['quantity']++;
+            } else {
+                $_SESSION['cart'][$product_id] = [
+                    'name' => $name,
+                    'quantity' => 1,
+                    'price' => $price
+                ];
+            }
         }
     }
 
