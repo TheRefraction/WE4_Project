@@ -15,13 +15,17 @@ class CartController{
             header('Location: /cart');
             exit;
         }
-        else {
-            $product = $_POST['product'];
-            if ($_POST['action'] === 'add') {
-                $this->addToCart($product->id, $product->name, $product->price);
-            } else if ($_POST['action'] === 'remove') {
-                $this->removeFromCart($product->id);
-            }
+        $id = $_POST['product_id'];
+        $name = $_POST['product_name'];
+        $price = $_POST['product_price'];
+        $is_from_cart = $_POST['is_from_cart'];
+        if ($_POST['action'] === 'add') {
+            $this->addToCart($id, $name, $price);
+        } else if ($_POST['action'] === 'remove') {
+            $this->removeFromCart($id);
+        }
+        if($is_from_cart === 'True'){
+            header('Location: /cart');
         }
     }
 
