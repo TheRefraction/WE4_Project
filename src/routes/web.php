@@ -40,7 +40,12 @@ return [
             'controller' => 'ProductController',
             'action' => 'viewSingleProduct',
             'access' => ['guest', 'client']
-        ],
+	],
+	'/cart'				=> [
+	    'controller' => 'CartController',
+	    'action' => 'viewCart',
+	    'access' => ['client']
+	],
         '/admin'                        => [
             'controller' => 'AdminController',
             'action' => 'viewAdmin',
@@ -147,7 +152,12 @@ return [
             'controller' => 'AuthController',
             'action' => 'updateAccount',
             'access' => ['client']
-        ],
+	],
+	'/cart'				=> [
+	    'controller' => 'CartController',
+	    'action' => 'cartAction',
+	    'access' => ['client']
+	],
         '/admin/accounts/update'        => [
             'controller' => 'AdminController',
             'action' => 'updateAccountAdmin',

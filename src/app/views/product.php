@@ -17,6 +17,14 @@
             . " - " . $product->supplier_phone 
             . "</p>";
         }
+        echo "
+            <form method='POST' action='/cart'>
+            <input type='hidden' name='product' value='" . $product . "'>
+            <button type='submit' name='action' value='add'>Add to Cart</button>
+            <button type='submit' name='action' value='remove'>Remove from Cart</button>
+            <!-- Handle appearance of the button above with Js: make
+            it greyed out or hidden when the add button is clicked ? -->
+            </form>"
     ?>
 </main>
 
