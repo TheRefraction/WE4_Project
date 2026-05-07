@@ -92,6 +92,31 @@ class Product extends BaseModel {
         return $stmt->fetch(PDO::FETCH_OBJ);
     }
 
+    public function getFiltered($search, $sort) {
+        $query = "SELECT * FROM product p WHERE 1";
+
+        if(!empty($search)) {
+            $query .= " AND name like :search";
+        }
+
+        if(!empty(search)) {
+            if($sort == "name_desc") {
+                $query .= " ORDER BY name DESC";
+            } else if ($sort == "name_asc") {
+                $query .= " ORDER BY name ASC";
+            }
+        }
+
+
+        $stmt = $this->conn->prepare($query);
+        if(!empty($search)) {
+            $stmt->bindValue(":search", "%$search%");
+        }
+
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_OBJ);
+    }
+
     /**
      * Reusable product details used by admin edit forms.
      */
