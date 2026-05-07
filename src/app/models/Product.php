@@ -99,11 +99,14 @@ class Product extends BaseModel {
             $query .= " AND name like :search";
         }
 
-        if($sort == "name_desc") {
-            $query .= " ORDER BY name DESC";
-        } else if ($sort == "name_asc") {
-            $query .= " ORDER BY name ASC";
+        if(!empty(search)) {
+            if($sort == "name_desc") {
+                $query .= " ORDER BY name DESC";
+            } else if ($sort == "name_asc") {
+                $query .= " ORDER BY name ASC";
+            }
         }
+
 
         $stmt = $this->conn->prepare($query);
         if(!empty($search)) {
