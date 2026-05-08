@@ -2,7 +2,7 @@
 
     <div class="container py-5">
         <div class="mb-5">
-            <h1 class="text-pourpre fw-bold">Bienvenue à EFES KEBAB</h1>
+            <h1 class="text-pourpre fw-bold">Bienvenue à EFFES KEBAB</h1>
             <p class="lead">Découvrez nos plats savoureux !</p>
         </div>
 

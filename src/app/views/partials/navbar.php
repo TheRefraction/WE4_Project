@@ -7,7 +7,7 @@ if (isset($_SESSION['user_id'])) {
 
 <nav class="navbar navbar-expand-lg navbar-dark bg-pourpre shadow-sm">
     <div class="container">
-        <a class="navbar-brand fw-bold" href="/">EFES KEBAB</a>
+        <a class="navbar-brand fw-bold" href="/">EFFES KEBAB</a>
 
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar">
             <span class="navbar-toggler-icon"></span>
