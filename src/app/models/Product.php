@@ -34,12 +34,16 @@ class Product extends BaseModel {
 
     /**
      * Retrieves all products from the database.
-     *
+     * @param bool $showHidden Whether to include hidden products in the results. Defaults to true.
      * @return array An array of product objects.
      */
-    public function getAllProducts() {
+    public function getAllProducts($showHidden = true) {
         $query = "SELECT * 
-                  FROM product;";
+                  FROM product";
+
+        if (!$showHidden) {
+            $query .= " WHERE hidden = 0";
+        }
 
         $stmt = $this->conn->prepare($query);
         $stmt->execute();
@@ -92,14 +96,22 @@ class Product extends BaseModel {
         return $stmt->fetch(PDO::FETCH_OBJ);
     }
 
-    public function getFiltered($search, $sort) {
-        $query = "SELECT * FROM product p WHERE 1";
+    /**
+     * Retrieves products based on search and sort criteria.
+     *
+     * @param string|null $search The search term to filter products by name.
+     * @param string|null $sort The sorting criteria (e.g., "name_asc", "name_desc").
+     * @return array An array of product objects that match the search and sort criteria.
+     */
+    public function getProductsFiltered($search, $sort) {
+        $query = "SELECT * 
+                  FROM product p WHERE hidden = 0";
 
         if(!empty($search)) {
             $query .= " AND name like :search";
         }
 
-        if(!empty(search)) {
+        if(!empty($sort)) {
             if($sort == "name_desc") {
                 $query .= " ORDER BY name DESC";
             } else if ($sort == "name_asc") {
@@ -109,6 +121,7 @@ class Product extends BaseModel {
 
 
         $stmt = $this->conn->prepare($query);
+
         if(!empty($search)) {
             $stmt->bindValue(":search", "%$search%");
         }
