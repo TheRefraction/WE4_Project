@@ -45,6 +45,11 @@ return [
 	    'controller' => 'CartController',
 	    'action' => 'viewCart',
 	    'access' => ['client']
+    ],
+        '/invoices'				=> [
+            'controller' => 'InvoiceController',
+            'action' => 'invoices',
+            'access' => ['client']
 	],
         '/admin'                        => [
             'controller' => 'AdminController',
@@ -135,6 +140,11 @@ return [
             'controller' => 'AdminController',
             'action' => 'viewEditSupplier',
             'access' => ['admin']
+        ],
+        '/gdpr' => [
+            'controller' => 'HomeController',
+            'action' => 'gdpr',
+            'access' => ['guest', 'client', 'admin']
         ],
     ],
     'POST' => [

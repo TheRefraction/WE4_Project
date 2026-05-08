@@ -26,6 +26,7 @@ if (isset($_SESSION['user_id'])) {
                     <li class="nav-item"><a class="nav-link" href="#">Order</a></li>
                     <li class="nav-item"><a class="nav-link" href="/account">My account</a></li>
                     <li class="nav-item"><a class="nav-link" href="/cart">Cart</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/invoices">Invoices</a></li>
                     <li class="nav-item"><a class="nav-link" href="/sign-out">Sign out</a></li>
                 <?php } else { ?>
                     <li class="nav-item"><a class="nav-link" href="/sign-in">Sign in</a></li>

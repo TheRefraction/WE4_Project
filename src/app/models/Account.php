@@ -191,4 +191,14 @@ class Account extends BaseModel {
 
         return $stmt->execute();
     }
+
+    /**
+     * Update the last login to the current time.
+     * @param $userId
+     */
+    public function updateLastLogin($userId) {
+        $sql = "UPDATE account SET last_login = NOW() WHERE id = :id";
+        $stmt = $this->conn->prepare($sql);
+        return $stmt->execute(['id' => $userId]);
+    }
 }

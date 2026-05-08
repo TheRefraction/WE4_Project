@@ -89,6 +89,7 @@ class AuthController {
         $user = $this->accountModel->getAccountByEmail($email);
 
         if ($user && password_verify($password, $user->password)) {
+            $this->accountModel->updateLastLogin($user->id);
             $_SESSION['user_id'] = $user->id;
             $_SESSION['user_first_name'] = $user->first_name;
             $_SESSION['user_last_name'] = $user->last_name;
