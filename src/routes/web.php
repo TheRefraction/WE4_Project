@@ -47,7 +47,7 @@ return [
 	    'access' => ['client']
     ],
         '/invoices'				=> [
-            'controller' => 'HomeController',
+            'controller' => 'InvoiceController',
             'action' => 'invoices',
             'access' => ['client']
 	],

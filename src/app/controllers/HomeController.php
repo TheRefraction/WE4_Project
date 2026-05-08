@@ -6,7 +6,4 @@ class HomeController {
     public function gdpr() {
         require_once __DIR__ . '/../views/gdpr.php';
     }
-    public function invoices() {
-        require_once __DIR__ . '/../views/invoices.php';
-    }
 }

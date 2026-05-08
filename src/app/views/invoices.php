@@ -6,21 +6,30 @@
         <table class="table table-bordered">
             <thead>
             <tr>
-                <th>N°</th>
+                <th>N° Facture</th>
                 <th>Date</th>
+                <th>Statut</th>
                 <th>Total</th>
             </tr>
             </thead>
             <tbody>
 
-            <! -- TODO : implement model to display all invoices -- >
-            <?php //foreach (): ?>
+            <?php foreach ($invoices as $invoice): ?>
                 <tr>
-                    <td><! -- id invoice -- ></td>
-                    <td><! -- date invoice -- ></td>
-                    <td><! -- price total invoice -- ></td>
+                    <td>
+                        <?= $invoice->id ?>
+                    </td>
+                    <td>
+                        <? echo date('d/m/Y', strtotime($invoice->date)) ?>
+                    </td>
+                    <td>
+                        <?php echo htmlspecialchars(ucfirst($invoice->status_name)); ?>
+                    </td>
+                    <td>
+                        <?php echo $invoice->total ?>
+                    </td>
                 </tr>
-            <?php //endforeach; ?>
+            <?php endforeach; ?>
             </tbody>
         </table>
     </main>
