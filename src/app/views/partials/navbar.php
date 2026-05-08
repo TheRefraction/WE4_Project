@@ -23,7 +23,6 @@ if (isset($_SESSION['user_id'])) {
                 </li>
 
                 <?php if ($userId) { ?>
-                    <li class="nav-item"><a class="nav-link" href="#">Order</a></li>
                     <li class="nav-item"><a class="nav-link" href="/account">My account</a></li>
                     <li class="nav-item"><a class="nav-link" href="/cart">Cart</a></li>
                     <li class="nav-item"><a class="nav-link" href="/invoices">Invoices</a></li>
