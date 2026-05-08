@@ -1,43 +1,46 @@
 <?php include 'partials/header.php'; ?>
 
-<main>
-    <h1>My account</h1>
+<main class="container py-5">
+    <h1 class="text-pourpre" >My account</h1>
 
     <div id="loading">Loading account information...</div>
     
     <!-- Sensitive information are not displayed until server is sure user is authenticated -->
-    <div id="account-content" style="display: none;">
-        <div class="account-details">
-            <div>
-                <label>First name</label>
-                <p id="user-first-name"></p>
+    <div id="account-content" style="display: none;" class="card shadow-sm p-4 mb-4">
+        <div class="account-details row">
+            <div class="col-md-4">
+                <label class="fw-bold">First name</label>
+                <p id="user-first-name" class="border-bottom pb-1"></p>
             </div>
-            <div>
-                <label>Last name</label>
-                <p id="user-last-name"></p>
+            <div class="col-md-4">
+                <label class="fw-bold">Last name</label>
+                <p id="user-last-name" class="border-bottom pb-1"></p>
             </div>
-            <div>
-                <label>Email</label>
-                <p id="user-email"></p>
+            <div class="col-md-4">
+                <label class="fw-bold">Email</label>
+                <p id="user-email" class="border-bottom pb-1"></p>
             </div>
         </div>
     </div>
-    <h2>Update account</h2>
-    <form action="/update-account" method="POST">
-        <div class="account-details">
-            <div>
-                <label>First name</label>
-                <input type="text" name="first_name"/>
+
+    <h2 class="text-pourpre border-bottom pb-2 mb-3">Update account</h2>
+    <form action="/update-account" method="POST" class="card p-4 shadow-sm">
+        <div class="account-details row g-3">
+            <div class="col-md-4">
+                <label class="form-label">First name</label>
+                <input type="text" name="first_name" class="form-control"/>
             </div>
-            <div>
-                <label>Last name</label>
-                <input type="text" name="last_name"/>
+            <div class="col-md-4">
+                <label class="form-label">Last name</label>
+                <input type="text" name="last_name" class="form-control"/>
             </div>
-            <div>
-                <label>Phone</label>
-                <input type="text" name="phone"/>
+            <div class="col-md-4">
+                <label class="form-label">Phone</label>
+                <input type="text" name="phone" class="form-control"/>
             </div>
-            <button type="submit">Update</button>
+            <div class="col-12 mt-4">
+                <button type="submit" class="btn btn-pourpre text-white px-4">Update</button>
+            </div>
         </div>
     </form>
 </main>

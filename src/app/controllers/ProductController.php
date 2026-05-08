@@ -11,8 +11,20 @@ class ProductController {
 
     public function viewProducts() {
         $title = "View Products";
-        $products = $this->productModel->getAll();
+        $products = $this->productModel->getAllProducts();
         require_once __DIR__ . "/../views/products.php";
+    }
+
+
+    public function filterProducts() {
+        $data = json_decode(file_get_contents("php://input"), true);
+
+        $search = $data['search'] ?? '';
+        $sort = $data['sort'] ?? '';
+
+        $products = $this->productModel->getFiltered($search, $sort);
+
+        require __DIR__ . "/../views/partials/product_list.php";
     }
 
     public function viewSingleProduct() {
@@ -28,7 +40,7 @@ class ProductController {
             exit;
         }
 
-        $product = $this->productModel->getById($id);
+        $product = $this->productModel->getProductById($id);
 
         if(!$product) {
             header('Location: /products');
