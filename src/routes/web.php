@@ -45,6 +45,11 @@ return [
 	    'controller' => 'CartController',
 	    'action' => 'viewCart',
 	    'access' => ['client']
+    ],
+        '/invoices'				=> [
+            'controller' => 'HomeController',
+            'action' => 'invoices',
+            'access' => ['client']
 	],
         '/admin'                        => [
             'controller' => 'AdminController',
