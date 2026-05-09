@@ -8,30 +8,7 @@ require_once __DIR__ . '/BaseModel.php';
  */
 class Product extends BaseModel {
     
-    /**
-     * Creates a new product in the database.
-     * @param int $id The unique identifier for the product.
-     * @param string $name The name of the product.
-     * @param string|null $description A description of the product.
-     * @param float $price The price of the product.
-     * @param int $supplier_id The ID of the supplier providing the product.
-     * @return bool Returns true on successful creation, false otherwise.
-     */
-    public function createProduct($id, $name, $description, $price, $supplier_id) {
-        $query = "INSERT INTO product (id, name, description, price, supplier_id)
-                  VALUES (:id, :name, :description, :price, :supplier_id);";
-
-        $stmt = $this->conn->prepare($query);
-
-        $stmt->bindValue(":id",             $id,            PDO::PARAM_INT);
-        $stmt->bindValue(":name",           $name,          PDO::PARAM_STR);
-        $stmt->bindValue(":description",    $description,   PDO::PARAM_STR);
-        $stmt->bindValue(":price",          $price);
-        $stmt->bindValue(":supplier_id",    $supplier_id,   PDO::PARAM_INT);
-
-        return $stmt->execute();
-    }
-
+    /*
     /**
      * Retrieves all products from the database.
      * @param bool $showHidden Whether to include hidden products in the results. Defaults to true.
