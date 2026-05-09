@@ -45,6 +45,11 @@ return [
 	    'controller' => 'CartController',
 	    'action' => 'viewCart',
 	    'access' => ['client']
+    ],
+        '/invoices'				=> [
+            'controller' => 'InvoiceController',
+            'action' => 'invoices',
+            'access' => ['client']
 	],
         '/admin'                        => [
             'controller' => 'AdminController',
@@ -136,6 +141,11 @@ return [
             'action' => 'viewEditSupplier',
             'access' => ['admin']
         ],
+        '/gdpr' => [
+            'controller' => 'HomeController',
+            'action' => 'gdpr',
+            'access' => ['guest', 'client', 'admin']
+        ],
     ],
     'POST' => [
         '/sign-in'                      => [
@@ -153,6 +163,11 @@ return [
             'action' => 'updateAccount',
             'access' => ['client']
 	],
+        '/update-password'               => [
+            'controller' => 'AuthController',
+            'action' => 'updatePassword',
+            'access' => ['client']
+        ],
         '/products/filter'              => [
             'controller' => 'ProductController',
             'action' => 'filterProducts',

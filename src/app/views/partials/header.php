@@ -10,6 +10,6 @@
 
 </head>
 
-<body>
+<body class = "d-flex min-vh-100 flex-column">
 
 <?php include 'navbar.php'; ?>

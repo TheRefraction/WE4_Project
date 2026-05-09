@@ -15,7 +15,7 @@ class ProductController {
 
     public function viewProducts() {
         $title = "View Products";
-        $products = $this->productModel->getAllProducts();
+        $products = $this->productModel->getAllProducts(false);
         require_once __DIR__ . "/../views/products.php";
     }
 
@@ -25,9 +25,9 @@ class ProductController {
         $search = $data['search'] ?? '';
         $sort = $data['sort'] ?? '';
 
-        $products = $this->productModel->getFiltered($search, $sort);
+        $products = $this->productModel->getProductsFiltered($search, $sort);
 
-        require __DIR__ . "/../views/partials/product_list.php";
+        require __DIR__ . "/../views/partials/product-list.php";
     }
 
     public function viewSingleProduct() {

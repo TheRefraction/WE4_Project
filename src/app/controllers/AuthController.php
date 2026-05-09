@@ -89,6 +89,7 @@ class AuthController {
         $user = $this->accountModel->getAccountByEmail($email);
 
         if ($user && password_verify($password, $user->password)) {
+            $this->accountModel->updateLastLogin($user->id);
             $_SESSION['user_id'] = $user->id;
             $_SESSION['user_first_name'] = $user->first_name;
             $_SESSION['user_last_name'] = $user->last_name;
@@ -161,4 +162,46 @@ class AuthController {
         header('Location: /account');
         exit;
     }
+
+    public function updatePassword() {
+        $email = $_SESSION['user_email'];
+        $actualPassword = trim($_POST["actual_password"] ?? '');
+        $newPassword = trim($_POST["new_password"] ?? '');
+        $confirmPassword = trim($_POST["confirm_new_password"] ?? '');
+
+        if (empty($actualPassword) || empty($newPassword) || empty($confirmPassword)) {
+            $_SESSION['errors'] = ["please fill all required fields."];
+            header('Location: /account');
+            exit;
+        }
+
+        $user = $this->accountModel->getAccountByEmail($email);
+        if (!$user || !password_verify($actualPassword, $user->password)) {
+            $_SESSION['errors'] = ["Current password is incorrect."];
+            header('Location: /account');
+            exit;
+        }
+
+        if ($newPassword !== $confirmPassword) {
+            $_SESSION['errors'] = ["Passwords do not match."];
+        } elseif (strlen($newPassword) < 6) {
+            $_SESSION['errors'] = ["New password must be at least 6 characters."];
+        } else {
+            $hashedPassword = password_hash($newPassword, PASSWORD_DEFAULT);
+            if ($this->accountModel->updateAccountPassword($email, $hashedPassword)) {
+                $_SESSION['success'] = "Your password has been updated!";
+            } else {
+                $_SESSION['errors'] = ["Error updating password."];
+            }
+        }
+
+        header('Location: /account');
+        exit;
+    }
+
+
+
+
+
+
 }
