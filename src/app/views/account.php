@@ -21,6 +21,7 @@
         </div>
         <?php unset($_SESSION['success']); ?>
     <?php endif; ?>
+    
     <div id="account-content" style="display: none;" class="card shadow-sm p-4 mb-4">
         <div class="account-details row">
             <div class="col-md-4">
@@ -79,7 +80,6 @@
     </form>
 </main>
 
-<!-- This may be deprecated -->
 <script>
     fetch('/account-data')
         .then(response => {

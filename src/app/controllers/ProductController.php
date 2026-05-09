@@ -2,20 +2,24 @@
 
 require __DIR__ .'/../models/Product.php';
 require __DIR__ .'/../models/ProductCustomization.php';
+require __DIR__ .'/../models/Cart.php';
 
 class ProductController {
 
-    private $dbConnection;
     private $productModel;
+    private $customizationModel;
+    private $cartModel;
 
     public function __construct(PDO $dbConnection) {
-        $this->dbConnection = $dbConnection;
         $this->productModel = new Product($dbConnection);
+        $this->customizationModel = new ProductCustomization($dbConnection);
+        $this->cartModel = new Cart();
     }
 
     public function viewProducts() {
         $title = "View Products";
         $products = $this->productModel->getAllProducts(false);
+
         require_once __DIR__ . "/../views/products.php";
     }
 
@@ -36,7 +40,7 @@ class ProductController {
             exit;
         }
 
-        $id = isset($_GET['id']) ? $_GET['id'] : null;
+        $id = $_GET['id'] ?? null;
 
         if(!$id) {
             header('Location: /products');
@@ -52,12 +56,12 @@ class ProductController {
 
         $title = $product->name;
 
-        $customizationModel = new ProductCustomization($this->dbConnection);
-        $slots = $customizationModel->getCustomizationSlotsByProductId($product->id);
+        $slots = $this->customizationModel->getCustomizationSlotsByProductId($id);
         foreach($slots as $slot) {
-            $slot->options = $customizationModel->getCustomizationOptionsBySlot($slot->id);
+            $slot->options = $this->customizationModel->getCustomizationOptionsBySlot($slot->id);
         }
 
+        $inCartQuantity = $this->cartModel->getProductQuantityById($product->id);
 
         require_once __DIR__ . "/../views/product.php";
     }

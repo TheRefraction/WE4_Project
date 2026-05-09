@@ -81,12 +81,15 @@ class Product extends BaseModel {
      */
     public function getProductById($id) {
         $query = "SELECT p.*, 
+                         pc.name            AS category_name,
                          s.name             AS supplier_name, 
                          s.email            AS supplier_email,
                          s.phone            AS supplier_phone
                   FROM product p
-                  LEFT JOIN supplier s      ON p.supplier_id = s.id
-                  WHERE p.id = :id";;
+                  LEFT JOIN supplier s                  ON p.supplier_id = s.id
+                  LEFT JOIN product_to_category ptc     ON p.id = ptc.product_id
+                  LEFT JOIN product_category pc         ON ptc.category_id = pc.id
+                  WHERE p.id = :id";
 
         $stmt = $this->conn->prepare($query);
 

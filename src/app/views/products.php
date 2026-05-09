@@ -2,7 +2,6 @@
 
 <main>
     <h1>Product list</h1>
-    <!--FIXME: fix category table, to organise products by category (those seen on the menu)-->
 
     <div class="sort-filter">
         <input type="text" id="search" placeholder="Rechercher...">
