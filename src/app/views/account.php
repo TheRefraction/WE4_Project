@@ -6,6 +6,21 @@
     <div id="loading">Loading account information...</div>
     
     <!-- Sensitive information are not displayed until server is sure user is authenticated -->
+    <?php if (isset($_SESSION['errors'])): ?>
+        <div class="alert alert-danger shadow-sm">
+            <?php foreach ($_SESSION['errors'] as $error): ?>
+                <p class="mb-0 small fw-bold"><?= htmlspecialchars($error) ?></p>
+            <?php endforeach; ?>
+        </div>
+        <?php unset($_SESSION['errors']); ?>
+    <?php endif; ?>
+
+    <?php if (isset($_SESSION['success'])): ?>
+        <div class="alert alert-success shadow-sm">
+            <p><?= htmlspecialchars($_SESSION['success']) ?></p>
+        </div>
+        <?php unset($_SESSION['success']); ?>
+    <?php endif; ?>
     <div id="account-content" style="display: none;" class="card shadow-sm p-4 mb-4">
         <div class="account-details row">
             <div class="col-md-4">
@@ -37,6 +52,20 @@
             <div class="col-md-4">
                 <label class="form-label">Phone</label>
                 <input type="text" name="phone" class="form-control"/>
+            </div>
+        </div>
+        <div class="account-details row g-3">
+            <div class="col-md-4">
+                <label class="form-label">New password</label>
+                <input type="password" name="new_password" class="form-control"/>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Confirm new password</label>
+                <input type="password" name="confirm_new_password" class="form-control"/>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Actual password</label>
+                <input type="password" name="actual_password" class="form-control"/>
             </div>
             <div class="col-12 mt-4">
                 <button type="submit" class="btn btn-pourpre text-white px-4">Update</button>

@@ -143,22 +143,45 @@ class AuthController {
         $lastName = trim($_POST["last_name"] ?? '');
         $phone = trim($_POST["phone"] ?? '');
         $email = $_SESSION['user_email'];
+        $newPassword = trim($_POST["new_password"] ?? '');
+        $confirmPassword = trim($_POST["confirm_new_password"] ?? '');
+        $actualPassword = trim($_POST["actual_password"] ?? '');
 
-        if (empty($firstName) || empty($lastName)) {
-            $_SESSION['errors'] = ["First name and Last name are required."];
+        $errors = [];
+
+        if (empty($firstName) || empty($lastName) || empty($newPassword) || empty($actualPassword) || empty($phone)) {
+            $_SESSION['errors'] = [ "All fields are required."];
             header('Location: /account');
             exit;
         }
 
-        if ($this->accountModel->updateAccountInfo($firstName, $lastName, $email, $phone)) {
+        $user = $this->accountModel->getAccountByEmail($email);
+        if (!$user && !password_verify($actualPassword, $user->password)) {
+            $_SESSION['errors'] = [ "Current password is incorrect."];
+            header('Location: /account');
+            exit;
+        }
+
+        if (!empty($newPassword)) {
+            if ($newPassword !== $confirmPassword) {
+                $_SESSION['errors'] = [ "New passwords do not match."];
+                header('Location: /account');
+                exit;
+            } elseif (strlen($newPassword) < 6) {
+                $_SESSION['errors'] = [ "Password must be at least 6 characters."];
+                header('Location: /account');
+                exit;
+            } else {
+                $hashedPassword = password_hash($newPassword, PASSWORD_DEFAULT);
+            }
+        }
+
+        if ($this->accountModel->updateAccountInfo($firstName, $lastName, $email, $phone, $hashedPassword)) {
             $_SESSION['user_first_name'] = $firstName;
             $_SESSION['user_last_name'] = $lastName;
             $_SESSION['user_phone'] = $phone;
             $_SESSION['success'] = "Profile updated!";
-        } else {
-            $_SESSION['errors'] = ["Error updating account."];
-        }
-
+            }
         header('Location: /account');
         exit;
     }

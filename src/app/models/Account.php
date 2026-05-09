@@ -159,11 +159,14 @@ class Account extends BaseModel {
      * @param string|null $phone The new phone number.
      * @return bool True if the update was successful, false otherwise.
      */
-    public function updateAccountInfo($firstName, $lastName, $email, $phone) {
+    public function updateAccountInfo($firstName, $lastName, $email, $phone, $newPassword) {
+        $hashedPassword = password_hash($newPassword, PASSWORD_DEFAULT);
+
         $query = "UPDATE account 
                   SET first_name = :firstName, 
                       last_name = :lastName, 
-                      phone = :phone 
+                      phone = :phone,
+                      password = :password
                   WHERE email = :email";
 
         $stmt = $this->conn->prepare($query);
@@ -172,6 +175,8 @@ class Account extends BaseModel {
         $stmt->bindValue(':lastName', $lastName, PDO::PARAM_STR);
         $stmt->bindValue(':phone', $phone, PDO::PARAM_STR);
         $stmt->bindValue(':email', $email, PDO::PARAM_STR);
+        $stmt->bindValue(':password', $hashedPassword, PDO::PARAM_STR);
+
 
         return $stmt->execute();
     }
