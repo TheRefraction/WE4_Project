@@ -4,7 +4,7 @@
 <h2 class="total">Total: <?= htmlspecialchars((string) $total) ?> €</h2>
 
 <?php $products = $cart['products'] ?? []; ?>
-<!-- <?php $menus = $cart['menus'] ?? []; ?> -->
+<?php $menus = $cart['menus'] ?? []; ?>
 
 <?php if (empty($products) && empty($menus)) { ?>
     <p>Your cart is empty.</p>
@@ -45,6 +45,7 @@
         <?php endforeach; ?>
     </ul>
         <!-- TODO: Display Menus -->
+    </ul>
 <?php } ?>
 
 <?php include 'partials/footer.php'; ?>
