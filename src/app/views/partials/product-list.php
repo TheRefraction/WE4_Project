@@ -5,7 +5,7 @@
             <img 
                 src="<?= htmlspecialchars($imagePath); ?>"
                 alt="<?= htmlspecialchars($product->name); ?>"
-            >
+            />
 
             <div class="product-info">
                 <h2><?= htmlspecialchars($product->name); ?></h2>

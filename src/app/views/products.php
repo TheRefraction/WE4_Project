@@ -14,7 +14,7 @@
     </div>
 
     <div class="products">
-        <?php include "partials/product_list.php"; ?>
+        <?php include "partials/product-list.php"; ?>
     </div>
 </main>
 
@@ -22,32 +22,31 @@
 
 
 <script>
-function loadProducts() {
-    const search = document.getElementById('search').value;
-    const sort = document.getElementById('sort').value;
+    function loadProducts() {
+        const search = document.getElementById('search').value;
+        const sort = document.getElementById('sort').value;
 
-    fetch('/products/filter', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ search, sort })
-    })
-    .then(res => res.text())
-    .then(html => {
-        document.querySelector('.products').innerHTML = html;
-    });
-}
+        fetch('/products/filter', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ search, sort })
+        })
+        .then(res => res.text())
+        .then(html => {
+            document.querySelector('.products').innerHTML = html;
+        });
+    }
 
-// events
-document.getElementById('search').addEventListener('input', debounce(loadProducts, 300));
-document.getElementById('sort').addEventListener('change', loadProducts);
+    // events
+    document.getElementById('search').addEventListener('input', debounce(loadProducts, 300));
+    document.getElementById('sort').addEventListener('change', loadProducts);
 
-// debounce
-function debounce(fn, delay) {
-    let timeout;
-    return (...args) => {
-        clearTimeout(timeout);
-        timeout = setTimeout(() => fn(...args), delay);
-    };
-}
-
+    // debounce
+    function debounce(fn, delay) {
+        let timeout;
+        return (...args) => {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => fn(...args), delay);
+        };
+    }
 </script>
