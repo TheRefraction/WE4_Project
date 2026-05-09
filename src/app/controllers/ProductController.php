@@ -1,11 +1,15 @@
 <?php
 
 require __DIR__ .'/../models/Product.php';
+require __DIR__ .'/../models/ProductCustomization.php';
 
 class ProductController {
+
+    private $dbConnection;
     private $productModel;
 
     public function __construct(PDO $dbConnection) {
+        $this->dbConnection = $dbConnection;
         $this->productModel = new Product($dbConnection);
     }
 
@@ -14,7 +18,6 @@ class ProductController {
         $products = $this->productModel->getAllProducts();
         require_once __DIR__ . "/../views/products.php";
     }
-
 
     public function filterProducts() {
         $data = json_decode(file_get_contents("php://input"), true);
@@ -48,6 +51,13 @@ class ProductController {
         }
 
         $title = $product->name;
+
+        $customizationModel = new ProductCustomization($this->dbConnection);
+        $slots = $customizationModel->getCustomizationSlotsByProductId($product->id);
+        foreach($slots as $slot) {
+            $slot->options = $customizationModel->getCustomizationOptionsBySlot($slot->id);
+        }
+
 
         require_once __DIR__ . "/../views/product.php";
     }

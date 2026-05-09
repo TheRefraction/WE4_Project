@@ -163,6 +163,11 @@ return [
 	    'action' => 'cartAction',
 	    'access' => ['client']
 	],
+        '/cart/customize' => [
+            'controller' => 'CartController',
+            'action' => 'saveCustomization',
+            'access' => ['client']
+        ],
         '/admin/accounts/update'        => [
             'controller' => 'AdminController',
             'action' => 'updateAccountAdmin',
