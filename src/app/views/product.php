@@ -1,11 +1,12 @@
 <?php include 'partials/header.php'; ?>
 
 <main>
-        <h1><?= $product->name ?></h1>;
-        <p>Price: <?= $product->price ?> €</p>;
-        <p>Description: <?= $product->description ?></p>;
-        <p>Category: <?= $product->category_name ?></p>;
-
+        <h1><?= $product->name ?></h1>
+        <div class="single-product">
+            <span class="label">Price:</span>     <span><?= $product->price ?> €</span>
+            <span class="label">Description:</span> <span><?= $product->description ?></span>
+            <span class="label">Category:</span>  <span><?= $product->category_name ?></span>
+        </div>
         <?php
         if($product->supplier_name && $product->supplier_phone && $product->supplier_email) {
 
@@ -22,9 +23,9 @@
             <input type='hidden' name='product_name' value='<?= $product->name ?>'>
             <input type='hidden' name='product_price' value='<?= $product->price ?>'>
             <input type="hidden" name="is_from_cart" value='False'>
-            <button type='submit' name='action' value='add'>Add to Cart</button>
-            <button type='submit' name='action' value='remove' id='remove-btn'>Remove from Cart</button>
-            <button type='button' id='customize-btn' onclick='openPopup()'>Customize</button>
+            <button type='submit' name='action' value='add' class="btn sm-mg btn-pourpre">+ Add to Cart</button>
+            <button type='submit' name='action' value='remove' id='remove-btn' class="btn btn-pourpre">- Remove from Cart</button>
+            <button type='button' id='customize-btn' onclick='openPopup()' class="btn btn-pourpre">Customize</button>
         </form>
 
         <div id='popup-overlay' style='display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:999;'>
