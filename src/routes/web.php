@@ -46,10 +46,10 @@ return [
             'action' => 'viewCart',
             'access' => ['client']
         ],
-            '/invoices'				=> [
-                'controller' => 'InvoiceController',
-                'action' => 'invoices',
-                'access' => ['client']
+        '/invoices'				=> [
+            'controller' => 'InvoiceController',
+            'action' => 'invoices',
+            'access' => ['client']
         ],
         '/admin'                        => [
             'controller' => 'AdminController',

@@ -4,11 +4,13 @@
 <h2>Total: <?= htmlspecialchars((string) $total) ?> €</h2>
 
 <?php $products = $cart['products'] ?? []; ?>
+<!-- <?php $menus = $cart['menus'] ?? []; ?> -->
 
-<?php if (empty($products)) { ?>
+<?php if (empty($products) && empty($menus)) { ?>
     <p>Your cart is empty.</p>
 <?php } else { ?>
     <ul>
+        <!-- Display Products -->
         <?php foreach ($products as $lineKey => $item): ?>
             <li>
                 <strong><?= htmlspecialchars($item['name'] ?? '') ?></strong>
@@ -47,7 +49,8 @@
                 </form>
             </li>
         <?php endforeach; ?>
-    </ul>
+
+        <!-- TODO: Display Menus -->
 <?php } ?>
 
 <?php include 'partials/footer.php'; ?>

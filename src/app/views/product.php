@@ -51,7 +51,7 @@
                                 <select name="customization[<?= (int) $slot->id ?>][]" <?= $row < (int) $slot->min_select ? 'required' : '' ?>>
                                     <option value="">-- Select an option --</option>
                                     <?php foreach ($slot->options as $option): ?>
-                                        <option value="<?= (int) $option->option_product_id ?>" <?= $row === $option->display_order && !empty($option->is_default) ? 'selected' : '' ?>>
+                                        <option value="<?= (int) $option->option_product_id ?>" <?= $row === 0 && !empty($option->is_default) ? 'selected' : '' ?>>
                                             <?= htmlspecialchars($option->option_product_name) ?>
                                             <?= ((float) $option->price_delta !== 0.0) ? ' (' . htmlspecialchars((string) $option->price_delta) . ' €)' : ' (free)' ?>
                                         </option>
@@ -64,7 +64,6 @@
             <?php } ?>
 
             <button type="submit" name="action" value="add">Add to Cart</button>
-            <button type="submit" name="action" value="remove" id="remove-btn">Remove from Cart</button>
         <?php } else { ?>
             <p style="color: red; font-weight: bold;">Please sign in to add this product to your cart.</p>
         <?php } ?>

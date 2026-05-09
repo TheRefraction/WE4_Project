@@ -153,22 +153,25 @@ class Account extends BaseModel {
     /**
      * Updates the account information for a user based on their email address. 
      * This is typically used for users to update their own profile information.
+     * @param int $id The ID of the account to update.
      * @param string $firstName The new first name.
      * @param string $lastName The new last name.
      * @param string $email The email address of the account to update (used as identifier).
      * @param string|null $phone The new phone number.
      * @return bool True if the update was successful, false otherwise.
      */
-    public function updateAccountInfo($firstName, $lastName, $email, $phone) {
+    public function updateAccountInfo($id, $firstName, $lastName, $email, $phone) {
 
         $query = "UPDATE account 
                   SET first_name = :firstName, 
                       last_name = :lastName, 
+                      email = :email,
                       phone = :phone
-                  WHERE email = :email";
+                  WHERE id = :id";
 
         $stmt = $this->conn->prepare($query);
 
+        $stmt->bindValue(':id', $id, PDO::PARAM_INT);
         $stmt->bindValue(':firstName', $firstName, PDO::PARAM_STR);
         $stmt->bindValue(':lastName', $lastName, PDO::PARAM_STR);
         $stmt->bindValue(':phone', $phone, PDO::PARAM_STR);

@@ -119,6 +119,10 @@ class Product extends BaseModel {
                 $query .= " ORDER BY name DESC";
             } else if ($sort == "name_asc") {
                 $query .= " ORDER BY name ASC";
+            } else if ($sort == "price_asc") {
+                $query .= " ORDER BY price ASC";
+            } else if ($sort == "price_desc") {
+                $query .= " ORDER BY price DESC";
             }
         }
 
