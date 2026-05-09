@@ -160,10 +160,11 @@ class Account extends BaseModel {
      * @return bool True if the update was successful, false otherwise.
      */
     public function updateAccountInfo($firstName, $lastName, $email, $phone) {
+
         $query = "UPDATE account 
                   SET first_name = :firstName, 
                       last_name = :lastName, 
-                      phone = :phone 
+                      phone = :phone
                   WHERE email = :email";
 
         $stmt = $this->conn->prepare($query);
@@ -200,5 +201,22 @@ class Account extends BaseModel {
         $sql = "UPDATE account SET last_login = NOW() WHERE id = :id";
         $stmt = $this->conn->prepare($sql);
         return $stmt->execute(['id' => $userId]);
+    }
+
+    /**
+     * Update the password based on their email address.
+     * @param $email
+     * @param $hashedPassword
+     * @return bool
+     */
+    public function updateAccountPassword($email, $hashedPassword)
+    {
+        $query = "UPDATE account 
+              SET password = :password
+              WHERE email = :email";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindValue(':password', $hashedPassword, PDO::PARAM_STR);
+        $stmt->bindValue(':email', $email, PDO::PARAM_STR);
+        return $stmt->execute();
     }
 }
