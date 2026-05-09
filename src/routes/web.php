@@ -40,17 +40,22 @@ return [
             'controller' => 'ProductController',
             'action' => 'viewSingleProduct',
             'access' => ['guest', 'client']
-	],
-	'/cart'				=> [
-	    'controller' => 'CartController',
-	    'action' => 'viewCart',
-	    'access' => ['client']
-    ],
+        ],
+        '/cart'				=> [
+            'controller' => 'CartController',
+            'action' => 'viewCart',
+            'access' => ['client']
+        ],
         '/invoices'				=> [
             'controller' => 'InvoiceController',
             'action' => 'invoices',
             'access' => ['client']
-	],
+        ],
+        '/invoices/:id/data' => [
+            'controller' => 'InvoiceController',
+            'action' => 'invoiceData',
+            'access' => ['client']
+        ],
         '/admin'                        => [
             'controller' => 'AdminController',
             'action' => 'viewAdmin',
