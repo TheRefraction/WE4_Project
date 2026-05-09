@@ -163,6 +163,11 @@ return [
             'action' => 'updateAccount',
             'access' => ['client']
 	],
+        '/update-password'               => [
+            'controller' => 'AuthController',
+            'action' => 'updatePassword',
+            'access' => ['client']
+        ],
         '/products/filter'              => [
             'controller' => 'ProductController',
             'action' => 'filterProducts',

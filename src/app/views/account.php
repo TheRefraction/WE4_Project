@@ -53,7 +53,12 @@
                 <label class="form-label">Phone</label>
                 <input type="text" name="phone" class="form-control"/>
             </div>
+            <div class="col-12 mt-4">
+                <button type="submit" class="btn btn-pourpre text-white px-4">Update</button>
+            </div>
         </div>
+    </form>
+    <form action="/update-password" method="POST" class="card p-4 shadow-sm">
         <div class="account-details row g-3">
             <div class="col-md-4">
                 <label class="form-label">New password</label>

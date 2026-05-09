@@ -143,46 +143,65 @@ class AuthController {
         $lastName = trim($_POST["last_name"] ?? '');
         $phone = trim($_POST["phone"] ?? '');
         $email = $_SESSION['user_email'];
+
+        if (empty($firstName) || empty($lastName)) {
+            $_SESSION['errors'] = ["First name and Last name are required."];
+            header('Location: /account');
+            exit;
+        }
+
+        if ($this->accountModel->updateAccountInfo($firstName, $lastName, $email, $phone)) {
+            $_SESSION['user_first_name'] = $firstName;
+            $_SESSION['user_last_name'] = $lastName;
+            $_SESSION['user_phone'] = $phone;
+            $_SESSION['success'] = "Profile updated!";
+        } else {
+            $_SESSION['errors'] = ["Error updating account."];
+        }
+
+        header('Location: /account');
+        exit;
+    }
+
+    public function updatePassword() {
+        $email = $_SESSION['user_email'];
+        $actualPassword = trim($_POST["actual_password"] ?? '');
         $newPassword = trim($_POST["new_password"] ?? '');
         $confirmPassword = trim($_POST["confirm_new_password"] ?? '');
-        $actualPassword = trim($_POST["actual_password"] ?? '');
 
-        $errors = [];
-
-        if (empty($firstName) || empty($lastName) || empty($newPassword) || empty($actualPassword) || empty($phone)) {
-            $_SESSION['errors'] = [ "All fields are required."];
+        if (empty($actualPassword) || empty($newPassword) || empty($confirmPassword)) {
+            $_SESSION['errors'] = ["please fill all required fields."];
             header('Location: /account');
             exit;
         }
 
         $user = $this->accountModel->getAccountByEmail($email);
-        if (!$user && !password_verify($actualPassword, $user->password)) {
-            $_SESSION['errors'] = [ "Current password is incorrect."];
+        if (!$user || !password_verify($actualPassword, $user->password)) {
+            $_SESSION['errors'] = ["Current password is incorrect."];
             header('Location: /account');
             exit;
         }
 
-        if (!empty($newPassword)) {
-            if ($newPassword !== $confirmPassword) {
-                $_SESSION['errors'] = [ "New passwords do not match."];
-                header('Location: /account');
-                exit;
-            } elseif (strlen($newPassword) < 6) {
-                $_SESSION['errors'] = [ "Password must be at least 6 characters."];
-                header('Location: /account');
-                exit;
+        if ($newPassword !== $confirmPassword) {
+            $_SESSION['errors'] = ["Passwords do not match."];
+        } elseif (strlen($newPassword) < 6) {
+            $_SESSION['errors'] = ["New password must be at least 6 characters."];
+        } else {
+            $hashedPassword = password_hash($newPassword, PASSWORD_DEFAULT);
+            if ($this->accountModel->updateAccountPassword($email, $hashedPassword)) {
+                $_SESSION['success'] = "Your password has been updated!";
             } else {
-                $hashedPassword = password_hash($newPassword, PASSWORD_DEFAULT);
+                $_SESSION['errors'] = ["Error updating password."];
             }
         }
 
-        if ($this->accountModel->updateAccountInfo($firstName, $lastName, $email, $phone, $hashedPassword)) {
-            $_SESSION['user_first_name'] = $firstName;
-            $_SESSION['user_last_name'] = $lastName;
-            $_SESSION['user_phone'] = $phone;
-            $_SESSION['success'] = "Profile updated!";
-            }
         header('Location: /account');
         exit;
     }
+
+
+
+
+
+
 }
