@@ -21,19 +21,24 @@
         </div>
         <?php unset($_SESSION['success']); ?>
     <?php endif; ?>
+    
     <div id="account-content" style="display: none;" class="card shadow-sm p-4 mb-4">
         <div class="account-details row">
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <label class="fw-bold">First name</label>
                 <p id="user-first-name" class="border-bottom pb-1"></p>
             </div>
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <label class="fw-bold">Last name</label>
                 <p id="user-last-name" class="border-bottom pb-1"></p>
             </div>
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <label class="fw-bold">Email</label>
                 <p id="user-email" class="border-bottom pb-1"></p>
+            </div>
+             <div class="col-md-3">
+                <label class="fw-bold">Phone</label>
+                <p id="user-phone" class="border-bottom pb-1"></p>
             </div>
         </div>
     </div>
@@ -41,15 +46,19 @@
     <h2 class="text-pourpre border-bottom pb-2 mb-3">Update account</h2>
     <form action="/update-account" method="POST" class="card p-4 shadow-sm">
         <div class="account-details row g-3">
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <label class="form-label">First name</label>
                 <input type="text" name="first_name" class="form-control"/>
             </div>
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <label class="form-label">Last name</label>
                 <input type="text" name="last_name" class="form-control"/>
             </div>
-            <div class="col-md-4">
+            <div class="col-md-3">
+                <label class="form-label">Email</label>
+                <input type="email" name="email" class="form-control"/>
+            </div>
+            <div class="col-md-3">
                 <label class="form-label">Phone</label>
                 <input type="text" name="phone" class="form-control"/>
             </div>
@@ -58,6 +67,7 @@
             </div>
         </div>
     </form>
+    
     <form action="/update-password" method="POST" class="card p-4 shadow-sm">
         <div class="account-details row g-3">
             <div class="col-md-4">
@@ -79,7 +89,6 @@
     </form>
 </main>
 
-<!-- This may be deprecated -->
 <script>
     fetch('/account-data')
         .then(response => {
@@ -96,6 +105,7 @@
                 document.getElementById('user-first-name').textContent = data.first_name;
                 document.getElementById('user-last-name').textContent = data.last_name;
                 document.getElementById('user-email').textContent = data.email;
+                document.getElementById('user-phone').textContent = data.phone;
 
                 document.getElementById('loading').style.display = 'none';
                 document.getElementById('account-content').style.display = 'block';
