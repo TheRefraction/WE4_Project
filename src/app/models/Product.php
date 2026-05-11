@@ -84,7 +84,8 @@ class Product extends BaseModel {
                          pc.name            AS category_name,
                          s.name             AS supplier_name, 
                          s.email            AS supplier_email,
-                         s.phone            AS supplier_phone
+                         s.phone            AS supplier_phone,
+                         pc.name            AS category_name
                   FROM product p
                   LEFT JOIN supplier s                  ON p.supplier_id = s.id
                   LEFT JOIN product_to_category ptc     ON p.id = ptc.product_id
