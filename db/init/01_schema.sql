@@ -1,2 +1,0 @@
-CREATE DATABASE IF NOT EXISTS wonka_db;
-USE wonka_db;
