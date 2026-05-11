@@ -1,49 +1,11 @@
 <?php
 
-class Cart
-{
+class Cart {
     public function __construct() {
         if (!isset($_SESSION['cart'])) {
             $_SESSION['cart'] = [];
-        }
-    }
-
-    public function addProduct($product_id, $name, $price) {
-        if (!isset($_SESSION['cart'])) {
-            header('Location: /cart');
-            exit;
-        }
-        if (isset($_SESSION['cart'][$product_id])) {
-            $_SESSION['cart'][$product_id]['quantity']++;
-        } else {
-            $_SESSION['cart'][$product_id] = [
-                'name' => $name,
-                'quantity' => 1,
-                'price' => $price,
-                'customization_index' => NULL
-            ];
-        }
-
-    }
-
-    public function removeProduct($product_id) {
-        if (!isset($_SESSION['cart'])) {
-            header('Location: /cart');
-            exit;
-        }
-        if (isset($_SESSION['cart'][$product_id])) {
-            if($_SESSION['cart'][$product_id]['quantity'] - 1 === 0) {
-                unset($_SESSION['cart'][$product_id]);
-                $keys = array_keys(array_filter($_SESSION['customizations'], function($entry) use ($product_id) {
-                    return $entry['product_id'] === $product_id;
-                }));
-                if (!empty($keys)) {
-                    $lastKey = end($keys);
-                    unset($_SESSION['customizations'][$lastKey]);
-                }
-            } else {
-                $_SESSION['cart'][$product_id]['quantity'] --;
-            }
+            $_SESSION['cart']['products'] = [];
+            $_SESSION['cart']['menus'] = [];
         }
     }
 
@@ -51,18 +13,223 @@ class Cart
         return $_SESSION['cart'];
     }
 
+    private function normalizeOptions($options) {
+        if (!is_array($options)) {
+            return [];
+        }
+
+        $normalized = [];
+
+        foreach ($options as $slot) {
+            if (!is_array($slot)) {
+                continue;
+            }
+
+            $choices = [];
+
+            if (isset($slot['choices']) && is_array($slot['choices'])) {
+                foreach ($slot['choices'] as $choice) {
+                    if (!is_array($choice)) {
+                        continue;
+                    }
+
+                    $choices[] = [
+                        'optionProductId' => isset($choice['optionProductId']) ? (int) $choice['optionProductId'] : null,
+                        'name' => (string) ($choice['name'] ?? ''),
+                        'priceDelta' => (float) ($choice['priceDelta'] ?? 0),
+                    ];
+                }
+            }
+
+            $normalized[] = [
+                'slotId' => isset($slot['slotId']) ? (int) $slot['slotId'] : null,
+                'categoryName' => (string) ($slot['categoryName'] ?? ''),
+                'choices' => $choices,
+            ];
+        }
+
+        return $normalized;
+    }
+
+    public function buildLineKey($id, $options = []) {
+        return $id . ':' . md5(json_encode($this->normalizeOptions($options)));
+    }
+
+    public function addProductToCart($product_id, $name, $price, $options = []) {
+        if (!isset($_SESSION['cart']['products'])) {
+            $_SESSION['cart']['products'] = [];
+        }
+
+        $normalizedOptions = $this->normalizeOptions($options);
+        $lineKey = $this->buildLineKey($product_id, $normalizedOptions);
+
+        if (isset($_SESSION['cart']['products'][$lineKey])) {
+            $_SESSION['cart']['products'][$lineKey]['quantity']++;
+        } else {
+            $_SESSION['cart']['products'][$lineKey] = [
+                'line_key' => $lineKey,
+                'product_id' => $product_id,
+                'name' => $name,
+                'quantity' => 1,
+                'price' => $price,
+                'options' => $normalizedOptions,
+            ];
+        }
+
+        return $lineKey;
+    }
+
+    public function removeProductFromCart($lineKey) {
+        if (!isset($_SESSION['cart']['products'])) {
+            $_SESSION['cart']['products'] = [];
+            return;
+        }
+
+        if (isset($_SESSION['cart']['products'][$lineKey])) {
+            if ($_SESSION['cart']['products'][$lineKey]['quantity'] - 1 === 0) {
+                unset($_SESSION['cart']['products'][$lineKey]);
+            } else {
+                $_SESSION['cart']['products'][$lineKey]['quantity'] --;
+            }
+        }
+    }
+
+    public function addMenuToCart($menu_id, $name, $price, $selections = []) {
+        if (!isset($_SESSION['cart']['menus'])) {
+            $_SESSION['cart']['menus'] = [];
+        }
+
+        $normalizedSelections = $this->normalizeOptions($selections);
+        $lineKey = $this->buildLineKey($menu_id, $normalizedSelections);
+
+        if (isset($_SESSION['cart']['menus'][$lineKey])) {
+            $_SESSION['cart']['menus'][$lineKey]['quantity']++;
+        } else {
+            $_SESSION['cart']['menus'][$lineKey] = [
+                'line_key' => $lineKey,
+                'menu_id' => $menu_id,
+                'name' => $name,
+                'quantity' => 1,
+                'price' => $price,
+                'selections' => $normalizedSelections,
+            ];
+        }
+
+        return $lineKey;
+    }
+
+    public function removeMenuFromCart($lineKey) {
+        if (!isset($_SESSION['cart']['menus'])) {
+            $_SESSION['cart']['menus'] = [];
+            return;
+        }
+
+        if (isset($_SESSION['cart']['menus'][$lineKey])) {
+            if ($_SESSION['cart']['menus'][$lineKey]['quantity'] - 1 === 0) {
+                unset($_SESSION['cart']['menus'][$lineKey]);
+            } else {
+                $_SESSION['cart']['menus'][$lineKey]['quantity'] --;
+            }
+        }
+    }
+
+    public function getProductQuantityById($productId) {
+        if (!isset($_SESSION['cart']['products'])) {
+            return 0;
+        }
+
+        $quantity = 0;
+
+        foreach ($_SESSION['cart']['products'] as $product) {
+            if ((int) ($product['product_id'] ?? 0) === (int) $productId) {
+                $quantity += (int) ($product['quantity'] ?? 0);
+            }
+        }
+
+        return $quantity;
+    }
+
+    public function getMenuQuantityById($menuId) {
+        if (!isset($_SESSION['cart']['menus'])) {
+            return 0;
+        }
+
+        $quantity = 0;
+
+        foreach ($_SESSION['cart']['menus'] as $menu) {
+            if ((int) ($menu['menu_id'] ?? 0) === (int) $menuId) {
+                $quantity += (int) ($menu['quantity'] ?? 0);
+            }
+        }
+
+        return $quantity;
+    }
+
+    public function getTotalCount() {
+        if (!isset($_SESSION['cart']) || !isset($_SESSION['cart']['products']) || !isset($_SESSION['cart']['menus'])) {
+            return 0;
+        }
+
+        $totalCount = 0;
+
+        foreach ($_SESSION['cart']['products'] as $product) {
+            $totalCount += $product['quantity'];
+        }
+
+        foreach ($_SESSION['cart']['menus'] as $menu) {
+            $totalCount += $menu['quantity'];
+        }
+
+        return $totalCount;
+    }
+
     public function computeTotal() {
         $total = 0;
-        foreach ($_SESSION['cart'] as $product) {
-            $total += $product['quantity'] * $product['price'];
-            if(isset($product['customization_index'])) {
-                foreach ($_SESSION['customizations'][$product['customization_index']]['customization'] as $slot) {
-                    foreach ($slot['choices'] as $choice) {
-                        $total += $choice['priceDelta'] * $product['quantity'];
+
+        // Add products total
+        if (isset($_SESSION['cart']['products'])) {
+            foreach ($_SESSION['cart']['products'] as $product) {
+                $quantity = (int) ($product['quantity'] ?? 0);
+                $price = (float) ($product['price'] ?? 0);
+
+                $total += $quantity * $price;
+
+                if (isset($product['options']) && is_array($product['options'])) {
+                    foreach ($product['options'] as $slot) {
+                        if (!isset($slot['choices']) || !is_array($slot['choices'])) {
+                            continue;
+                        }
+
+                        foreach ($slot['choices'] as $choice) {
+                            $total += $quantity * (float) ($choice['priceDelta'] ?? 0);
+                        }
                     }
                 }
             }
         }
+
+        // Add menus total
+        if (isset($_SESSION['cart']['menus'])) {
+            foreach ($_SESSION['cart']['menus'] as $menu) {
+                $quantity = (int) ($menu['quantity'] ?? 0);
+                $price = (float) ($menu['price'] ?? 0);
+
+                $total += $quantity * $price;
+
+                if (isset($menu['selections']) && is_array($menu['selections'])) {
+                    foreach ($menu['selections'] as $slot) {
+                        if (!isset($slot['choices']) || !is_array($slot['choices'])) {
+                            continue;
+                        }
+
+                        foreach ($slot['choices'] as $choice) {
+                            $total += $quantity * (float) ($choice['priceDelta'] ?? 0);
+                        }
+                    }
+                }
+            }
+        }
+
         return $total;
     }
 

@@ -40,17 +40,17 @@ return [
             'controller' => 'ProductController',
             'action' => 'viewSingleProduct',
             'access' => ['guest', 'client']
-	],
-	'/cart'				=> [
-	    'controller' => 'CartController',
-	    'action' => 'viewCart',
-	    'access' => ['client']
-    ],
+        ],
+        '/cart'				=> [
+            'controller' => 'CartController',
+            'action' => 'viewCart',
+            'access' => ['client']
+        ],
         '/invoices'				=> [
             'controller' => 'InvoiceController',
             'action' => 'invoices',
             'access' => ['client']
-	],
+        ],
         '/admin'                        => [
             'controller' => 'AdminController',
             'action' => 'viewAdmin',
@@ -162,7 +162,7 @@ return [
             'controller' => 'AuthController',
             'action' => 'updateAccount',
             'access' => ['client']
-	],
+	    ],
         '/update-password'               => [
             'controller' => 'AuthController',
             'action' => 'updatePassword',
@@ -173,14 +173,9 @@ return [
             'action' => 'filterProducts',
             'access' => ['guest', 'client']
         ],
-	'/cart'				=> [
-	    'controller' => 'CartController',
-	    'action' => 'cartAction',
-	    'access' => ['client']
-	],
-        '/cart/customize' => [
+        '/cart'				=> [
             'controller' => 'CartController',
-            'action' => 'saveCustomization',
+            'action' => 'cartAction',
             'access' => ['client']
         ],
         '/admin/accounts/update'        => [
