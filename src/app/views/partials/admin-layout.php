@@ -1,7 +1,7 @@
 <body>
     <main id="admin-container">
         <aside>
-            <h1>Efes Industries</h1>
+            <h1>Effes Industries</h1>
             <nav>
                 <ul>
                     <li><a href="/admin">Dashboard</a></li>

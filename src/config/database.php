@@ -7,11 +7,11 @@ class Database {
     private $password;
 
     public function __construct() {
-        $this->host = $_ENV['MYSQL_HOST'];
-        $this->port = $_ENV['MYSQL_PORT'];
-        $this->dbname = $_ENV['MYSQL_DATABASE'];
-        $this->username = $_ENV['MYSQL_USER'];
-        $this->password = $_ENV['MYSQL_PASSWORD'];
+        $this->host = getenv('MYSQL_HOST');
+        $this->port = getenv('MYSQL_PORT');
+        $this->dbname = getenv('MYSQL_DATABASE');
+        $this->username = getenv('MYSQL_USER');
+        $this->password = getenv('MYSQL_PASSWORD');
     }
 
     public function getConnection() {
