@@ -44,8 +44,9 @@
             </li>
         <?php endforeach; ?>
     </ul>
-        <!-- TODO: Display Menus -->
-    </ul>
+
+    <a href="/checkout">Checkout</a>
+    <!-- TODO: Display Menus -->
 <?php } ?>
 
 <?php include 'partials/footer.php'; ?>

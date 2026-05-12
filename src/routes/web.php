@@ -146,6 +146,11 @@ return [
             'action' => 'gdpr',
             'access' => ['guest', 'client', 'admin']
         ],
+        '/checkout' => [
+            'controller' => 'CheckoutController',
+            'action' => 'viewCheckout',
+            'access' => ['guest', 'client', 'admin']
+        ],
     ],
     'POST' => [
         '/sign-in'                      => [
@@ -176,6 +181,11 @@ return [
         '/cart'				=> [
             'controller' => 'CartController',
             'action' => 'cartAction',
+            'access' => ['client']
+        ],
+        '/checkout/saveOrder'         => [
+            'controller' => 'CheckoutController',
+            'action' => 'saveOrder',
             'access' => ['client']
         ],
         '/admin/accounts/update'        => [
