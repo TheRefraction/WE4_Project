@@ -48,10 +48,10 @@
         </div>
         <div class="row mt-4">
             <div class="col-12">
-                <h3 class="border-bottom pb-2">À propos de Efes Kebab</h3>
+                <h3 class="border-bottom pb-2">À propos de Effes Kebab</h3>
 
                 <p class="text-justify">
-                    Envie d'une escapade gourmande aux saveurs de la Turquie ? Bienvenue chez <strong>Efes Kebab</strong>, où chaque plat est une invitation au voyage. Dans un cadre accueillant et convivial, nous vous proposons une cuisine généreuse, préparée avec passion et des ingrédients rigoureusement sélectionnés.
+                    Envie d'une escapade gourmande aux saveurs de la Turquie ? Bienvenue chez <strong>Effes Kebab</strong>, où chaque plat est une invitation au voyage. Dans un cadre accueillant et convivial, nous vous proposons une cuisine généreuse, préparée avec passion et des ingrédients rigoureusement sélectionnés.
                 </p>
 
                 <h4 class="mt-4 mb-3">Pourquoi nous rendre visite ?</h4>

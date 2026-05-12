@@ -10,10 +10,10 @@
             <h2 class="h4 border-bottom pb-2 text-pourpre">1. Responsable du traitement des données</h2>
             <p style="text-align: justify;">Le responsable du traitement des données personnelles est l'entreprise :</p>
             <address class="p-3">
-                <strong class="text-pourpre">EFES KEBAB</strong><br>
+                <strong class="text-pourpre">EFFES KEBAB</strong><br>
                 Adresse établissement<br>
                 90000, Belfort<br>
-                Email : <a href="mailto:efesRestoBelfort@gmail.com" class="text-decoration-none">efesRestoBelfort@gmail.com</a>
+                Email : <a href="mailto:temp@gmail.com" class="text-decoration-none">temp@gmail.com</a>
             </address>
         </section>
 
