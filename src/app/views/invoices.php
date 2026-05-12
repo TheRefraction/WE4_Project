@@ -1,39 +1,38 @@
 <?php include 'partials/header.php'; ?>
 
-    <main class="container py-5">
-        <h1 class="text-pourpre mb-4">Mes Factures</h1>
+<main class="container py-5">
+    <h1 class="text-pourpre mb-4">Mes Factures</h1>
 
-        <table class="table table-bordered">
-            <thead>
-                <tr>
-                    <th>N° Facture</th>
-                    <th>Date</th>
-                    <th>Statut</th>
-                    <th>Total</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            
-            <tbody>
-            <?php foreach ($invoices as $invoice): ?>
-                <tr>
-                    <td><?= $invoice->id ?></td>
-                    <td><?= date('d/m/Y', strtotime($invoice->date)) ?></td>
-                    <td><?= htmlspecialchars(ucfirst($invoice->status_name)); ?></td>
-                    <td><?= $invoice->total ?></td>
-                    <td>
-                        <button
-                            type="button"
-                            class="btn btn-outline-dark btn-sm js-download-invoice"
-                            data-invoice-id="<?= (int) $invoice->id ?>">
-                            Télécharger PDF
-                        </button>
-                    </td>
-                </tr>
-            <?php endforeach; ?>
-            </tbody>
-        </table>
-    </main>
+    <table class="table table-bordered">
+        <thead>
+        <tr>
+            <th>N° Facture</th>
+            <th>Date</th>
+            <th>Statut</th>
+            <th>Total</th>
+        </tr>
+        </thead>
+        <tbody>
+
+        <?php foreach ($invoices as $invoice): ?>
+            <tr>
+                <td>
+                    <?= $invoice->id ?>
+                </td>
+                <td>
+                    <? echo date('d/m/Y', strtotime($invoice->date)) ?>
+                </td>
+                <td>
+                    <?php echo htmlspecialchars(ucfirst($invoice->status_name)); ?>
+                </td>
+                <td>
+                    <?php echo $invoice->total ?>
+                </td>
+            </tr>
+        <?php endforeach; ?>
+        </tbody>
+    </table>
+</main>
 
 <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.2/dist/jspdf.plugin.autotable.min.js"></script>

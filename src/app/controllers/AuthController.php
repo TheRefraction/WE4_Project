@@ -90,11 +90,12 @@ class AuthController {
 
         if ($user && password_verify($password, $user->password)) {
             $this->accountModel->updateLastLogin($user->id);
+            
             $_SESSION['user_id'] = $user->id;
             $_SESSION['user_first_name'] = $user->first_name;
             $_SESSION['user_last_name'] = $user->last_name;
-	    $_SESSION['user_email'] = $user->email;
-	    $_SESSION['user_phone'] = $user->phone;
+            $_SESSION['user_email'] = $user->email;
+            $_SESSION['user_phone'] = $user->phone;
 
             $role = $this->accountModel->getAccountRole($user->id); 
             if ($role === 'admin') {
@@ -142,7 +143,9 @@ class AuthController {
         $firstName = trim($_POST["first_name"] ?? '');
         $lastName = trim($_POST["last_name"] ?? '');
         $phone = trim($_POST["phone"] ?? '');
-        $email = $_SESSION['user_email'];
+        $email = trim($_POST["email"] ?? '');
+
+        $id = $_SESSION['user_id'];
 
         if (empty($firstName) || empty($lastName)) {
             $_SESSION['errors'] = ["First name and Last name are required."];
@@ -150,10 +153,11 @@ class AuthController {
             exit;
         }
 
-        if ($this->accountModel->updateAccountInfo($firstName, $lastName, $email, $phone)) {
+        if ($this->accountModel->updateAccountInfo($id, $firstName, $lastName, $email, $phone)) {
             $_SESSION['user_first_name'] = $firstName;
             $_SESSION['user_last_name'] = $lastName;
             $_SESSION['user_phone'] = $phone;
+            $_SESSION['user_email'] = $email;
             $_SESSION['success'] = "Profile updated!";
         } else {
             $_SESSION['errors'] = ["Error updating account."];

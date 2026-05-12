@@ -1,6 +1,6 @@
 <?php include 'partials/header.php'; ?>
 
-    <div class="container py-5">
+    <main class="container py-5">
         <div class="mb-5">
             <h1 class="text-pourpre fw-bold">Bienvenue à EFFES KEBAB</h1>
             <p class="lead">Découvrez nos plats savoureux !</p>
@@ -69,5 +69,6 @@
                 </ul>
             </div>
         </div>
-    </div>
+    </main>
+
 <?php include 'partials/footer.php'; ?>

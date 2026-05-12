@@ -107,11 +107,11 @@ if ($matched) {
             }
         } else {
             http_response_code(500);
-            echo "Action $matchedAction in $matchedController is undefined!";
+            //echo "Action $matchedAction in $matchedController is undefined!";
         }
     } else {
         http_response_code(500);
-        echo "Controller $matchedController does not exist!";
+        //echo "Controller $matchedController does not exist!";
     }
 } else {
     http_response_code(404);
