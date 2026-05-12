@@ -43,7 +43,7 @@ class CheckoutController {
             $data["code-postal"],
             $data["country"]
         );
-
+/*
         $this->invoiceModel->createInvoice(
             $_SESSION['user_id'],
             $_SESSION['cart'],
@@ -52,7 +52,7 @@ class CheckoutController {
             $address_id
         );
 
-
+ */
 
         // TODO: take into account all payment statuses and check in a cleaner way
         if($data['simulate_status'] == 3) {
