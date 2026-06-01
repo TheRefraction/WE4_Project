@@ -1,0 +1,9 @@
+<main>
+  <h1>Hello, {{ title() }}</h1>
+
+  @if (error()) {
+    <p>{{ error() }}</p>
+  } @else {
+    <p>API health: {{ health() }}</p>
+  }
+</main>

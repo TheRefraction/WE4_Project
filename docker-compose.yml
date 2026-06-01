@@ -1,59 +1,117 @@
 services:
-  mysql:
-    image: mysql:8.0
-    restart: always
-    env_file:
-      - .env
+  frontend:
+    container_name: efes-frontend
+    build: 
+      context: ./frontend
+      dockerfile: Dockerfile
+      target: production
+    ports: 
+      - "${DOCKER_PORT_FRONTEND}:80"
+    depends_on:
+      - backend
+    networks:
+      - app-network
+    restart: unless-stopped
+
+  frontend-dev:
+    container_name: efes-frontend-dev
+    build: 
+      context: ./frontend
+      dockerfile: Dockerfile
+      target: development
     ports:
-      - "${DOCKER_PORT_MYSQL:-3306}:3306"
+      - "${DOCKER_PORT_FRONTEND}:4200"
     volumes:
-      - mysql_data:/var/lib/mysql
-      #- ./db/init:/docker-entrypoint-initdb.d
+      - ./frontend/src:/app/src
+      - ./frontend/public:/app/public
+    depends_on:
+      - backend-dev
+    networks:
+      - app-network
+    profiles:
+      - dev
+  
+  backend:
+    container_name: efes-backend
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      target: production
+    ports:
+      - "${DOCKER_PORT_BACKEND}:3000"
+    env_file: .env
+    depends_on:
+      postgres:
+        condition: service_healthy
+      mongo:
+        condition: service_healthy
+    networks:
+      - app-network
+    restart: unless-stopped
+
+  backend-dev:
+    container_name: efes-backend-dev
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      target: development
+    ports:
+      - "${DOCKER_PORT_BACKEND}:3000"
+    env_file: .env
+    volumes:
+      - ./backend:/app       # hot reload tsx watch
+      - backend_node_modules:/app/node_modules
+    depends_on:
+      postgres:
+        condition: service_healthy
+      mongo:
+        condition: service_healthy
+    networks:
+      - app-network
+    profiles:
+      - dev
+
+  postgres:
+    container_name: efes-postgres
+    image: postgres:16-alpine
+    ports:
+      - "${DOCKER_PORT_POSTGRES}:5432"
+    environment:
+      POSTGRES_DB:       ${POSTGRES_DB}
+      POSTGRES_USER:     ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - app-network
+    restart: unless-stopped
     healthcheck:
-      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}" ]
-      timeout: 20s
-      retries: 10
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 5s
-      start_period: 30s
+      timeout: 5s
+      retries: 5
 
-  php:
-    build: ./php
-    restart: always
+  mongo:
+    container_name: efes-mongo
+    image: mongo:7
     ports:
-      - "${DOCKER_PORT_PHP:-8080}:80"
+      - "${DOCKER_PORT_MONGO}:27017"
     volumes:
-      - ./src:/var/www/html
-    env_file:
-      - .env
-    depends_on:
-      mysql:
-        condition: service_healthy
+      - mongodb-data:/data/db
+    networks:
+      - app-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
-  phpmyadmin:
-    image: phpmyadmin/phpmyadmin
-    restart: always
-    ports:
-      - "${DOCKER_PORT_PMA:-8081}:80"
-    environment:
-      PMA_HOST: mysql
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-    depends_on:
-      mysql:
-        condition: service_healthy
-
-  flyway:
-    image: flyway/flyway:latest
-    restart: no
-    environment:
-      FLYWAY_URL: jdbc:mysql://${MYSQL_HOST}:${MYSQL_PORT}/${MYSQL_DATABASE}?allowPublicKeyRetrieval=true&useSSL=false
-      FLYWAY_USER: ${MYSQL_USER}
-      FLYWAY_PASSWORD: ${MYSQL_PASSWORD}
-    command: migrate
-    volumes:
-      - ./db/migrations:/flyway/sql
-    depends_on:
-      mysql:
-        condition: service_healthy
+networks:
+  app-network:
+    driver: bridge
 
 volumes:
-  mysql_data:
+  mongodb-data:
+  postgres-data:
+  backend_node_modules:
