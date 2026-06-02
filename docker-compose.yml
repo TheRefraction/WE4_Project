@@ -1,21 +1,23 @@
 services:
   frontend:
     container_name: efes-frontend
-    build: 
+    build:
       context: ./frontend
       dockerfile: Dockerfile
       target: production
-    ports: 
+    ports:
       - "${DOCKER_PORT_FRONTEND}:80"
     depends_on:
       - backend
     networks:
       - app-network
+    profiles:
+      - prod
     restart: unless-stopped
 
   frontend-dev:
     container_name: efes-frontend-dev
-    build: 
+    build:
       context: ./frontend
       dockerfile: Dockerfile
       target: development
@@ -30,7 +32,7 @@ services:
       - app-network
     profiles:
       - dev
-  
+
   backend:
     container_name: efes-backend
     build:
@@ -47,6 +49,8 @@ services:
         condition: service_healthy
     networks:
       - app-network
+    profiles:
+      - prod
     restart: unless-stopped
 
   backend-dev:
@@ -59,7 +63,7 @@ services:
       - "${DOCKER_PORT_BACKEND}:3000"
     env_file: .env
     volumes:
-      - ./backend:/app       # hot reload tsx watch
+      - ./backend:/app
       - backend_node_modules:/app/node_modules
     depends_on:
       postgres:
@@ -98,6 +102,7 @@ services:
       - "${DOCKER_PORT_MONGO}:27017"
     volumes:
       - mongodb-data:/data/db
+      - mongodb-configdb:/data/configdb
     networks:
       - app-network
     restart: unless-stopped
@@ -113,5 +118,6 @@ networks:
 
 volumes:
   mongodb-data:
+  mongodb-configdb:
   postgres-data:
   backend_node_modules:

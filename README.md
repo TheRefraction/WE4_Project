@@ -11,7 +11,7 @@
 | `postgres` | `postgres:16-alpine` | Persists DB files in `postgres-data` volume. Exposes port 5432. |
 | `mongo` | `mongo:7` | Persists DB files in `mongodb-data` volume. Exposes port 27017. |
 
-Container names are prefixed `efes-` (e.g. `frontend` → `efes-frontend`).
+Container names are prefixed `efes-` (e.g. `frontend` -> `efes-frontend`).
 
 ## Ports
 
@@ -45,22 +45,22 @@ Local mounts used in dev:
 
 ## Network
 
-All services share the custom bridge network `app-network`. Cross-container DNS is automatic — e.g. `frontend-dev` can reach the backend at `http://backend:3000`.
+All services share the custom bridge network `app-network`. Cross-container DNS is automatic — e.g. `frontend-dev` can reach the backend at `http://backend-dev:3000`.
 
 ## Healthchecks & startup order
 
-- **Postgres** — `pg_isready` healthcheck (see `docker-compose.yml`)
-- **Mongo** — `mongosh ping` healthcheck
+- **Postgres** - `pg_isready` healthcheck (see `docker-compose.yml`)
+- **Mongo** - `mongosh ping` healthcheck
 - `backend` and `backend-dev` both declare `depends_on` with `condition: service_healthy`, so Compose waits for DB readiness before starting them.
 
 ## How the frontend reaches the API
 
 | Mode | Mechanism |
 |---|---|
-| **Production** | Nginx proxies `/api/` → `http://backend:3000/api/` (see `nginx.conf`) |
-| **Dev** | `proxy.conf.json` forwards `/api` → `http://backend:3000` (see `proxy.conf.json`) |
+| **Production** | Nginx proxies `/api/` -> `http://backend:3000/api/` (see `nginx.conf`) |
+| **Dev** | `proxy.conf.json` forwards `/api` -> `http://backend-dev:3000` (see `proxy.conf.json`) |
 
-Browser JS should always call same-origin paths like `/api/health`. The dev server or Nginx forwards the request to the backend. Do **not** call container names directly from the browser — `http://backend:3000` is only reachable inside Docker.
+Browser JS should always call same-origin paths like `/api/health`. The dev server or Nginx forwards the request to the backend. Do **not** call container names directly from the browser - `http://backend-dev:3000` is only reachable inside Docker.
 
 ## Dev vs. production
 
