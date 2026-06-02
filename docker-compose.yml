@@ -6,7 +6,7 @@ services:
       dockerfile: Dockerfile
       target: production
     ports:
-      - "${DOCKER_PORT_FRONTEND}:80"
+      - "${DOCKER_PORT_FRONTEND:-4200}:80"
     depends_on:
       - backend
     networks:
@@ -22,7 +22,7 @@ services:
       dockerfile: Dockerfile
       target: development
     ports:
-      - "${DOCKER_PORT_FRONTEND}:4200"
+      - "${DOCKER_PORT_FRONTEND:-4200}:4200"
     volumes:
       - ./frontend/src:/app/src
       - ./frontend/public:/app/public
@@ -40,13 +40,17 @@ services:
       dockerfile: Dockerfile
       target: production
     ports:
-      - "${DOCKER_PORT_BACKEND}:3000"
+      - "${DOCKER_PORT_BACKEND:-3000}:3000"
     env_file: .env
+    environment:
+      MONGO_URI: mongodb://${MONGO_APP_USER}:${MONGO_APP_PASSWORD}@mongo:27017/${MONGO_DB}?authSource=${MONGO_DB}
     depends_on:
       postgres:
         condition: service_healthy
       mongo:
         condition: service_healthy
+      flyway:
+        condition: service_completed_successfully
     networks:
       - app-network
     profiles:
@@ -60,16 +64,20 @@ services:
       dockerfile: Dockerfile
       target: development
     ports:
-      - "${DOCKER_PORT_BACKEND}:3000"
+      - "${DOCKER_PORT_BACKEND:-3000}:3000"
     env_file: .env
+    environment:
+      MONGO_URI: mongodb://${MONGO_APP_USER}:${MONGO_APP_PASSWORD}@mongo:27017/${MONGO_DB}?authSource=${MONGO_DB}
     volumes:
       - ./backend:/app
-      - backend_node_modules:/app/node_modules
+      - backend-node-modules:/app/node_modules
     depends_on:
       postgres:
         condition: service_healthy
       mongo:
         condition: service_healthy
+      flyway:
+        condition: service_completed_successfully
     networks:
       - app-network
     profiles:
@@ -78,19 +86,20 @@ services:
   postgres:
     container_name: efes-postgres
     image: postgres:16-alpine
-    ports:
-      - "${DOCKER_PORT_POSTGRES}:5432"
     environment:
-      POSTGRES_DB:       ${POSTGRES_DB}
-      POSTGRES_USER:     ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB:           ${POSTGRES_DB}
+      POSTGRES_USER:         ${POSTGRES_ROOT_USER}
+      POSTGRES_PASSWORD:     ${POSTGRES_ROOT_PASSWORD}
+      POSTGRES_APP_USER:     ${POSTGRES_APP_USER}
+      POSTGRES_APP_PASSWORD: ${POSTGRES_APP_PASSWORD}
     volumes:
       - postgres-data:/var/lib/postgresql/data
+      - ./backend/db/init:/docker-entrypoint-initdb.d
     networks:
       - app-network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_ROOT_USER} -d ${POSTGRES_DB}"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -98,11 +107,16 @@ services:
   mongo:
     container_name: efes-mongo
     image: mongo:7
-    ports:
-      - "${DOCKER_PORT_MONGO}:27017"
+    environment:
+      MONGO_INITDB_DATABASE: ${MONGO_DB}
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD}
+      MONGO_APP_USER: ${MONGO_APP_USER}
+      MONGO_APP_PASSWORD: ${MONGO_APP_PASSWORD}
     volumes:
       - mongodb-data:/data/db
       - mongodb-configdb:/data/configdb
+      - ./backend/db/mongo:/docker-entrypoint-initdb.d
     networks:
       - app-network
     restart: unless-stopped
@@ -112,6 +126,23 @@ services:
       timeout: 5s
       retries: 5
 
+  flyway:
+    image: flyway/flyway:latest
+    container_name: efes-flyway
+    command: migrate
+    environment:
+      FLYWAY_URL: jdbc:postgresql://${POSTGRES_HOST:-postgres}:${POSTGRES_PORT:-5432}/${POSTGRES_DB}
+      FLYWAY_USER: ${POSTGRES_ROOT_USER}
+      FLYWAY_PASSWORD: ${POSTGRES_ROOT_PASSWORD}
+      FLYWAY_LOCATIONS: filesystem:/flyway/sql
+    volumes:
+      - ./backend/db/migrations:/flyway/sql
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - app-network
+
 networks:
   app-network:
     driver: bridge
@@ -120,4 +151,4 @@ volumes:
   mongodb-data:
   mongodb-configdb:
   postgres-data:
-  backend_node_modules:
+  backend-node-modules:

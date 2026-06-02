@@ -8,10 +8,15 @@
 | `frontend-dev` | Custom (dev target) | Runs `ng serve` on port 4200. Mounts local `src/` and `public/` for hot reload. |
 | `backend` | Custom (prod target) | Runs compiled Node app on port 3000. Reads secrets from `.env` via `env_file`. |
 | `backend-dev` | Custom (dev target) | Runs `npm run dev` (`tsx watch`) on port 3000. Mounts local `backend/` for hot reload. |
-| `postgres` | `postgres:16-alpine` | Persists DB files in `postgres-data` volume. Exposes port 5432. |
-| `mongo` | `mongo:7` | Persists DB files in `mongodb-data` volume. Exposes port 27017. |
+| `postgres` | `postgres:16-alpine` | Persists DB files in `postgres-data` volume. |
+| `mongo` | `mongo:7` | Persists DB files in `mongodb-data` volume. |
+| `flyway` | `flyway:latest` | Runs migrations before starting the backend. |
 
-Container names are prefixed `efes-` (e.g. `frontend` -> `efes-frontend`).
+> [!NOTE]
+> Container names are prefixed `efes-` (e.g. `frontend` -> `efes-frontend`).
+
+> [!CAUTION]
+> Starting both production and development containers will result in undefined behavior. Please make sure you stop containers with the command `docker compose --profile <profile_name> stop`.
 
 ## Ports
 
@@ -22,10 +27,12 @@ Host ports are set in your `.env` as `DOCKER_PORT_*` variables. Container-side p
 | Frontend (prod) | `DOCKER_PORT_FRONTEND` | `80` (Nginx) |
 | Frontend (dev) | `DOCKER_PORT_FRONTEND` | `4200` (ng serve) |
 | Backend | `DOCKER_PORT_BACKEND` | `3000` |
-| Postgres | `DOCKER_PORT_POSTGRES` | `5432` |
-| Mongo | `DOCKER_PORT_MONGO` | `27017` |
 
-> **Note:** Inside the Docker network, services talk to each other by service name (e.g. `http://backend:3000`), not `localhost`.
+> [!NOTE] 
+> Inside the Docker network, services talk to each other by service name (e.g. `http://backend:3000`), not `localhost`.
+
+> [!IMPORTANT]
+> Both `postgres` and `mongo` are not exposed as it having those programs already installed onto the host may interfere if not configured properly. If you want to access the shell or run commands, please use `docker compose exec <service_name> <bash|cmd>`.
 
 ## Volumes
 
@@ -33,15 +40,22 @@ Host ports are set in your `.env` as `DOCKER_PORT_*` variables. Container-side p
 |---|---|---|
 | `postgres-data` | `/var/lib/postgresql/data` | Persist Postgres DB files |
 | `mongodb-data` | `/data/db` | Persist Mongo DB files |
-| `backend_node_modules` | `/app/node_modules` | Preserve node_modules across dev rebuilds |
+| `mongodb-configdb` | `/data/configdb` | Persist Mongo DB config files |
+| `backend-node-modules` | `/app/node_modules` | Preserve node_modules across dev rebuilds |
 
 Local mounts used in dev:
 
-| Local path | Container path | Service |
-|---|---|---|
-| `./frontend/src` | `/app/src` | `frontend-dev` |
-| `./frontend/public` | `/app/public` | `frontend-dev` |
-| `./backend` | `/app` | `backend-dev` |
+| Local path | Container path | Service | Purpose |
+|---|---|---|---|
+| `./frontend/src` | `/app/src` | `frontend-dev` | Mount app source for `ng serve` so code edits are reflected immediately |
+| `./frontend/public` | `/app/public` | `frontend-dev` | Mount static assets |
+| `./backend` | `/app` | `backend-dev` | Mount backend source for `tsx watch` so the server restarts in code changes |
+| `./backend/db/init` | `/docker-entrypoint-initdb.d` | `postgres` | Bootstrap SQL/shell scripts executed once on a fresh postgres volume |
+| `./backend/db/mongo` | `/docker-entrypoint-initdb.d` | `mongo` | JavaScript init scripts executed once on a fresh mongo volume |
+| `./backend/db/migrations` | `/flyway/sql` | `flyway` | Versioned SQL migration files read by Flyway |
+
+> [!NOTE]
+> In production, those folders are not mounted. Instead the service the files it has within its image.
 
 ## Network
 
@@ -51,6 +65,7 @@ All services share the custom bridge network `app-network`. Cross-container DNS 
 
 - **Postgres** - `pg_isready` healthcheck (see `docker-compose.yml`)
 - **Mongo** - `mongosh ping` healthcheck
+- **Flyway** - runs once to migrate the database
 - `backend` and `backend-dev` both declare `depends_on` with `condition: service_healthy`, so Compose waits for DB readiness before starting them.
 
 ## How the frontend reaches the API
@@ -72,6 +87,12 @@ Browser JS should always call same-origin paths like `/api/health`. The dev serv
 
 # Commands
 Open a terminal window from the project root and make sure Docker Desktop is started.
+
+> [!NOTE]
+> The default profile is `prod`. Thus the following commands are equivalent: `docker compose --profile prod <...>` and `docker compose <...>`.
+
+> [!IMPORTANT]
+> When you enter a command for a given profile, the "counter-command" should also include the profile. Failure to do so may yield networking errors or containers may fail to stop/remove themselves.
 
 ## Start
 
@@ -111,8 +132,14 @@ Open a terminal window from the project root and make sure Docker Desktop is sta
 
 | Description | Command |
 |---|---|
-| Open a shell in a container | `docker compose exec frontend-dev sh` |
+| Open a shell in a container | `docker compose exec -it frontend-dev sh` |
 | Run a command in a container | `docker compose exec frontend-dev <cmd>` |
+| Open `mongosh` | `docker compose exec mongo mongosh -u <root_user> -p <root_password>` |
+| Open `psql` | `docker compose exec postgres psql -U <root_user> -d <db_name> -W` |
+| Migrate | `docker compose run --rm flyway` |
+| Repair migrations | `docker compose run --rm flyway repair` |
+| Validate migrations | `docker compose run --rm flyway validate` |
+| Info on migrations | `docker compose run --rm flyway info` |
 
 ## Status
 
