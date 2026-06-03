@@ -1,59 +1,154 @@
 services:
-  mysql:
-    image: mysql:8.0
-    restart: always
-    env_file:
-      - .env
+  frontend:
+    container_name: efes-frontend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      target: production
     ports:
-      - "${DOCKER_PORT_MYSQL:-3306}:3306"
-    volumes:
-      - mysql_data:/var/lib/mysql
-      #- ./db/init:/docker-entrypoint-initdb.d
-    healthcheck:
-      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}" ]
-      timeout: 20s
-      retries: 10
-      interval: 5s
-      start_period: 30s
-
-  php:
-    build: ./php
-    restart: always
-    ports:
-      - "${DOCKER_PORT_PHP:-8080}:80"
-    volumes:
-      - ./src:/var/www/html
-    env_file:
-      - .env
+      - "${DOCKER_PORT_FRONTEND:-4200}:80"
     depends_on:
-      mysql:
-        condition: service_healthy
+      - backend
+    networks:
+      - app-network
+    profiles:
+      - prod
+    restart: unless-stopped
 
-  phpmyadmin:
-    image: phpmyadmin/phpmyadmin
-    restart: always
+  frontend-dev:
+    container_name: efes-frontend-dev
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      target: development
     ports:
-      - "${DOCKER_PORT_PMA:-8081}:80"
+      - "${DOCKER_PORT_FRONTEND:-4200}:4200"
+    volumes:
+      - ./frontend/src:/app/src
+      - ./frontend/public:/app/public
+    depends_on:
+      - backend-dev
+    networks:
+      - app-network
+    profiles:
+      - dev
+
+  backend:
+    container_name: efes-backend
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      target: production
+    ports:
+      - "${DOCKER_PORT_BACKEND:-3000}:3000"
+    env_file: .env
     environment:
-      PMA_HOST: mysql
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MONGO_URI: mongodb://${MONGO_APP_USER}:${MONGO_APP_PASSWORD}@mongo:27017/${MONGO_DB}?authSource=${MONGO_DB}
     depends_on:
-      mysql:
+      postgres:
         condition: service_healthy
+      mongo:
+        condition: service_healthy
+      flyway:
+        condition: service_completed_successfully
+    networks:
+      - app-network
+    profiles:
+      - prod
+    restart: unless-stopped
+
+  backend-dev:
+    container_name: efes-backend-dev
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      target: development
+    ports:
+      - "${DOCKER_PORT_BACKEND:-3000}:3000"
+    env_file: .env
+    environment:
+      MONGO_URI: mongodb://${MONGO_APP_USER}:${MONGO_APP_PASSWORD}@mongo:27017/${MONGO_DB}?authSource=${MONGO_DB}
+    volumes:
+      - ./backend:/app
+      - backend-node-modules:/app/node_modules
+    depends_on:
+      postgres:
+        condition: service_healthy
+      mongo:
+        condition: service_healthy
+      flyway:
+        condition: service_completed_successfully
+    networks:
+      - app-network
+    profiles:
+      - dev
+
+  postgres:
+    container_name: efes-postgres
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB:           ${POSTGRES_DB}
+      POSTGRES_USER:         ${POSTGRES_ROOT_USER}
+      POSTGRES_PASSWORD:     ${POSTGRES_ROOT_PASSWORD}
+      POSTGRES_APP_USER:     ${POSTGRES_APP_USER}
+      POSTGRES_APP_PASSWORD: ${POSTGRES_APP_PASSWORD}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./backend/db/init:/docker-entrypoint-initdb.d
+    networks:
+      - app-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_ROOT_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  mongo:
+    container_name: efes-mongo
+    image: mongo:7
+    environment:
+      MONGO_INITDB_DATABASE: ${MONGO_DB}
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD}
+      MONGO_APP_USER: ${MONGO_APP_USER}
+      MONGO_APP_PASSWORD: ${MONGO_APP_PASSWORD}
+    volumes:
+      - mongodb-data:/data/db
+      - mongodb-configdb:/data/configdb
+      - ./backend/db/mongo:/docker-entrypoint-initdb.d
+    networks:
+      - app-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   flyway:
     image: flyway/flyway:latest
-    restart: no
-    environment:
-      FLYWAY_URL: jdbc:mysql://${MYSQL_HOST}:${MYSQL_PORT}/${MYSQL_DATABASE}?allowPublicKeyRetrieval=true&useSSL=false
-      FLYWAY_USER: ${MYSQL_USER}
-      FLYWAY_PASSWORD: ${MYSQL_PASSWORD}
+    container_name: efes-flyway
     command: migrate
+    environment:
+      FLYWAY_URL: jdbc:postgresql://${POSTGRES_HOST:-postgres}:${POSTGRES_PORT:-5432}/${POSTGRES_DB}
+      FLYWAY_USER: ${POSTGRES_ROOT_USER}
+      FLYWAY_PASSWORD: ${POSTGRES_ROOT_PASSWORD}
+      FLYWAY_LOCATIONS: filesystem:/flyway/sql
     volumes:
-      - ./db/migrations:/flyway/sql
+      - ./backend/db/migrations:/flyway/sql
     depends_on:
-      mysql:
+      postgres:
         condition: service_healthy
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
 
 volumes:
-  mysql_data:
+  mongodb-data:
+  mongodb-configdb:
+  postgres-data:
+  backend-node-modules:
