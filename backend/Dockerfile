@@ -11,12 +11,12 @@ FROM node:20-alpine AS development
 WORKDIR /app
 
 COPY docker-entrypoint.sh /usr/local/bin/entrypoint.sh
-RUN chmod +x /usr/local/bin/entrypoint.sh
+RUN sed -i 's/\r$//' /usr/local/bin/entrypoint.sh && chmod +x /usr/local/bin/entrypoint.sh
 
 COPY . .
 
 EXPOSE 3000
-ENTRYPOINT ["entrypoint.sh"]
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 CMD ["npm", "run", "dev"]
 
 # Stage 3 : build TypeScript

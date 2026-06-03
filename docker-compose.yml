@@ -39,8 +39,6 @@ services:
       context: ./backend
       dockerfile: Dockerfile
       target: production
-    ports:
-      - "${DOCKER_PORT_BACKEND:-3000}:3000"
     env_file: .env
     environment:
       MONGO_URI: mongodb://${MONGO_APP_USER}:${MONGO_APP_PASSWORD}@mongo:27017/${MONGO_DB}?authSource=${MONGO_DB}
