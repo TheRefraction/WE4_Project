@@ -140,6 +140,7 @@ Open a terminal window from the project root and make sure Docker Desktop is sta
 | Repair migrations | `docker compose run --rm flyway repair` |
 | Validate migrations | `docker compose run --rm flyway validate` |
 | Info on migrations | `docker compose run --rm flyway info` |
+| Use Angular commands | `docker compose exec frontend-dev npx ng <args>` |
 
 ## Status
 
