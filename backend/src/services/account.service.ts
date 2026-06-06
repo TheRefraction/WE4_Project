@@ -77,6 +77,7 @@ export class AccountService {
             throw new Error('Invalid email or password');
         }
 
+        console.log(`${password} vs ${account.passwordHash}`);
         const isPasswordValid = await bcrypt.compare(password, account.passwordHash);
 
         if (!isPasswordValid) {

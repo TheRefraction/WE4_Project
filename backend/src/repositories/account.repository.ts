@@ -19,12 +19,13 @@ export class AccountRepository {
                 a.last_name AS "lastName", 
                 a.email, 
                 a.phone, 
+                a.password_hash AS "passwordHash",
                 a.created_at AS "createdAt",
                 a.updated_at AS "updatedAt", 
                 a.loyalty_points AS "loyaltyPoints", 
                 r.id AS "roleId"
-            FROM accounts a 
-            JOIN roles r ON a.role_id = r.id
+            FROM account a 
+            JOIN role r ON a.role_id = r.id
         `;
         
         const params: any[] = [];
@@ -48,12 +49,13 @@ export class AccountRepository {
                 a.last_name AS "lastName", 
                 a.email, 
                 a.phone, 
+                a.password_hash AS "passwordHash",
                 a.created_at AS "createdAt",
                 a.updated_at AS "updatedAt", 
                 a.loyalty_points AS "loyaltyPoints", 
                 r.id AS "roleId"
-            FROM accounts a 
-            JOIN roles r ON a.role_id = r.id
+            FROM account a 
+            JOIN role r ON a.role_id = r.id
             WHERE a.id = $1
         `;
 
@@ -69,12 +71,13 @@ export class AccountRepository {
                 a.last_name AS "lastName", 
                 a.email, 
                 a.phone, 
+                a.password_hash AS "passwordHash",
                 a.created_at AS "createdAt",
                 a.updated_at AS "updatedAt", 
                 a.loyalty_points AS "loyaltyPoints", 
                 r.id AS "roleId"
-            FROM accounts a 
-            JOIN roles r ON a.role_id = r.id
+            FROM account a 
+            JOIN role r ON a.role_id = r.id
             WHERE a.email = $1
         `;
 
@@ -83,7 +86,7 @@ export class AccountRepository {
     }
 
     async getRoleById(roleId: number): Promise<string> {
-        const query = 'SELECT name FROM roles WHERE id = $1';
+        const query = 'SELECT name FROM role WHERE id = $1';
         
         const res = await pgPool.query(query, [roleId]);
         return res.rows[0]?.name || 'unknown'; 
@@ -100,7 +103,7 @@ export class AccountRepository {
 
         const res = await pgPool.query(
         `
-            INSERT INTO accounts (first_name, last_name, email, phone, password_hash) 
+            INSERT INTO account (first_name, last_name, email, phone, password_hash) 
             VALUES ($1, $2, $3, $4, $5) 
             RETURNING *
         `,
@@ -145,7 +148,7 @@ export class AccountRepository {
         values.push(id);
         const res = await pgPool.query(
             `
-                UPDATE accounts SET ${fields.join(', ')} 
+                UPDATE account SET ${fields.join(', ')} 
                 WHERE id = $${paramCount} 
                 RETURNING *
             `, 
@@ -156,7 +159,7 @@ export class AccountRepository {
     }
 
     async delete(id: number): Promise<boolean> {
-        const res = await pgPool.query('DELETE FROM accounts WHERE id = $1', [id]);
+        const res = await pgPool.query('DELETE FROM account WHERE id = $1', [id]);
 
         return (res.rowCount ?? 0) > 0;
     }
