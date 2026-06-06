@@ -55,8 +55,42 @@ export class ProductController {
   };
 
 
+create = async (req: Request, res: Response) => {
+  try {
+    const newProduct = await Product.createProductWithCategories(req.body);
+    res.status(201).json(newProduct);
+  } catch (error: any) {
+    res.status(500).json({ message: 'Erreur lors de la création du produit', error: error.message });
+  }
+};
+
+update = async (req: Request, res: Response) => {
+  try {
+    const id = parseInt(req.params.id, 10);
+    const updatedProduct = await Product.updateWithCategories(id, req.body);
+    if (!updatedProduct) {
+      res.status(404).json({ message: 'Produit non trouvé' });
+      return;
+    }
+    res.status(200).json(updatedProduct);
+  } catch (error: any) {
+    res.status(500).json({ message: 'Erreur lors de la mise à jour du produit', error: error.message });
+  }
+};
 
 
-
+delete = async (req: Request, res: Response) => {
+  try {
+    const id = parseInt(req.params.id, 10);
+    const success = await Product.delete(id);
+    if (!success) {
+      res.status(404).json({ message: 'Produit non trouvé' });
+      return;
+    }
+    res.status(200).json({ message: 'Produit supprimé avec succès' });
+  } catch (error: any) {
+    res.status(500).json({ message: 'Erreur lors de la suppression du produit', error: error.message });
+  }
+};
 
 }

@@ -85,7 +85,64 @@ export class Product {
     }
 
 
+    static createProductWithCategories = async (productData: any) => {
+        const {name, description, price, hidden, supplier_id, categoryIds } = productData;
+        try {
+            const query = `INSERT INTO product (name, description, price, hidden, supplier_id)
+                            VALUES ($1, $2, $3, $4, $5) RETURNING *`;
+            const produtValues = [name, description, price, hidden, supplier_id];
+            const result = await pool.query(query, produtValues);
+            const newProduct = result.rows[0];
+            if (categoryIds && categoryIds.length > 0) {
+                const secondQuery = `
+                INSERT INTO product_to_category (product_id, category_id)
+                SELECT $1, unnest($2::int[])
+                `;
+                await pool.query(secondQuery, [newProduct.id, categoryIds]);
+            }
+            return new Product(newProduct);
+        } catch (error) {
+            throw error;
+        }
+    }
 
 
+
+    static  updateWithCategories = async (id: number, productData: any) => {
+        const {name, description, price, hidden, supplier_id, categoryIds } = productData;
+        try {
+            const query = `UPDATE product SET name = $1, description = $2, price = $3, hidden = $4, supplier_id = $5
+                            WHERE id = $6 RETURNING *`;
+            const produtValues = [name, description, price, hidden, supplier_id, id];
+            const result = await pool.query(query, produtValues);
+            if (result.rows.length === 0) {
+                return null;
+            }
+            await pool.query('DELETE FROM product_to_category WHERE product_id = $1', [id]);
+            if (categoryIds && categoryIds.length > 0) {
+                const secondQuery = `
+                INSERT INTO product_to_category (product_id, category_id)
+                SELECT $1, unnest($2::int[])
+                `;
+                await pool.query(secondQuery, [id, categoryIds]);
+            }
+            return new Product(result.rows[0]);
+        } catch (error) {
+            throw error;
+        }
+
+    }
+
+
+    static  delete = async (id: number) => {
+        try {
+            await pool.query('DELETE FROM product_to_category WHERE product_id = $1', [id]);
+            const query = `DELETE FROM product WHERE id = $1 RETURNING *`;
+            const result = await pool.query(query, [id]);
+            return result.rows[0];
+        } catch (error) {
+            throw error;
+        }
+    }
 
 }
