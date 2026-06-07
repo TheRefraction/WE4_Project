@@ -1,17 +1,37 @@
 -- V2_0_0__migrating_tables.sql
 -- This migration script is designed to migrate existing tables to a new schema structure/Postgres.
 
-CREATE TABLE IF NOT EXISTS role (
-    id SERIAL PRIMARY KEY,
-    name VARCHAR(64) NOT NULL
+CREATE TYPE role_enum AS ENUM (
+    'unknown',
+    'client',
+    'supplier',
+    'admin'
 );
-
-INSERT INTO role (id, name)
-VALUES 
-    (1, 'client'),
-    (2, 'supplier'),
-    (3, 'admin')
-ON CONFLICT (id) DO NOTHING;
+ 
+CREATE TYPE payment_mode_enum AS ENUM (
+    'unknown',
+    'credit_card',
+    'bank_note',
+    'cash',
+    'meal_voucher',
+    'paypal'
+);
+ 
+CREATE TYPE payment_status_enum AS ENUM (
+    'unknown',
+    'pending',
+    'paid',
+    'failed',
+    'refunded'
+);
+ 
+CREATE TYPE invoice_status_enum AS ENUM (
+    'unknown',
+    'draft',
+    'pending',
+    'paid',
+    'cancelled'
+);
 
 CREATE TABLE IF NOT EXISTS account (
     id SERIAL PRIMARY KEY,
@@ -23,77 +43,21 @@ CREATE TABLE IF NOT EXISTS account (
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     loyalty_points INTEGER DEFAULT 0,
-    role_id INT NOT NULL DEFAULT 1, -- Default to 'client'
-
-    CONSTRAINT fk_role 
-    FOREIGN KEY (role_id) REFERENCES role(id)
-    ON UPDATE CASCADE 
-    ON DELETE RESTRICT,
+    role role_enum NOT NULL DEFAULT 'client',
 
     CONSTRAINT chk_loyalty_points CHECK (loyalty_points >= 0)
 );
 
 CREATE UNIQUE INDEX uc_email ON account (LOWER(email));
 
-CREATE TABLE IF NOT EXISTS payment_mode (
-    id SERIAL PRIMARY KEY,
-    name VARCHAR(64) NOT NULL
-);
-
-INSERT INTO payment_mode (id, name)
-VALUES 
-    (1, 'unknown'),
-    (2, 'credit_card'),
-	(3, 'bank_note'),
-	(4, 'cash'),
-	(5, 'meal_voucher'),
-	(6, 'paypal')
-ON CONFLICT (id) DO NOTHING;
-
-CREATE TABLE IF NOT EXISTS payment_status (
-    id SERIAL PRIMARY KEY,
-    name VARCHAR(64) NOT NULL
-);
-
-INSERT INTO payment_status (id, name) 
-VALUES 
-    (1, 'pending'),
-    (2, 'paid'),
-    (3, 'failed'),
-	(4, 'refunded')
-ON CONFLICT (id) DO NOTHING;
-
 CREATE TABLE IF NOT EXISTS payment (
     id SERIAL PRIMARY KEY,
     payment_date TIMESTAMP NOT NULL,
-    mode_id INT NOT NULL,
-    status_id INT NOT NULL,
+    mode payment_mode_enum NOT NULL,
+    status payment_status_enum NOT NULL DEFAULT 'pending',
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
-
-    CONSTRAINT fk_payment_mode 
-    FOREIGN KEY (mode_id) REFERENCES payment_mode(id)
-    ON UPDATE CASCADE 
-    ON DELETE RESTRICT,
-
-    CONSTRAINT fk_payment_status 
-    FOREIGN KEY (status_id) REFERENCES payment_status(id)
-    ON UPDATE CASCADE 
-    ON DELETE RESTRICT
+    updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
-
-CREATE TABLE IF NOT EXISTS invoice_status (
-    id SERIAL PRIMARY KEY,
-    name VARCHAR(64) NOT NULL
-);
-
-INSERT INTO invoice_status (id, name)
-VALUES 
-    (1, 'draft'),
-    (2, 'pending'),
-    (3, 'paid'),
-	(4, 'cancelled')
-ON CONFLICT (id) DO NOTHING;
 
 CREATE TABLE IF NOT EXISTS invoice (
     id SERIAL PRIMARY KEY,
@@ -101,18 +65,13 @@ CREATE TABLE IF NOT EXISTS invoice (
     amount DECIMAL(10, 2) NOT NULL,
     due_date TIMESTAMP NOT NULL,
     billing_address JSONB NOT NULL,
-    status_id INT NOT NULL,
+    status invoice_status_enum NOT NULL DEFAULT 'draft',
     payment_id INT DEFAULT NULL, -- NULL means payment not yet established
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT fk_account 
     FOREIGN KEY (account_id) REFERENCES account(id)
-    ON UPDATE CASCADE 
-    ON DELETE RESTRICT,
-
-    CONSTRAINT fk_invoice_status 
-    FOREIGN KEY (status_id) REFERENCES invoice_status(id)
     ON UPDATE CASCADE 
     ON DELETE RESTRICT,
 
@@ -294,27 +253,3 @@ CREATE TABLE IF NOT EXISTS customization_slot_option (
 CREATE UNIQUE INDEX IF NOT EXISTS ux_customization_slot_option_default
 ON customization_slot_option (customization_slot_id)
 WHERE is_default = TRUE;
-
-CREATE OR REPLACE FUNCTION set_updated_at()
-RETURNS TRIGGER AS $$
-BEGIN
-  NEW.updated_at = CURRENT_TIMESTAMP;
-  RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
-CREATE TRIGGER trg_account_updated_at
-BEFORE UPDATE ON account
-FOR EACH ROW EXECUTE FUNCTION set_updated_at();
-
-CREATE TRIGGER trg_payment_updated_at
-BEFORE UPDATE ON payment
-FOR EACH ROW EXECUTE FUNCTION set_updated_at();
-
-CREATE TRIGGER trg_invoice_updated_at
-BEFORE UPDATE ON invoice
-FOR EACH ROW EXECUTE FUNCTION set_updated_at();
-
-CREATE TRIGGER trg_stock_updated_at
-BEFORE UPDATE ON stock
-FOR EACH ROW EXECUTE FUNCTION set_updated_at();
