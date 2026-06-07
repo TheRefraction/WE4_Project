@@ -1,0 +1,260 @@
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,400;0,500;1,400&display=swap');
+
+$fire: #E8390E;
+$coal: #1A1208;
+$ash: #2E2416;
+$cream: #F5ECD7;
+$muted: #9C8E7A;
+
+.home {
+  background: #0F0C08;
+  color: $cream;
+  font-family: 'DM Sans', sans-serif;
+  min-height: 100vh;
+}
+
+.hero {
+  background: $coal;
+  border-bottom: 1px solid $ash;
+  padding: 5rem 2rem 4rem;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: 'EFFES';
+    position: absolute;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 20rem;
+    color: rgba(255,255,255,0.02);
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    white-space: nowrap;
+  }
+}
+
+.hero-eyebrow {
+  display: block;
+  font-size: 0.8rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: $muted;
+  margin-bottom: 0.5rem;
+}
+
+.hero-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(4rem, 12vw, 9rem);
+  color: $cream;
+  line-height: 1;
+  letter-spacing: 0.04em;
+  margin: 0 0 0.5rem;
+
+  span {
+    color: $fire;
+  }
+}
+
+.hero-sub {
+  font-size: 1.1rem;
+  color: $muted;
+  font-style: italic;
+  margin-bottom: 2rem;
+}
+
+.hero-cta {
+  display: inline-block;
+  background: $fire;
+  color: $cream;
+  text-decoration: none;
+  padding: 0.75rem 2.5rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  border-radius: 3px;
+  transition: background 0.2s, transform 0.15s;
+
+  &:hover {
+    background: darken($fire, 8%);
+    transform: translateY(-2px);
+  }
+}
+
+.section {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 4rem 2rem;
+
+  &.two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+
+    @media (max-width: 768px) {
+      grid-template-columns: 1fr;
+    }
+  }
+}
+
+.section-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.8rem;
+  letter-spacing: 0.06em;
+  color: $cream;
+  border-bottom: 1px solid $ash;
+  padding-bottom: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.card {
+  background: $coal;
+  border: 1px solid $ash;
+  border-radius: 6px;
+  padding: 2rem;
+}
+
+.hours-block {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  margin-bottom: 2rem;
+}
+
+.hours-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+
+  strong {
+    font-size: 1rem;
+    color: $cream;
+    padding-left: 0.25rem;
+  }
+}
+
+.badge {
+  display: inline-block;
+  background: $fire;
+  color: $cream;
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  padding: 0.25rem 0.75rem;
+  border-radius: 99px;
+  text-transform: uppercase;
+  width: fit-content;
+}
+
+.service-chips {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.chip {
+  background: $ash;
+  border: 1px solid lighten($ash, 8%);
+  border-radius: 4px;
+  padding: 0.75rem 1rem;
+  text-align: center;
+
+  .chip-title {
+    display: block;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.1rem;
+    letter-spacing: 0.08em;
+    color: $fire;
+    margin-bottom: 0.2rem;
+  }
+
+  small {
+    color: $muted;
+    font-size: 0.8rem;
+  }
+}
+
+.photo-card {
+  display: flex;
+  flex-direction: column;
+}
+
+.photo-frame {
+  background: $ash;
+  border-radius: 4px;
+  overflow: hidden;
+  height: 250px;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    object-position: center 30%;
+  }
+}
+
+.about {
+  border-top: 1px solid $ash;
+}
+
+.about-lead {
+  font-size: 1.05rem;
+  line-height: 1.8;
+  color: darken($cream, 15%);
+  margin-bottom: 2.5rem;
+
+  strong {
+    color: $fire;
+  }
+}
+
+.why-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.4rem;
+  letter-spacing: 0.06em;
+  color: $cream;
+  margin-bottom: 1.5rem;
+}
+
+.reasons {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+
+  li {
+    display: flex;
+    gap: 1.25rem;
+    align-items: flex-start;
+    padding: 1.5rem;
+    background: $coal;
+    border: 1px solid $ash;
+    border-left: 3px solid $fire;
+    border-radius: 4px;
+  }
+
+  .reason-icon {
+    font-size: 1.5rem;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  strong {
+    display: block;
+    font-size: 1rem;
+    color: $cream;
+    margin-bottom: 0.4rem;
+  }
+
+  p {
+    font-size: 0.9rem;
+    color: $muted;
+    line-height: 1.7;
+    margin: 0;
+  }
+}

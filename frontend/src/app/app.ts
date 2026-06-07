@@ -1,10 +1,11 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { RouterOutlet } from '@angular/router';
+import { NavbarComponent } from './partials/navbar/navbar.component';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet],
+  imports: [RouterOutlet, NavbarComponent],
   templateUrl: './app.html',
   styleUrl: './app.scss'
 })
@@ -12,6 +13,7 @@ export class App implements OnInit {
   protected readonly title = signal('frontend');
   protected readonly health = signal('loading...');
   protected readonly error = signal('');
+  currentUserId: string | null = "user-123";
 
   constructor(private readonly http: HttpClient) {}
 
