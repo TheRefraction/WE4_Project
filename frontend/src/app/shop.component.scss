@@ -1,0 +1,12 @@
+main {
+  margin: 10px;
+}
+
+.products-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+.products-grid app-product-card {
+  width: 320px;
+}
