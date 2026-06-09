@@ -11,64 +11,64 @@
       <div class="info-grid">
         <div class="info-field">
           <label>First name</label>
-          <p>Jean</p>
+          <p>{{ accountForm().first_name }}</p>
         </div>
         <div class="info-field">
           <label>Last name</label>
-          <p>Dupont</p>
+          <p>{{ accountForm().last_name }}</p>
         </div>
         <div class="info-field">
           <label>Email</label>
-          <p>jean.dupont&#64;email.com</p>
+          <p>{{ accountForm().email }}</p>
         </div>
         <div class="info-field">
           <label>Phone</label>
-          <p>+33 6 12 34 56 78</p>
+          <p>{{ accountForm().phone }}</p>
         </div>
       </div>
     </section>
 
-    <section class="card">
+    <form (ngSubmit)="onUpdateAccount()" class="card">
       <h2 class="card-title">Update account</h2>
       <div class="form-grid">
         <div class="form-field">
           <label>First name</label>
-          <input type="text" placeholder="Jean" />
+          <input type="text" [(ngModel)]="accountForm().first_name" name="first_name" />
         </div>
         <div class="form-field">
           <label>Last name</label>
-          <input type="text" placeholder="Dupont" />
+          <input type="text" [(ngModel)]="accountForm().last_name" name="last_name" />
         </div>
         <div class="form-field">
           <label>Email</label>
-          <input type="email" placeholder="jean.dupont@email.com" />
+          <input type="email" [(ngModel)]="accountForm().email" name="email" />
         </div>
         <div class="form-field">
           <label>Phone</label>
-          <input type="text" placeholder="+33 6 12 34 56 78" />
+          <input type="text" [(ngModel)]="accountForm().phone" name="phone" />
         </div>
       </div>
-      <button class="btn-fire">Update</button>
-    </section>
+      <button type="submit" class="btn-fire">Update</button>
+    </form>
 
-    <section class="card">
+    <form (ngSubmit)="onUpdatePassword()" class="card">
       <h2 class="card-title">Update password</h2>
       <div class="form-grid">
         <div class="form-field">
           <label>New password</label>
-          <input type="password" placeholder="••••••••" />
+          <input type="password" [(ngModel)]="passwordForm().new_password" name="new_password" />
         </div>
         <div class="form-field">
           <label>Confirm new password</label>
-          <input type="password" placeholder="••••••••" />
+          <input type="password" [(ngModel)]="passwordForm().confirm_new_password" name="confirm_new_password" />
         </div>
         <div class="form-field">
           <label>Actual password</label>
-          <input type="password" placeholder="••••••••" />
+          <input type="password" [(ngModel)]="passwordForm().actual_password" name="actual_password" />
         </div>
       </div>
-      <button class="btn-fire">Update</button>
-    </section>
+      <button type="submit" class="btn-fire">Update</button>
+    </form>
 
   </div>
 </main>
