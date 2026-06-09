@@ -45,7 +45,8 @@ CREATE TABLE IF NOT EXISTS account (
     loyalty_points INTEGER DEFAULT 0,
     role role_enum NOT NULL DEFAULT 'client',
 
-    CONSTRAINT chk_loyalty_points CHECK (loyalty_points >= 0)
+    CONSTRAINT chk_loyalty_points CHECK (loyalty_points >= 0),
+    CONSTRAINT chk_email CHECK (email ~* '^[A-Za-z0-9._%+\-]+@[A-Za-z0-9.\-]+\.[A-Za-z]{2,}$')
 );
 
 CREATE UNIQUE INDEX uc_email ON account (LOWER(email));
@@ -63,7 +64,6 @@ CREATE TABLE IF NOT EXISTS invoice (
     id SERIAL PRIMARY KEY,
     account_id INT NOT NULL,
     amount DECIMAL(10, 2) NOT NULL,
-    due_date TIMESTAMP NOT NULL,
     billing_address JSONB NOT NULL,
     status invoice_status_enum NOT NULL DEFAULT 'draft',
     payment_id INT DEFAULT NULL, -- NULL means payment not yet established
