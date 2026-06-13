@@ -10,7 +10,7 @@
 
     <ul class="navbar-links" [class.open]="menuOpen">
       <li><a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Home</a></li>
-      <li><a routerLink="/products" routerLinkActive="active">Order</a></li>
+      <li><a routerLink="/shop" routerLinkActive="active">Order</a></li>
       @if (userId) {
         <li><a routerLink="/cart" routerLinkActive="active">Cart</a></li>
         <li><a routerLink="/account" routerLinkActive="active">My account</a></li>

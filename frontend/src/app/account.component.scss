@@ -1,0 +1,160 @@
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,400;0,500;1,400&display=swap');
+
+$fire: #E8390E;
+$coal: #1A1208;
+$ash: #2E2416;
+$cream: #F5ECD7;
+$muted: #9C8E7A;
+
+.account {
+  background: #0F0C08;
+  color: $cream;
+  font-family: 'DM Sans', sans-serif;
+  min-height: 100vh;
+}
+
+.page-header {
+  background: $coal;
+  border-bottom: 1px solid $ash;
+  padding: 3rem 2rem 2.5rem;
+
+  h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(2.5rem, 6vw, 4.5rem);
+    letter-spacing: 0.05em;
+    color: $cream;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+}
+
+.account-container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 3rem 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.card {
+  background: $coal;
+  border: 1px solid $ash;
+  border-radius: 6px;
+  padding: 2rem;
+}
+
+.card-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.6rem;
+  letter-spacing: 0.06em;
+  color: $cream;
+  border-bottom: 1px solid $ash;
+  padding-bottom: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.info-card {
+  border-left: 3px solid $fire;
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.5rem;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  @media (max-width: 480px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.info-field {
+  label {
+    display: block;
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: $muted;
+    margin-bottom: 0.35rem;
+  }
+
+  p {
+    font-size: 1rem;
+    color: $cream;
+    border-bottom: 1px solid $ash;
+    padding-bottom: 0.5rem;
+    margin: 0;
+  }
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.25rem;
+  margin-bottom: 1.5rem;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  @media (max-width: 480px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+
+  label {
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: $muted;
+  }
+
+  input {
+    background: $ash;
+    border: 1px solid lighten($ash, 10%);
+    border-radius: 4px;
+    padding: 0.6rem 0.85rem;
+    color: $cream;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    outline: none;
+    transition: border-color 0.2s;
+
+    &::placeholder {
+      color: $muted;
+    }
+
+    &:focus {
+      border-color: $fire;
+    }
+  }
+}
+
+.btn-fire {
+  background: $fire;
+  color: $cream;
+  border: none;
+  border-radius: 3px;
+  padding: 0.7rem 2rem;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.15s;
+
+  &:hover {
+    background: darken($fire, 8%);
+    transform: translateY(-2px);
+  }
+}
