@@ -1,0 +1,74 @@
+<main class="account">
+
+  <section class="page-header">
+    <h1>My Account</h1>
+  </section>
+
+  <div class="account-container">
+
+    <section class="card info-card">
+      <h2 class="card-title">Account Details</h2>
+      <div class="info-grid">
+        <div class="info-field">
+          <label>First name</label>
+          <p>{{ accountForm().first_name }}</p>
+        </div>
+        <div class="info-field">
+          <label>Last name</label>
+          <p>{{ accountForm().last_name }}</p>
+        </div>
+        <div class="info-field">
+          <label>Email</label>
+          <p>{{ accountForm().email }}</p>
+        </div>
+        <div class="info-field">
+          <label>Phone</label>
+          <p>{{ accountForm().phone }}</p>
+        </div>
+      </div>
+    </section>
+
+    <form (ngSubmit)="onUpdateAccount()" class="card">
+      <h2 class="card-title">Update account</h2>
+      <div class="form-grid">
+        <div class="form-field">
+          <label>First name</label>
+          <input type="text" [(ngModel)]="accountForm().first_name" name="first_name" />
+        </div>
+        <div class="form-field">
+          <label>Last name</label>
+          <input type="text" [(ngModel)]="accountForm().last_name" name="last_name" />
+        </div>
+        <div class="form-field">
+          <label>Email</label>
+          <input type="email" [(ngModel)]="accountForm().email" name="email" />
+        </div>
+        <div class="form-field">
+          <label>Phone</label>
+          <input type="text" [(ngModel)]="accountForm().phone" name="phone" />
+        </div>
+      </div>
+      <button type="submit" class="btn-fire">Update</button>
+    </form>
+
+    <form (ngSubmit)="onUpdatePassword()" class="card">
+      <h2 class="card-title">Update password</h2>
+      <div class="form-grid">
+        <div class="form-field">
+          <label>New password</label>
+          <input type="password" [(ngModel)]="passwordForm().new_password" name="new_password" />
+        </div>
+        <div class="form-field">
+          <label>Confirm new password</label>
+          <input type="password" [(ngModel)]="passwordForm().confirm_new_password" name="confirm_new_password" />
+        </div>
+        <div class="form-field">
+          <label>Actual password</label>
+          <input type="password" [(ngModel)]="passwordForm().actual_password" name="actual_password" />
+        </div>
+      </div>
+      <button type="submit" class="btn-fire">Update</button>
+    </form>
+
+  </div>
+</main>
