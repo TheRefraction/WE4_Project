@@ -8,7 +8,7 @@
  */
 
 import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
+import jwt, { SignOptions } from 'jsonwebtoken';
 
 import { env } from '../config/env';
 import { AccountRepository } from '../repositories/account.repository';
@@ -89,7 +89,7 @@ export class AccountService {
         const token = this.generateToken(accountResponse);
 
         return { 
-            account: accountResponse, 
+            account: accountResponse,
             token 
         };
     }
@@ -184,7 +184,7 @@ export class AccountService {
         return jwt.sign(
             payload, 
             env.JWT_SECRET!, 
-            { expiresIn: env.JWT_EXPIRES_IN }
+            { expiresIn: env.JWT_EXPIRES_IN as SignOptions['expiresIn'] }
         );
     }
 
