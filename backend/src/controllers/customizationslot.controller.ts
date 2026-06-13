@@ -27,6 +27,7 @@ export class CustomizationController{
             const productId = parseInt(req.params.productId, 10);
             if (isNaN(productId)){
                 res.status(400).json({success: false, message: 'Invalid product ID'});
+                return;
             }
             const slots = await customizationService.getSlotsByProductId(productId);
             res.status(200).json({
