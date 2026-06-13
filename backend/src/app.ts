@@ -60,11 +60,13 @@ class App {
 
   private async initializeDatabases(): Promise<void> {
     try {
-      // Initialize PostgreSQL
-      await pgPool.query('SELECT 1');
+      await Promise.all([
+        // Initialize PostgreSQL
+        await pgPool.query('SELECT 1'),
 
-      // Initialize MongoDB
-      await connectMongoDB();
+        // Initialize MongoDB
+        await connectMongoDB(),
+      ]);
     } catch (error) {
       console.error('Database initialization failed:', error);
       process.exit(1);
