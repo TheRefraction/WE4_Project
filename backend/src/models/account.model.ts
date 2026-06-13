@@ -6,13 +6,14 @@
  * These interfaces are used throughout the application to ensure type safety and consistency when working with account data.
  */
 
-/**
- * This interface defines the structure of a user role in the system.
- */
-export interface Role {
-    id: number;
-    name: 'client' | 'supplier' | 'admin';
-}
+export const Role = {
+    Unknown: 'unknown',
+    Client: 'client',
+    Supplier: 'supplier',
+    Admin: 'admin',
+} as const;
+
+export type Role = typeof Role[keyof typeof Role];
 
 /**
  * This interface defines the structure of the Account entity as stored in the database.
@@ -27,7 +28,7 @@ export interface Account {
     createdAt: Date;
     updatedAt: Date;
     loyaltyPoints: number;
-    roleId: number;
+    role: Role;
 }
 
 /**
@@ -50,6 +51,7 @@ export interface UpdateAccountDTO {
     email?: string;
     phone?: string;
     password?: string;
+    role?: Role;
 }
 
 /**
@@ -66,5 +68,5 @@ export interface AccountResponse {
     createdAt: Date;
     updatedAt: Date;
     loyaltyPoints: number;
-    role: string;
+    role: Role;
 }

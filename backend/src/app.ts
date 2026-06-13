@@ -4,7 +4,7 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import routes from './routes';
 
-import { errorMiddleware } from './middlewares/error.middleware';
+import { errorMiddleware, AppError } from './middlewares/error.middleware';
 import { connectMongoDB } from './config/mongo';
 import { pgPool } from './config/postgres';
 import { env } from './config/env';
@@ -14,10 +14,10 @@ class App {
 
   constructor() {
     this.app = express();
+
     this.initializeMiddlewares();
     this.initializeRoutes();
     this.initializeErrorHandling();
-    this.initializeDatabases();
   }
 
   private initializeMiddlewares(): void {
@@ -34,7 +34,7 @@ class App {
             if (!origin || allowedOrigins.has(origin)) {
                 callback(null, true);
             } else {
-                callback(new Error('Origin not allowed'));
+                callback(new AppError('Origin not allowed', 403));
             }
         },
         methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
@@ -58,14 +58,14 @@ class App {
     this.app.use(errorMiddleware);
   }
 
-  private async initializeDatabases(): Promise<void> {
+  public async init(): Promise<void> {
     try {
       await Promise.all([
         // Initialize PostgreSQL
-        await pgPool.query('SELECT 1'),
+        pgPool.query('SELECT 1'),
 
         // Initialize MongoDB
-        await connectMongoDB(),
+        connectMongoDB(),
       ]);
     } catch (error) {
       console.error('Database initialization failed:', error);
@@ -78,4 +78,4 @@ class App {
   }
 }
 
-export default new App().getApp();
+export default new App();

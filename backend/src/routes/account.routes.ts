@@ -1,11 +1,15 @@
 import { Router } from 'express';
+import { body, param } from 'express-validator';
+
+import { Role } from '../models/account.model';
 import { AccountController } from '../controllers/account.controller';
 import { authMiddleware } from '../middlewares/auth.middleware';
 import { validateRequest } from '../middlewares/validation.middleware';
-import { body } from 'express-validator';
 
 const router = Router();
 const accountController = new AccountController();
+
+const idValidation = [param('id').isInt().withMessage('Invalid id')];
 
 // Validation rules
 const registerValidation = [
@@ -26,7 +30,8 @@ const updateValidation = [
   body('lastName').optional().notEmpty(),
   body('email').optional().isEmail(),
   body('phone').optional(),
-  body('password').optional().isLength({ min: 6 })
+  body('password').optional().isLength({ min: 6 }),
+  body('role').optional().isIn(Object.values(Role)).withMessage('Invalid role value')
 ];
 
 // Public routes
@@ -36,11 +41,11 @@ router.post('/login', loginValidation, validateRequest, accountController.login)
 // Protected routes
 router.use(authMiddleware);
 router.get('/profile', accountController.getProfile);
-router.put('/profile/:id', updateValidation, validateRequest, accountController.updateAccount);
-router.delete('/profile/:id', accountController.deleteAccount);
+router.put('/profile/:id', idValidation, updateValidation, validateRequest, accountController.updateAccount);
+router.delete('/profile/:id', idValidation, validateRequest, accountController.deleteAccount);
 
 // Admin routes
 router.get('/admin/accounts', accountController.getAllAccounts);
-router.get('/admin/accounts/:id', accountController.getAccountById);
+router.get('/admin/accounts/:id', idValidation, validateRequest, accountController.getAccountById);
 
 export default router;

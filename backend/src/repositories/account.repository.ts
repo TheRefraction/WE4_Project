@@ -8,31 +8,30 @@
  */
 
 import { pgPool } from '../config/postgres';
-import { Account, UpdateAccountDTO } from '../models/account.model';
+import { Account, UpdateAccountDTO, Role } from '../models/account.model';
 
 export class AccountRepository {
-    async findAll(roleId?: number): Promise<Account[]> {
+    async findAll(role?: Role): Promise<Account[]> {
         let query = `
             SELECT 
-                a.id, 
-                a.first_name AS "firstName", 
-                a.last_name AS "lastName", 
-                a.email, 
-                a.phone, 
-                a.password_hash AS "passwordHash",
-                a.created_at AS "createdAt",
-                a.updated_at AS "updatedAt", 
-                a.loyalty_points AS "loyaltyPoints", 
-                r.id AS "roleId"
-            FROM account a 
-            JOIN role r ON a.role_id = r.id
+                id, 
+                first_name AS "firstName", 
+                last_name AS "lastName", 
+                email, 
+                phone, 
+                password_hash AS "passwordHash",
+                created_at AS "createdAt",
+                updated_at AS "updatedAt", 
+                loyalty_points AS "loyaltyPoints", 
+                role
+            FROM account 
         `;
         
         const params: any[] = [];
 
-        if (roleId !== undefined) {
-            query += ' WHERE role_id = $${params.length}';
-            params.push(roleId);
+        if (role !== undefined) {
+            query += ' WHERE role = $${params.length}';
+            params.push(role);
         }
 
         query += ' ORDER BY created_at DESC';
@@ -44,19 +43,18 @@ export class AccountRepository {
     async findById(id: number): Promise<Account | null> {
         const query = `
             SELECT 
-                a.id, 
-                a.first_name AS "firstName", 
-                a.last_name AS "lastName", 
-                a.email, 
-                a.phone, 
-                a.password_hash AS "passwordHash",
-                a.created_at AS "createdAt",
-                a.updated_at AS "updatedAt", 
-                a.loyalty_points AS "loyaltyPoints", 
-                r.id AS "roleId"
-            FROM account a 
-            JOIN role r ON a.role_id = r.id
-            WHERE a.id = $1
+                id, 
+                first_name AS "firstName", 
+                last_name AS "lastName", 
+                email, 
+                phone, 
+                password_hash AS "passwordHash",
+                created_at AS "createdAt",
+                updated_at AS "updatedAt", 
+                loyalty_points AS "loyaltyPoints", 
+                role
+            FROM account 
+            WHERE id = $1
         `;
 
         const res = await pgPool.query(query, [id]);
@@ -66,33 +64,25 @@ export class AccountRepository {
     async findByEmail(email: string): Promise<Account | null> {
         const query = `
             SELECT 
-                a.id, 
-                a.first_name AS "firstName", 
-                a.last_name AS "lastName", 
-                a.email, 
-                a.phone, 
-                a.password_hash AS "passwordHash",
-                a.created_at AS "createdAt",
-                a.updated_at AS "updatedAt", 
-                a.loyalty_points AS "loyaltyPoints", 
-                r.id AS "roleId"
-            FROM account a 
-            JOIN role r ON a.role_id = r.id
-            WHERE a.email = $1
+                id, 
+                first_name AS "firstName", 
+                last_name AS "lastName", 
+                email, 
+                phone, 
+                password_hash AS "passwordHash",
+                created_at AS "createdAt",
+                updated_at AS "updatedAt", 
+                loyalty_points AS "loyaltyPoints", 
+                role
+            FROM account 
+            WHERE email = $1
         `;
 
         const res = await pgPool.query(query, [email]);
         return res.rows[0] || null;
     }
 
-    async getRoleById(roleId: number): Promise<string> {
-        const query = 'SELECT name FROM role WHERE id = $1';
-        
-        const res = await pgPool.query(query, [roleId]);
-        return res.rows[0]?.name || 'unknown'; 
-    }
-
-    async create(data: Omit<Account, 'id' | 'createdAt' | 'updatedAt' | 'loyaltyPoints' | 'roleId'>): Promise<Account> {
+    async create(data: Omit<Account, 'id' | 'createdAt' | 'updatedAt' | 'loyaltyPoints' | 'role'>): Promise<Account> {
         const {
             firstName,
             lastName,
@@ -141,6 +131,11 @@ export class AccountRepository {
         if (data.password !== undefined) {
             fields.push(`password_hash = $${paramCount++}`);
             values.push(data.password);
+        }
+
+        if (data.role !== undefined) {
+            fields.push(`role = $${paramCount++}`);
+            values.push(data.role);
         }
 
         if (fields.length === 0) return this.findById(id);

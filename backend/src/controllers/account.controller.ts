@@ -8,6 +8,7 @@
  */
 
 import { Request, Response, NextFunction } from 'express';
+import { Role } from '../models/account.model';
 import { AccountService } from '../services/account.service';
 import { AuthRequest } from '../middlewares/auth.middleware';
 
@@ -78,7 +79,7 @@ export class AccountController {
 
     async getAllAccounts(req: AuthRequest, res: Response, next: NextFunction) {
         try {
-            if (req.user!.roleId !== 3) {
+            if (req.user!.role !== Role.Admin) {
                 res.status(403).json({
                     success: false,
                     message: 'Permission denied'
@@ -87,13 +88,15 @@ export class AccountController {
             }
 
             const { role } = req.query;
-            let result;
 
-            if (role) {
-                result = await accountService.getAllAccounts(role as number);
-            } else {
-                result = await accountService.getAllAccounts();
+            if (role !== undefined) {
+                if (typeof role !== 'string' || !Object.values(Role).includes(role as Role)) {
+                    res.status(400).json({ success: false, message: 'Invalid role filter' });
+                    return;
+                }
             }
+
+            const result = await accountService.getAllAccounts(role as Role | undefined);
 
             res.json({ 
                 success: true,
@@ -130,7 +133,7 @@ export class AccountController {
 
             await accountService.deleteAccount(parseInt(id), userId);
 
-            res.status(204).json({
+            res.status(200).json({
                 success: true,
                 message: 'Account deleted successfully'
             });

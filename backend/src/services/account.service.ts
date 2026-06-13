@@ -9,9 +9,11 @@
 
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+
 import { env } from '../config/env';
 import { AccountRepository } from '../repositories/account.repository';
-import { CreateAccountDTO, UpdateAccountDTO, AccountResponse } from '../models/account.model';
+import { CreateAccountDTO, UpdateAccountDTO, AccountResponse, Role } from '../models/account.model';
+import { AppError } from '../middlewares/error.middleware';
 
 export class AccountService {
     private accountRepository: AccountRepository;
@@ -20,22 +22,22 @@ export class AccountService {
         this.accountRepository = new AccountRepository();
     }
 
-    async getAllAccounts(roleId?: number): Promise<AccountResponse[]> {
-        const accounts = await this.accountRepository.findAll(roleId);
+    async getAllAccounts(role?: Role): Promise<AccountResponse[]> {
+        const accounts = await this.accountRepository.findAll(role);
 
         return Promise.all(accounts.map((account) => this.mapToResponse(account)));
     }
 
     async getAccountById(id: number): Promise<AccountResponse | null> {
         const account = await this.accountRepository.findById(id);
-        if (!account) throw new Error('Account not found');
+        if (!account) throw new AppError('Account not found', 404);
 
         return this.mapToResponse(account);
     }
 
     async getAccountByEmail(email: string): Promise<AccountResponse | null> {
         const account = await this.accountRepository.findByEmail(email);
-        if (!account) throw new Error('Account not found');
+        if (!account) throw new AppError('Account not found', 404);
 
         return this.mapToResponse(account);
     }
@@ -44,11 +46,11 @@ export class AccountService {
         const existingAccount = await this.accountRepository.findByEmail(data.email);
 
         if (existingAccount) {
-            throw new Error('Email already in use');
+            throw new AppError('Email already in use', 409);
         }
 
         if (data.password.length < 6) {
-            throw new Error('Password must be at least 6 characters long');
+            throw new AppError('Password must be at least 6 characters long', 400);
         }
 
         const passwordHash = await bcrypt.hash(data.password, 10);
@@ -74,14 +76,13 @@ export class AccountService {
         const account = await this.accountRepository.findByEmail(email);
 
         if (!account) {
-            throw new Error('Invalid email or password');
+            throw new AppError('Invalid email or password', 401);
         }
 
-        console.log(`${password} vs ${account.passwordHash}`);
         const isPasswordValid = await bcrypt.compare(password, account.passwordHash);
 
         if (!isPasswordValid) {
-            throw new Error('Invalid email or password');
+            throw new AppError('Invalid email or password', 401);
         }
 
         const accountResponse = await this.mapToResponse(account);
@@ -97,24 +98,39 @@ export class AccountService {
         const account = await this.accountRepository.findById(id);
 
         if (!account) {
-            throw new Error('Account not found');
+            throw new AppError('Account not found', 404);
         }
 
         const requesterAccount = await this.accountRepository.findById(requesterId);
 
         if (!requesterAccount) {
-            throw new Error('Requester account not found');
+            throw new AppError('Requester account not found', 404);
         }
 
-        const isAdmin = await this.accountRepository.getRoleById(requesterAccount.roleId) === 'admin';
+        const isAdmin = requesterAccount.role === Role.Admin;
 
         if (account.id !== requesterId && !isAdmin) {
-            throw new Error('Permission denied');
+            throw new AppError('Permission denied', 403);
+        }
+
+        // Only an admin can change roles, and only to a valid Role value
+        if (data.role !== undefined) {
+            if (!isAdmin) {
+                throw new AppError('Permission denied', 403);
+            }
+
+            if (!Object.values(Role).includes(data.role)) {
+                throw new AppError('Invalid role value', 400);
+            }
+
+            if (account.id === requesterId && data.role !== Role.Admin) {
+                throw new AppError('Admins cannot demote themselves', 400);
+            }
         }
 
         if (data.password) {
             if (data.password.length < 6) {
-                throw new Error('Password must be at least 6 characters long');
+                throw new AppError('Password must be at least 6 characters long', 400);
             }
 
             data.password = await bcrypt.hash(data.password, 10);
@@ -123,12 +139,12 @@ export class AccountService {
         if (data.email && data.email !== account.email) {
             const existingAccount = await this.accountRepository.findByEmail(data.email);
             if (existingAccount) {
-                throw new Error('Email already in use');
+                throw new AppError('Email already in use', 409);
             }
         }
 
         const updatedAccount = await this.accountRepository.update(id, data);
-        if (!updatedAccount) throw new Error('Failed to update account');
+        if (!updatedAccount) throw new AppError('Failed to update account', 500);
 
         return this.mapToResponse(updatedAccount);
     }
@@ -137,30 +153,30 @@ export class AccountService {
         const account = await this.accountRepository.findById(id);
 
         if (!account) {
-            throw new Error('Account not found');
+            throw new AppError('Account not found', 404);
         }
 
         const requesterAccount = await this.accountRepository.findById(requesterId);
 
         if (!requesterAccount) {
-            throw new Error('Requester account not found');
+            throw new AppError('Requester account not found', 404);
         }
 
-        const isAdmin = await this.accountRepository.getRoleById(requesterAccount.roleId) === 'admin';
+        const isAdmin = requesterAccount.role === Role.Admin;
 
         if (account.id !== requesterId && !isAdmin) {
-            throw new Error('Permission denied');
+            throw new AppError('Permission denied', 403);
         }
 
         const success = await this.accountRepository.delete(id);
-        if (!success) throw new Error('Failed to delete account');
+        if (!success) throw new AppError('Failed to delete account', 500);
 
         return { success: true };
     }
 
     private generateToken(account: AccountResponse): string {
         const payload = {
-            id: account.id,
+            userId: account.id,
             email: account.email,
             role: account.role,
         };
@@ -182,7 +198,7 @@ export class AccountService {
             createdAt: account.createdAt,
             updatedAt: account.updatedAt,
             loyaltyPoints: account.loyaltyPoints,
-            role: await this.accountRepository.getRoleById(account.roleId),
+            role: account.role
         };
     }
 }

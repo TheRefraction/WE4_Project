@@ -15,12 +15,16 @@ export const errorMiddleware = (
   error: Error | AppError,
   req: Request,
   res: Response,
-  next: NextFunction
+  _next: NextFunction
 ) => {
   const statusCode = error instanceof AppError ? error.statusCode : 500;
   const message = error.message || 'Internal Server Error';
   
-  console.error('Error:', error);
+  if (statusCode >= 500) {
+    console.error('Error:', error);
+  } else {
+    console.warn('Error:', message);
+  }
   
   res.status(statusCode).json({
     success: false,

@@ -1,12 +1,13 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { env } from '../config/env';
+import { Role } from '../models/account.model';
 
 export interface AuthRequest extends Request {
   user?: {
     userId: number;
     email: string;
-    roleId: number;
+    role: Role;
   };
 }
 
@@ -26,7 +27,7 @@ export const authMiddleware = async (
     const decoded = jwt.verify(token, env.JWT_SECRET) as {
       userId: number;
       email: string;
-      roleId: number;
+      role: Role;
     };
     
     req.user = decoded;
@@ -42,7 +43,7 @@ export const adminMiddleware = async (
   res: Response,
   next: NextFunction
 ) => {
-  if (req.user?.roleId !== 3) {
+  if (req.user?.role !== Role.Admin) {
     res.status(403).json({ success: false, message: 'Admin access required' });
     return;
   }
