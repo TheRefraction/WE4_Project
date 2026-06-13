@@ -92,7 +92,7 @@ services:
       POSTGRES_APP_PASSWORD: ${POSTGRES_APP_PASSWORD}
     volumes:
       - postgres-data:/var/lib/postgresql/data
-      - ./backend/db/init:/docker-entrypoint-initdb.d
+      - ./backend/db/postgres/init:/docker-entrypoint-initdb.d
     networks:
       - app-network
     restart: unless-stopped
@@ -134,7 +134,7 @@ services:
       FLYWAY_PASSWORD: ${POSTGRES_ROOT_PASSWORD}
       FLYWAY_LOCATIONS: filesystem:/flyway/sql
     volumes:
-      - ./backend/db/migrations:/flyway/sql
+      - ./backend/db/postgres/migrations:/flyway/sql
     depends_on:
       postgres:
         condition: service_healthy
