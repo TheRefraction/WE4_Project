@@ -9,7 +9,9 @@
       <h3 class="product-name">{{ product.name }}</h3>
       <p class="product-description">{{ product.description }}</p>
     </div>
-    <span class="product-price">{{ totalPrice() }}€</span>
+    @if (!inMenu) {
+      <span class="product-price">{{ totalPrice() }}€</span>
+    }
   </div>
 
   <button class="toggle-btn" (click)="expanded.set(!expanded())">
@@ -18,73 +20,84 @@
   </button>
 
   @if (expanded()) {
+    <div class="backdrop" (click)="expanded.set(false)"></div>
     <div class="customisation">
 
-      <div class="custom-section">
-        <h4 class="custom-title">Ingrédients</h4>
-        <div class="chips">
-          @for (ingredient of ingredients(); track ingredient.id) {
-            <button
-              class="chip"
-              [class.active]="ingredient.included"
-              (click)="toggleIngredient(ingredient.id)"
-            >
-              {{ ingredient.included ? '✓' : '✕' }} {{ ingredient.name }}
-            </button>
-          }
+      @if (ingredients().length > 0){
+        <div class="custom-section">
+          <h4 class="custom-title">Ingrédients</h4>
+          <div class="chips">
+           @for (ingredient of ingredients(); track ingredient.id) {
+              <button
+                class="chip"
+                [class.active]="ingredient.included"
+                (click)="toggleIngredient(ingredient.id)"
+              >
+                {{ ingredient.included ? '✓' : '✕' }} {{ ingredient.name }}
+              </button>
+            }
+          </div>
         </div>
-      </div>
+      }
 
-      <div class="custom-section">
-        <h4 class="custom-title">Taille</h4>
-        <div class="chips">
-          @for (size of sizes; track size.id) {
-            <button
-              class="chip"
-              [class.active]="size.selected"
-              (click)="toggleSize(size.id)"
-            >
-              {{ size.name }}
-              @if (size.price > 0) { <span class="chip-price-add">+{{ size.price.toFixed(2) }}€</span> }
-              @if (size.price < 0) { <span class="chip-price-rem">{{ size.price.toFixed(2) }}€</span> }
-            </button>
-          }
+      @if (sizes.length > 0){
+        <div class="custom-section">
+          <h4 class="custom-title">Taille</h4>
+          <div class="chips">
+            @for (size of sizes; track size.id) {
+              <button
+                class="chip"
+                [class.active]="size.selected"
+                (click)="toggleSize(size.id)"
+              >
+                {{ size.name }}
+                @if (size.price > 0) { <span class="chip-price-add">+{{ size.price.toFixed(2) }}€</span> }
+                @if (size.price < 0) { <span class="chip-price-rem">{{ size.price.toFixed(2) }}€</span> }
+              </button>
+            }
+          </div>
         </div>
-      </div>
+      }
 
-      <div class="custom-section">
-        <h4 class="custom-title">Suppléments</h4>
-        <div class="chips">
-          @for (extra of supplements; track extra.id) {
-            <button
-              class="chip"
-              [class.active]="extra.selected"
-              (click)="toggleExtra(extra.id)"
-            >
-              {{ extra.name }}
-              @if (extra.price > 0) { <span class="chip-price">+{{ extra.price.toFixed(2) }}€</span> }
-            </button>
-          }
+      @if (supplements.length > 0){
+        <div class="custom-section">
+          <h4 class="custom-title">Suppléments</h4>
+          <div class="chips">
+            @for (extra of supplements; track extra.id) {
+              <button
+                class="chip"
+                [class.active]="extra.selected"
+                (click)="toggleExtra(extra.id)"
+              >
+                {{ extra.name }}
+                @if (extra.price > 0) { <span class="chip-price">+{{ extra.price.toFixed(2) }}€</span> }
+              </button>
+            }
+          </div>
         </div>
-      </div>
+      }
 
-      <div class="custom-section">
-        <h4 class="custom-title">Sauces</h4>
-        <div class="chips">
-          @for (sauce of sauces; track sauce.id) {
-            <button
-              class="chip"
-              [class.active]="sauce.selected"
-              (click)="toggleExtra(sauce.id)"
-            >
-              {{ sauce.name }}
-            </button>
-          }
+      @if (sauces.length > 0){
+        <div class="custom-section">
+          <h4 class="custom-title">Sauces</h4>
+          <div class="chips">
+            @for (sauce of sauces; track sauce.id) {
+              <button
+                class="chip"
+                [class.active]="sauce.selected"
+                (click)="toggleExtra(sauce.id)"
+              >
+                {{ sauce.name }}
+              </button>
+            }
+          </div>
         </div>
-      </div>
+      }
 
     </div>
   }
-  <button class="btn-fire">Ajouter au panier — {{ totalPrice() }}€</button>
+  @if (!inMenu) {
+    <button class="btn-fire">Ajouter au panier — {{ totalPrice() }}€</button>
+  }
 
 </article>

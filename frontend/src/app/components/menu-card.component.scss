@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,400;0,500;1,400&display=swap');
 
 $fire: #E8390E;
 $coal: #1A1208;
@@ -6,7 +6,7 @@ $ash: #2E2416;
 $cream: #F5ECD7;
 $muted: #9C8E7A;
 
-.product-card {
+.menu-card {
   background: $coal;
   border: 1px solid $ash;
   border-radius: 6px;
@@ -18,14 +18,50 @@ $muted: #9C8E7A;
   display: flex;
   flex-direction: column;
   z-index: 1;
+  height: 470px; //should be changed if we need menus with 4 products i suppose
 
   &.expanded {
     z-index: 11;
     border-color: $fire;
+    height: unset;
   }
 }
 
-.product-image {
+.menu-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1rem 1rem 0.5rem;
+  min-width: 320px;
+  min-height: 100px;
+  max-width: 320px;
+  max-height: 100px;
+}
+
+.menu-name {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.3rem;
+  letter-spacing: 0.05em;
+  margin: 0 0 0.25rem;
+  color: $cream;
+}
+
+.menu-description {
+  font-size: 0.82rem;
+  color: $muted;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.menu-price {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.4rem;
+  color: $fire;
+  white-space: nowrap;
+}
+
+.menu-image {
   height: 180px;
   overflow: hidden;
   background: $ash;
@@ -41,38 +77,8 @@ $muted: #9C8E7A;
   &:hover img { transform: scale(1.04); }
 }
 
-.product-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 1rem;
-  padding: 1rem 1rem 0.5rem;
-  min-width: 320px;
-  min-height: 100px;
-  max-width: 320px;
-  max-height: 100px;
-}
-
-.product-name {
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 1.3rem;
-  letter-spacing: 0.05em;
-  margin: 0 0 0.25rem;
-  color: $cream;
-}
-
-.product-description {
-  font-size: 0.82rem;
-  color: $muted;
-  margin: 0;
-  line-height: 1.5;
-}
-
-.product-price {
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 1.4rem;
-  color: $fire;
-  white-space: nowrap;
+.menu-products {
+    flex : 1;
 }
 
 .toggle-btn {
@@ -100,79 +106,6 @@ $muted: #9C8E7A;
   }
 }
 
-.customisation {
-  padding: 1rem;
-  border-top: 1px solid $ash;
-  display: flex;
-  flex-direction: column;
-  gap: 1.25rem;
-  position: absolute;
-  top: 100%;
-  left: -1px;
-  right: -1px;
-  z-index: 10;
-  background: $coal;
-  border: 1px solid $fire;
-  border-top: none;
-  border-radius: 0 0 6px 6px;
-}
-
-.custom-section {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.custom-title {
-  font-size: 0.72rem;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: $muted;
-  margin: 0;
-}
-
-.chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.4rem;
-}
-
-.chip {
-  background: $ash;
-  border: 1px solid lighten($ash, 8%);
-  border-radius: 99px;
-  color: $muted;
-  font-family: 'DM Sans', sans-serif;
-  font-size: 0.8rem;
-  padding: 0.3rem 0.75rem;
-  cursor: pointer;
-  transition: all 0.15s;
-  display: flex;
-  align-items: center;
-  gap: 0.3rem;
-
-  &:hover {
-    border-color: $cream;
-    color: $cream;
-  }
-
-  &.active {
-    background: rgba($fire, 0.15);
-    border-color: $fire;
-    color: $cream;
-  }
-}
-
-.chip-price-add {
-  font-size: 0.72rem;
-  color: $fire;
-}
-
-.chip-price-rem {
-  font-size: 0.72rem;
-  color: $muted;
-}
-
 .btn-fire {
   background: $fire;
   color: $cream;
@@ -187,16 +120,10 @@ $muted: #9C8E7A;
   cursor: pointer;
   width: 100%;
   transition: background 0.2s, transform 0.15s;
+  margin-top : auto;
   
 
   &:hover {
     background: darken($fire, 8%);
   }
-}
-
-.backdrop {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.45);
-  z-index: 9;
 }

@@ -1,13 +1,13 @@
-import { Component, Input, signal, computed } from '@angular/core';
+import { Component, Input, signal, computed, Output, EventEmitter, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
-interface Ingredient {
+export interface Ingredient { //Temporary export for mock data
 	id: number;
 	name: string;
 	included: boolean;
 }
 
-interface Extra {
+export interface Extra { //Temporary export for mock data
 	id: number;
 	name: string;
 	price: number;
@@ -43,7 +43,7 @@ export class ProductCardComponent {
 			{ id: 2, name: 'Tomate', included: true },
 			{ id: 3, name: 'Oignon', included: true },
 			{ id: 4, name: 'Cornichon', included: false },
-			{ id: 6, name: 'Poivron', included: false },
+			{ id: 5, name: 'Poivron', included: false },
 		],
 		extras: [
 			{ id: 1, name: 'Petite', price: -2.0, selected: false, type: 'size' },
@@ -56,6 +56,7 @@ export class ProductCardComponent {
 			{ id: 8, name: 'Sauce algerienne', price: 1.0, selected: false, type: 'sauce' },
 		]
 	}
+	@Input() inMenu: boolean = false;
 
 	expanded = signal(false);
 
