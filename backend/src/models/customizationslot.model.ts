@@ -1,4 +1,6 @@
-
+/**
+ * category.model.ts
+ */
 
 /**
  * structure de la table customization_slot
