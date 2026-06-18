@@ -18,7 +18,7 @@ $muted: #9C8E7A;
   display: flex;
   flex-direction: column;
   z-index: 1;
-  height: 470px; //should be changed if we need menus with 4 products i suppose
+  height: 470px;
 
   &.expanded {
     z-index: 11;
@@ -78,7 +78,9 @@ $muted: #9C8E7A;
 }
 
 .menu-products {
-    flex : 1;
+  flex: 1;
+  // Les product-card enfants en mode inMenu sont inline, pas de overflow caché
+  overflow: visible;
 }
 
 .toggle-btn {
@@ -120,10 +122,7 @@ $muted: #9C8E7A;
   cursor: pointer;
   width: 100%;
   transition: background 0.2s, transform 0.15s;
-  margin-top : auto;
-  
+  margin-top: auto;
 
-  &:hover {
-    background: darken($fire, 8%);
-  }
+  &:hover { background: darken($fire, 8%); }
 }

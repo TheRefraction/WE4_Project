@@ -23,6 +23,12 @@ $muted: #9C8E7A;
     z-index: 11;
     border-color: $fire;
   }
+
+  &.in-menu {
+    background: transparent;
+    border: none;
+    border-radius: 0;
+  }
 }
 
 .product-image {
@@ -117,6 +123,13 @@ $muted: #9C8E7A;
   border-radius: 0 0 6px 6px;
 }
 
+.customisation-inline {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  padding: 0.75rem 0 0.25rem;
+}
+
 .custom-section {
   display: flex;
   flex-direction: column;
@@ -187,11 +200,8 @@ $muted: #9C8E7A;
   cursor: pointer;
   width: 100%;
   transition: background 0.2s, transform 0.15s;
-  
 
-  &:hover {
-    background: darken($fire, 8%);
-  }
+  &:hover { background: darken($fire, 8%); }
 }
 
 .backdrop {
@@ -199,4 +209,36 @@ $muted: #9C8E7A;
   inset: 0;
   background: rgba(0, 0, 0, 0.45);
   z-index: 9;
+}
+
+.product-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.btn-secondary {
+  flex: 1;
+  background: transparent;
+  border: 1px solid $fire;
+  border-radius: 3px;
+  color: $fire;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 0.75rem 0.75rem;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.2s, color 0.2s;
+
+  &:hover {
+    background: rgba($fire, 0.12);
+    color: $cream;
+  }
+}
+
+.product-actions .btn-fire {
+  flex: 2;
+  width: auto;
 }
