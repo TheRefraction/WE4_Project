@@ -1,104 +1,114 @@
-import { Component, Input, signal, computed, Output, EventEmitter, effect } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, Input, Output, EventEmitter, signal, computed, inject } from '@angular/core';
+import { CommonModule, NgTemplateOutlet } from '@angular/common';
+import { CartService } from '../services/cart.service';
 
-export interface Ingredient { //Temporary export for mock data
-	id: number;
-	name: string;
-	included: boolean;
+export interface Ingredient {
+  id: number;
+  name: string;
+  included: boolean;
 }
 
-export interface Extra { //Temporary export for mock data
-	id: number;
-	name: string;
-	price: number;
-	selected: boolean;
-	type: 'supplement' | 'size' | 'sauce';
+export interface Extra {
+  id: number;
+  name: string;
+  price: number;
+  selected: boolean;
+  type: 'supplement' | 'size' | 'sauce';
 }
 
 export interface Product {
-	id: number;
-	name: string;
-	description: string;
-	price: number;
-	image: string;
-	ingredients: Ingredient[];
-	extras: Extra[];
+  id: number;
+  name: string;
+  description: string;
+  price: number;
+  image: string;
+  ingredients: Ingredient[];
+  extras: Extra[];
 }
 
 @Component({
-	selector: 'app-product-card',
-	standalone: true,
-	templateUrl: './product-card.component.html',
-	styleUrl: './product-card.component.scss'
+  selector: 'app-product-card',
+  standalone: true,
+  imports: [CommonModule, NgTemplateOutlet],
+  templateUrl: './product-card.component.html',
+  styleUrl: './product-card.component.scss',
 })
 export class ProductCardComponent {
-	@Input() product: Product = {
-		id: 1,
-		name: 'Kebab Classique',
-		description: 'Pain maison, viande grillée, légumes frais et sauce du chef',
-		price: 7.50,
-		image: '/assets/images/1.png',
-		ingredients: [
-			{ id: 1, name: 'Salade', included: true },
-			{ id: 2, name: 'Tomate', included: true },
-			{ id: 3, name: 'Oignon', included: true },
-			{ id: 4, name: 'Cornichon', included: false },
-			{ id: 5, name: 'Poivron', included: false },
-		],
-		extras: [
-			{ id: 1, name: 'Petite', price: -2.0, selected: false, type: 'size' },
-			{ id: 2, name: 'Moyen', price: 0.0, selected: true, type: 'size' },
-			{ id: 3, name: 'Grande', price: 3.0, selected: false, type: 'size' },
-			{ id: 4, name: 'Fromage', price: 1.0, selected: false, type: 'supplement' },
-			{ id: 5, name: 'Double viande', price: 4.0, selected: false, type: 'supplement' },
-			{ id: 6, name: 'Sauce blanche', price: 1.0, selected: false, type: 'sauce' },
-			{ id: 7, name: 'Sauce harissa', price: 1.0, selected: false, type: 'sauce' },
-			{ id: 8, name: 'Sauce algerienne', price: 1.0, selected: false, type: 'sauce' },
-		]
-	}
-	@Input() inMenu: boolean = false;
+  private cartService = inject(CartService);
 
-	expanded = signal(false);
+  @Input() product!: Product;
+  @Input() inMenu: boolean = false;
 
-	ingredients = signal<Ingredient[]>([]);
-	extras = signal<Extra[]>([]);
+  @Output() customizationChange = new EventEmitter<{ ingredients: Ingredient[]; extras: Extra[] }>();
 
-	ngOnInit() {
-		this.ingredients.set([...this.product.ingredients]);
-		this.extras.set([...this.product.extras]);
-	}
+  expanded = signal(false);
+  ingredients = signal<Ingredient[]>([]);
+  extras = signal<Extra[]>([]);
+  addedFeedback = signal(false);
 
-	totalPrice = computed(() => {
-		const extrasTotal = this.extras()
-			.filter(e => e.selected)
-			.reduce((sum, e) => sum + e.price, 0)
+  ngOnInit() {
+    this.resetToDefaults();
+  }
 
-		return (this.product.price + extrasTotal).toFixed(2);
-	});
+  private resetToDefaults() {
+    this.ingredients.set(this.product.ingredients.map(i => ({ ...i })));
+    this.extras.set(this.product.extras.map(e => ({ ...e })));
+  }
 
-	get sizes() { return this.extras().filter(e => e.type === 'size'); }
-	get supplements() { return this.extras().filter(e => e.type === 'supplement'); }
-	get sauces() { return this.extras().filter(e => e.type === 'sauce'); }
+  totalPrice = computed(() => {
+    const extrasTotal = this.extras()
+      .filter(e => e.selected)
+      .reduce((sum, e) => sum + e.price, 0);
+    return (this.product.price + extrasTotal).toFixed(2);
+  });
 
-	toggleIngredient(id: number) {
-		this.ingredients.update(list =>
-			list.map(i => i.id === id ? { ...i, included: !i.included } : i)
-		);
-	}
+  get sizes() { return this.extras().filter(e => e.type === 'size'); }
+  get supplements() { return this.extras().filter(e => e.type === 'supplement'); }
+  get sauces() { return this.extras().filter(e => e.type === 'sauce'); }
 
-	toggleSize(id: number) {
-		this.extras.update(list =>
-			list.map(e => e.type === 'size' ? { ...e, selected: e.id === id } : e)
-		);
-	}
+  toggleIngredient(id: number) {
+    this.ingredients.update(list =>
+      list.map(i => i.id === id ? { ...i, included: !i.included } : i)
+    );
+    this.emitChange();
+  }
 
-	toggleExtra(id: number) {
-		this.extras.update(list =>
-			list.map(e => e.id === id ? { ...e, selected: !e.selected } : e)
-		);
-	}
+  toggleSize(id: number) {
+    this.extras.update(list =>
+      list.map(e => e.type === 'size' ? { ...e, selected: e.id === id } : e)
+    );
+    this.emitChange();
+  }
 
-	fallbackImage(event: Event) {
-		(event.target as HTMLImageElement).src = '/assets/images/1.png';
-	}
-};
+  toggleExtra(id: number) {
+    this.extras.update(list =>
+      list.map(e => e.id === id ? { ...e, selected: !e.selected } : e)
+    );
+    this.emitChange();
+  }
+
+  private emitChange() {
+    if (this.inMenu) {
+      this.customizationChange.emit({
+        ingredients: this.ingredients(),
+        extras: this.extras(),
+      });
+    }
+  }
+
+  addToCart() {
+    this.cartService.addProduct(this.product, this.ingredients(), this.extras());
+    console.log('[CartService] localStorage updated :', JSON.parse(localStorage.getItem('cart_items') ?? '[]'));
+    this.addedFeedback.set(true);
+    // Après l'anim : reset la custom et ferme le panneau
+    setTimeout(() => {
+      this.addedFeedback.set(false);
+      this.expanded.set(false);
+      this.resetToDefaults();
+    }, 1200);
+  }
+
+  fallbackImage(event: Event) {
+    (event.target as HTMLImageElement).src = '/assets/images/1.png';
+  }
+}
