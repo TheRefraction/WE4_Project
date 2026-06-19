@@ -95,7 +95,16 @@ export class AccountRepository {
         `
             INSERT INTO account (first_name, last_name, email, phone, password_hash) 
             VALUES ($1, $2, $3, $4, $5) 
-            RETURNING *
+            RETURNING 
+                id,
+                first_name AS "firstName",
+                last_name AS "lastName",
+                email,
+                phone,
+                created_at AS "createdAt",
+                updated_at AS "updatedAt", 
+                loyalty_points AS "loyaltyPoints",
+                role
         `,
             [firstName, lastName, email.toLowerCase(), phone, passwordHash]
         );
@@ -139,13 +148,22 @@ export class AccountRepository {
         }
 
         if (fields.length === 0) return this.findById(id);
-
         values.push(id);
+        
         const res = await pgPool.query(
             `
                 UPDATE account SET ${fields.join(', ')} 
                 WHERE id = $${paramCount} 
-                RETURNING *
+                RETURNING 
+                    id,
+                    first_name AS "firstName",
+                    last_name AS "lastName",
+                    email,
+                    phone,
+                    created_at AS "createdAt",
+                    updated_at AS "updatedAt", 
+                    loyalty_points AS "loyaltyPoints",
+                    role
             `, 
                 values
         );

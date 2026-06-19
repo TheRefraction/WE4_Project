@@ -1,9 +1,7 @@
-import { CustomizationRepository} from '../repositories/customizationslot.repository';
+import { CustomizationRepository} from '../repositories/customization.repository';
 import {
     CreateCustomizationSlotDTO,
-    CreateCustomizationOptionDTO,
     CustomizationSlotResponse,
-    CustomizationOptionResponse
 } from '../models/customization.model';
 
 export class CustomizationService {
