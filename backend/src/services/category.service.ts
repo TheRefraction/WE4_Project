@@ -15,6 +15,12 @@ export class CategoryService {
         return Promise.all(categories.map((cat) => this.mapToResponse(cat)));
     }
 
+    async getAllByProductId(productId: number): Promise<CategoryResponse[]> {
+        const categories = await this.repo.findAllByProductId(productId);
+
+        return Promise.all(categories.map((cat) => this.mapToResponse(cat)));
+    }
+
     async getById(id: number): Promise<CategoryResponse> {
         const category = await this.repo.findById(id);
 

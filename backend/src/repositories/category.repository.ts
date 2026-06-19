@@ -30,6 +30,20 @@ export class CategoryRepository {
         return res.rows || [];
     }
 
+    async findAllByProductId(productId: number): Promise<CategoryResponse[]> {
+        const query = `
+            SELECT ${SELECT_FIELDS}
+            FROM category c
+            LEFT JOIN product_category pc ON c.id = pc.category_id
+            WHERE pc.product_id
+            GROUP BY c.id
+            ORDER BY c.name ASC
+        `;
+
+        const res = await pgPool.query(query, [productId]);
+        return res.rows || [];
+    }
+
     async findById(id: number): Promise<CategoryResponse | null> {
         const query = `
             SELECT ${SELECT_FIELDS}
