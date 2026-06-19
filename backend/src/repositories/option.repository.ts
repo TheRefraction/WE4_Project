@@ -14,7 +14,7 @@ const OPTION_FIELDS = `
 `;
 
 const RETURN_FIELDS = `
-    customization_slot_id AS "customizationSlotId", 
+    customization_slot_id AS "slotId", 
     product_id AS "productId", 
     price_delta AS "priceDelta", 
     is_default AS "isDefault", 
@@ -22,7 +22,6 @@ const RETURN_FIELDS = `
 `;
 
 export class CustomizationOptionRepository {
-    
     async findAllBySlotId(slotId: number): Promise<CustomizationOptionResponse[]> {
         const query = `
             SELECT 
@@ -122,8 +121,7 @@ export class CustomizationOptionRepository {
         return option;
     }
 
-
-    async deleteOption(slotId: number, productId: number): Promise<boolean> {
+    async delete(slotId: number, productId: number): Promise<boolean> {
         const query = 'DELETE FROM customization_slot_option WHERE customization_slot_id = $1 AND product_id = $2';
         const res = await pgPool.query(query, [slotId, productId]);
 

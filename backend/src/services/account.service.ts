@@ -1,10 +1,5 @@
 /**
  * account.service.ts
- * 
- * This file defines the AccountService class, which provides methods for handling business logic related to user accounts.
- * It interacts with the AccountRepository to perform database operations and includes methods for creating accounts, authenticating users, updating account information, and more.
- * The service also handles password hashing using bcrypt and JWT token generation for authentication.
- * By centralizing the business logic in this service layer, we can keep our controllers clean and focused on handling HTTP requests and responses.
  */
 
 import bcrypt from 'bcrypt';
@@ -16,34 +11,33 @@ import { CreateAccountDTO, UpdateAccountDTO, AccountResponse, Role } from '../mo
 import { AppError } from '../middlewares/error.middleware';
 
 export class AccountService {
-    private accountRepository: AccountRepository;
+    constructor(private repo: AccountRepository) {}
 
-    constructor() {
-        this.accountRepository = new AccountRepository();
-    }
-
-    async getAllAccounts(role?: Role): Promise<AccountResponse[]> {
-        const accounts = await this.accountRepository.findAll(role);
+    async getAll(role?: Role): Promise<AccountResponse[]> {
+        const accounts = await this.repo.findAll(role);
 
         return Promise.all(accounts.map((account) => this.mapToResponse(account)));
     }
 
-    async getAccountById(id: number): Promise<AccountResponse | null> {
-        const account = await this.accountRepository.findById(id);
+    async getById(id: number): Promise<AccountResponse | null> {
+        const account = await this.repo.findById(id);
         if (!account) throw new AppError('Account not found', 404);
 
         return this.mapToResponse(account);
     }
 
-    async getAccountByEmail(email: string): Promise<AccountResponse | null> {
-        const account = await this.accountRepository.findByEmail(email);
+    async getByEmail(email: string): Promise<AccountResponse | null> {
+        const account = await this.repo.findByEmail(email);
         if (!account) throw new AppError('Account not found', 404);
 
         return this.mapToResponse(account);
     }
 
-    async register(data: CreateAccountDTO) {
-        const existingAccount = await this.accountRepository.findByEmail(data.email);
+    async register(data: CreateAccountDTO): Promise<{ 
+        account: AccountResponse; 
+        token: string; 
+    }> {
+        const existingAccount = await this.repo.findByEmail(data.email);
 
         if (existingAccount) {
             throw new AppError('Email already in use', 409);
@@ -55,7 +49,7 @@ export class AccountService {
 
         const passwordHash = await bcrypt.hash(data.password, 10);
 
-        const account = await this.accountRepository.create({
+        const account = await this.repo.create({
             firstName: data.firstName,
             lastName: data.lastName,
             email: data.email,
@@ -72,8 +66,11 @@ export class AccountService {
         };
     }
 
-    async login(email: string, password: string) {
-        const account = await this.accountRepository.findByEmail(email);
+    async login(email: string, password: string): Promise<{ 
+        account: AccountResponse; 
+        token: string; 
+    }> {
+        const account = await this.repo.findByEmail(email);
 
         if (!account) {
             throw new AppError('Invalid email or password', 401);
@@ -94,14 +91,14 @@ export class AccountService {
         };
     }
 
-    async updateAccount(id: number, data: UpdateAccountDTO, requesterId: number): Promise<AccountResponse> {
-        const account = await this.accountRepository.findById(id);
+    async update(id: number, data: UpdateAccountDTO, requesterId: number): Promise<AccountResponse> {
+        const account = await this.repo.findById(id);
 
         if (!account) {
             throw new AppError('Account not found', 404);
         }
 
-        const requesterAccount = await this.accountRepository.findById(requesterId);
+        const requesterAccount = await this.repo.findById(requesterId);
 
         if (!requesterAccount) {
             throw new AppError('Requester account not found', 404);
@@ -137,26 +134,26 @@ export class AccountService {
         }
 
         if (data.email && data.email !== account.email) {
-            const existingAccount = await this.accountRepository.findByEmail(data.email);
+            const existingAccount = await this.repo.findByEmail(data.email);
             if (existingAccount) {
                 throw new AppError('Email already in use', 409);
             }
         }
 
-        const updatedAccount = await this.accountRepository.update(id, data);
+        const updatedAccount = await this.repo.update(id, data);
         if (!updatedAccount) throw new AppError('Failed to update account', 500);
 
         return this.mapToResponse(updatedAccount);
     }
 
-    async deleteAccount(id: number, requesterId: number) {
-        const account = await this.accountRepository.findById(id);
+    async delete(id: number, requesterId: number): Promise<{ success: boolean }> {
+        const account = await this.repo.findById(id);
 
         if (!account) {
             throw new AppError('Account not found', 404);
         }
 
-        const requesterAccount = await this.accountRepository.findById(requesterId);
+        const requesterAccount = await this.repo.findById(requesterId);
 
         if (!requesterAccount) {
             throw new AppError('Requester account not found', 404);
@@ -168,10 +165,10 @@ export class AccountService {
             throw new AppError('Permission denied', 403);
         }
 
-        const success = await this.accountRepository.delete(id);
+        const success = await this.repo.delete(id);
         if (!success) throw new AppError('Failed to delete account', 500);
 
-        return { success: true };
+        return { success: success };
     }
 
     private generateToken(account: AccountResponse): string {
@@ -194,7 +191,7 @@ export class AccountService {
             firstName: account.firstName,
             lastName: account.lastName,
             email: account.email,
-            phone: account.phone,
+            phone: account.phone ?? null,
             createdAt: account.createdAt,
             updatedAt: account.updatedAt,
             loyaltyPoints: account.loyaltyPoints,

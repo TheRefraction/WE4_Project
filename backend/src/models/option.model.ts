@@ -15,6 +15,6 @@ export type CreateCustomizationOptionDTO = CustomizationOption;
 export type UpdateCustomizationOptionDTO = Pick<CustomizationOption, 'productId'> & 
     Partial<Omit<CustomizationOption, 'slotId' | 'productId'>>;
 
-export interface CustomizationOptionResponse extends Omit<CustomizationOption, 'slotId'> {
+export interface CustomizationOptionResponse extends CustomizationOption {
     name?: string;
 }
