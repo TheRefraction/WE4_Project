@@ -1,39 +1,26 @@
+/**
+ * product.model.ts 
+ */
+
+import { CategoryResponse } from "./category.model";
+import { CustomizationSlotResponse } from "./customization.model";
+import { SupplierResponse } from "./supplier.model";
+
 export interface Product {
     id: number;
     name: string;
-    description: string | null;
+    description?: string;
     price: number;
-    supplier_id: number | null;
+    supplierId?: number;
     hidden: boolean;
 }
 
-export interface CreateProductDTO {
-    name: string;
-    description?: string | null;
-    price: number;
-    supplier_id: number | null;
-    hidden?: boolean;
-    categoryIds: number[];
-}
+export type CreateProductDTO = Omit<Product, 'id'> & { categoryIds?: number[] };
 
-export interface UpdateProductDTO {
-    name?: string;
-    description?: string | null;
-    price?: number;
-    supplier_id?: number | null;
-    hidden?: boolean;
-    categoryIds?: number[]; 
-}
+export type UpdateProductDTO = Partial<Omit<Product, 'id'>> & { categoryIds?: number[] };
 
-export interface ProductResponse {
-    id: number;
-    name: string;
-    description: string | null;
-    price: number;
-    supplierId: number | null; 
-    hidden: boolean;
-    supplierName?: string | null;
-    categories?: string | null; 
-    supplierEmail?: string | null;
-    supplierPhone?: string | null;
+export interface ProductResponse extends Product {
+    customizations?: CustomizationSlotResponse[];
+    categories?: CategoryResponse[];
+    supplier?: SupplierResponse;
 }

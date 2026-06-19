@@ -1,22 +1,16 @@
 /**
- * category.model.ts
+ * category.model.ts 
  */
 
 export interface Category {
-    id: number;
+    readonly id: number;
     name: string;
 }
 
-export interface CreateCategoryDTO {
-    name: string;
-}
+export type CreateCategoryDTO = Omit<Category, 'id'>;
 
-export interface UpdateCategoryDTO {
-    name: string;
-}
+export type UpdateCategoryDTO = Partial<Omit<Category, 'id'>>;
 
-export interface CategoryResponse {
-    id: number;
-    name: string;
+export interface CategoryResponse extends Category {
     productCount?: number;
 }

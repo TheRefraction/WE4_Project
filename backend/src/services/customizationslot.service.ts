@@ -4,7 +4,7 @@ import {
     CreateCustomizationOptionDTO,
     CustomizationSlotResponse,
     CustomizationOptionResponse
-} from '../models/customizationslot.model';
+} from '../models/customization.model';
 
 export class CustomizationService {
     private customizationRepository: CustomizationRepository;

@@ -1,5 +1,5 @@
 import { pgPool } from '../config/postgres';
-import { CustomizationSlot, CustomizationSlotOption, CreateCustomizationSlotDTO, CreateCustomizationOptionDTO } from '../models/customizationslot.model';
+import { CustomizationSlot, CustomizationSlotOption, CreateCustomizationSlotDTO, CreateCustomizationOptionDTO } from '../models/customization.model';
 
 export class CustomizationRepository {
 
