@@ -1,25 +1,43 @@
-export enum PaymentMode {
-    UNKNOWN = 'unknown',
-    CREDIT_CARD = 'credit_card',
-    BANK_NOTE = 'bank_note',
-    CASH = 'cash',
-    MEAL_VOUCHER = 'meal_voucher',
-    PAYPAL = 'paypal'
-}
+/**
+ * payment.model.ts
+ */
 
-export enum PaymentStatus {
-    UNKNOWN = 'unknown',
-    PENDING = 'pending',
-    PAID = 'paid',
-    FAILED = 'failed',
-    REFUNDED = 'refunded'
-}
+export const PaymentMode = {
+    Unknown: 'unknown',
+    CreditCard: 'credit_card',
+    BankNote: 'bank_note',
+    Cash: 'cash',
+    MealVoucher: 'meal_voucher',
+    Paypal: 'paypal'
+} as const;
+
+export type PaymentMode = typeof PaymentMode[keyof typeof PaymentMode];
+
+export const PaymentStatus = {
+    Unknown: 'unknown',
+    Pending: 'pending',
+    Paid: 'paid',
+    Failed: 'failed',
+    Refunded: 'refunded'
+} as const;
+
+export type PaymentStatus = typeof PaymentStatus[keyof typeof PaymentStatus];
 
 export interface Payment {
-    id?: number;
-    payment_date: Date;
+    id: number;
+    paymentDate: Date;
     mode: PaymentMode;
     status: PaymentStatus;
-    created_at?: Date;
-    updated_at?: Date;
+    createdAt: Date;
+    updatedAt: Date;
+}
+
+export interface CreatePaymentDTO {
+    mode: PaymentMode;
+}
+
+export interface UpdatePaymentDTO {
+    paymentDate?: Date;
+    mode?: PaymentMode;
+    status?: PaymentStatus;
 }

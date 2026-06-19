@@ -53,7 +53,7 @@ CREATE UNIQUE INDEX uc_email ON account (LOWER(email));
 
 CREATE TABLE IF NOT EXISTS payment (
     id SERIAL PRIMARY KEY,
-    payment_date TIMESTAMP NOT NULL,
+    payment_date TIMESTAMP DEFAULT NULL, -- Pas encore payé
     mode payment_mode_enum NOT NULL,
     status payment_status_enum NOT NULL DEFAULT 'pending',
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
