@@ -15,6 +15,12 @@ export class CustomizationService {
         return Promise.all(slots.map((opt) => this.mapToResponse(opt)));
     }
 
+    async getById(slotId: number): Promise<CustomizationSlotResponse> {
+        const slot = await this.repo.findById(slotId);
+
+        return this.mapToResponse(slot);
+    }
+
     async create(dto: CreateCustomizationSlotDTO): Promise<any> {
         const existingSlot = await this.repo.findByProductAndCategory(dto.productId, dto.categoryId);
 
