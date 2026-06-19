@@ -5,6 +5,7 @@ import productRoutes from './product.routes'
 import categoryRoutes from './category.routes'
 import customizationRoutes from './customizationslot.routes';
 import paymentRoutes from './payment.routes';
+import invoiceRoutes from './invoice.routes';
 
 const router = Router();
 
@@ -14,6 +15,7 @@ router.use('/api/suppliers', supplierRoutes);
 router.use('/api/products' , productRoutes)
 router.use('/api/categories' , categoryRoutes)
 router.use('/api/payments', paymentRoutes)
+router.use('/api/invoices', invoiceRoutes);
 
 
 
