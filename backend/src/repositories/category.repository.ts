@@ -3,15 +3,23 @@
  */
 
 import { pgPool } from '../config/postgres';
-import { Category, CategoryResponse, CreateCategoryDTO, UpdateCategoryDTO } from '../models/category.model';
+import { CategoryResponse, CreateCategoryDTO, UpdateCategoryDTO } from '../models/category.model';
+
+const SELECT_FIELDS = `
+    c.id, 
+    c.name, 
+    COALESCE(COUNT(pc.product_id)::int, 0) AS "productCount"
+`;
+
+const RETURN_FIELDS = `
+    id, 
+    name
+`;
 
 export class CategoryRepository {
     async findAll(): Promise<CategoryResponse[]> {
         const query = `
-            SELECT 
-                c.id, 
-                c.name, 
-                COALESCE(COUNT(pc.product_id)::int, 0) AS "productCount"
+            SELECT ${SELECT_FIELDS}
             FROM category c
             LEFT JOIN product_category pc ON c.id = pc.category_id
             GROUP BY c.id
@@ -24,10 +32,7 @@ export class CategoryRepository {
 
     async findById(id: number): Promise<CategoryResponse | null> {
         const query = `
-            SELECT 
-                c.id, 
-                c.name, 
-                COALESCE(COUNT(pc.product_id)::int, 0) AS "productCount"
+            SELECT ${SELECT_FIELDS}
             FROM category c
             LEFT JOIN product_category pc ON c.id = pc.category_id
             WHERE c.id = $1
@@ -36,15 +41,17 @@ export class CategoryRepository {
         `;
 
         const res = await pgPool.query(query, [id]);
-        return res.rows[0] || null;
+
+        if (!res.rows[0]) {
+            return null;
+        }
+
+        return res.rows[0];
     }
 
     async findByName(name: string): Promise<CategoryResponse | null> {
         const query = `
-            SELECT 
-                c.id, 
-                c.name, 
-                COALESCE(COUNT(pc.product_id)::int, 0) AS "productCount"
+            SELECT ${SELECT_FIELDS}
             FROM category c
             LEFT JOIN product_category pc ON c.id = pc.category_id
             WHERE LOWER(name) = LOWER($1)
@@ -53,7 +60,12 @@ export class CategoryRepository {
         `;
 
         const res = await pgPool.query(query, [name]);
-        return res.rows[0] || null;
+
+        if (!res.rows[0]) {
+            return null;
+        }
+
+        return res.rows[0];
     }
 
     async findCategoryIdsByProductId(productId: number): Promise<number[]> {
@@ -71,9 +83,7 @@ export class CategoryRepository {
         const query = `
             INSERT INTO category (name) 
             VALUES ($1) 
-            RETURNING 
-                id, 
-                name
+            RETURNING ${RETURN_FIELDS}
         `;
 
         const res = await pgPool.query(query, [data.name]);
@@ -87,12 +97,15 @@ export class CategoryRepository {
             UPDATE category 
             SET name = $1 
             WHERE id = $2 
-            RETURNING 
-                id, 
-                name
+            RETURNING ${RETURN_FIELDS}
         `;
 
         const res = await pgPool.query(query, [data.name, id]);
+
+        if (!res.rows[0]) {
+            return null;
+        }
+        
         const category : CategoryResponse = res.rows[0];
 
         return category || null;

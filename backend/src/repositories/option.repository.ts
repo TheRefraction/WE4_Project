@@ -1,77 +1,132 @@
+/**
+ * option.repository.ts
+ */
+
 import { pgPool } from '../config/postgres';
-import {  } from '../models/option.model';
+import { CustomizationOptionResponse, CreateCustomizationOptionDTO, UpdateCustomizationOptionDTO } from '../models/option.model';
 
-export class CustomizationOption {
-    async findOptionBySlotAndProduct(slotId: number, productId: number): Promise<any | null> {
-        const query = `
-            SELECT 
-                cso.customization_slot_id AS "customizationSlotId",
-                cso.product_id AS "productId",
-                cso.price_delta AS "priceDelta",
-                cso.is_default AS "isDefault",
-                cso.display_order AS "displayOrder",
-                p.name AS "optionProductName"
-            FROM customization_slot_option cso
-            LEFT JOIN product p ON cso.product_id = p.id
-            WHERE cso.customization_slot_id = $1 AND cso.product_id = $2
-        `;
-        const res = await pgPool.query(query, [slotId, productId]);
-        return res.rows[0] || null;
-    }
+const OPTION_FIELDS = `
+    cso.customization_slot_id AS "slotId",
+    cso.product_id AS "productId",
+    cso.price_delta AS "priceDelta",
+    cso.is_default AS "isDefault",
+    cso.display_order AS "displayOrder"
+`;
 
+const RETURN_FIELDS = `
+    customization_slot_id AS "customizationSlotId", 
+    product_id AS "productId", 
+    price_delta AS "priceDelta", 
+    is_default AS "isDefault", 
+    display_order AS "displayOrder"
+`;
+
+export class CustomizationOptionRepository {
     
-
-    async findOptionsBySlotId(slotId: number): Promise<any[]> {
+    async findAllBySlotId(slotId: number): Promise<CustomizationOptionResponse[]> {
         const query = `
             SELECT 
-                cso.customization_slot_id AS "customizationSlotId",
-                cso.product_id AS "productId",
-                p.name AS "optionProductName",
-                p.price AS "basePrice",
-                cso.price_delta AS "priceDelta",
-                cso.is_default AS "isDefault",
-                cso.display_order AS "displayOrder"
+                ${OPTION_FIELDS},
+                p.name AS "name"
             FROM customization_slot_option cso
             LEFT JOIN product p ON cso.product_id = p.id
             WHERE cso.customization_slot_id = $1
             ORDER BY cso.display_order ASC
         `;
+
         const res = await pgPool.query(query, [slotId]);
         return res.rows || [];
     }
-    
-    async createOption(slotId: number, data: CreateCustomizationOptionDTO): Promise<CustomizationSlotOption> {
+
+    async findBySlotAndProduct(slotId: number, productId: number): Promise<CustomizationOptionResponse | null> {
         const query = `
-            INSERT INTO customization_slot_option (customization_slot_id, product_id, price_delta, is_default, display_order)
-            VALUES ($1, $2, $3, $4, $5)
-            RETURNING customization_slot_id AS "customizationSlotId", product_id AS "productId", price_delta AS "priceDelta", is_default AS "isDefault", display_order AS "displayOrder"
+            SELECT 
+                ${OPTION_FIELDS},
+                p.name AS "name"
+            FROM customization_slot_option cso
+            LEFT JOIN product p ON cso.product_id = p.id
+            WHERE cso.customization_slot_id = $1 AND cso.product_id = $2
         `;
-        const res = await pgPool.query(query, [
-            slotId,
-            data.product_id,
-            data.price_delta ?? 0,
-            data.is_default ?? false,
-            data.display_order ?? 0
-        ]);
+
+        const res = await pgPool.query(query, [slotId, productId]);
+
+        if (!res.rows[0]) {
+            return null;
+        }
+
         return res.rows[0];
     }
 
+    async create(slotId: number, data: CreateCustomizationOptionDTO): Promise<CustomizationOptionResponse> {
+        const {
+            productId,
+            priceDelta,
+            isDefault,
+            displayOrder
+        } = data;
 
-    async updateOption(slotId: number, productId: number, priceDelta: number, isDefault: boolean, displayOrder: number): Promise<CustomizationSlotOption | null> {
         const query = `
-            UPDATE customization_slot_option
-            SET price_delta = $1, is_default = $2, display_order = $3
-            WHERE customization_slot_id = $4 AND product_id = $5
-            RETURNING customization_slot_id AS "customizationSlotId", product_id AS "productId", price_delta AS "priceDelta", is_default AS "isDefault", display_order AS "displayOrder"
+            INSERT INTO customization_slot_option (customization_slot_id, product_id, price_delta, is_default, display_order)
+            VALUES ($1, $2, $3, $4, $5)
+            RETURNING ${RETURN_FIELDS}
         `;
-        const res = await pgPool.query(query, [priceDelta, isDefault, displayOrder, slotId, productId]);
-        return res.rows[0] || null;
+
+        const res = await pgPool.query(query, [slotId, productId, priceDelta, isDefault, displayOrder]);
+        const option : CustomizationOptionResponse = res.rows[0];
+
+        return option;
+    }
+
+    async update(slotId: number, data: UpdateCustomizationOptionDTO): Promise<CustomizationOptionResponse | null> {
+        const fields = [];
+        const values = [];
+        let paramCount = 1;
+
+        if (data.productId === undefined) return null; // Cannot update nothing
+
+        fields.push(`product_id = $${paramCount++}`);
+        values.push(data.productId);
+
+        if (data.priceDelta !== undefined) {
+            fields.push(`price_delta = $${paramCount++}`);
+            values.push(data.priceDelta);
+        }
+
+        if (data.isDefault !== undefined) {
+            fields.push(`is_default = $${paramCount++}`);
+            values.push(data.isDefault);
+        }
+
+        if (data.displayOrder !== undefined) {
+            fields.push(`display_order = $${paramCount++}`);
+            values.push(data.displayOrder);
+        }
+
+        if (fields.length === 1) return this.findBySlotAndProduct(slotId, data.productId);
+        values.push(slotId);
+
+        const query = `
+            UPDATE customization_slot_option SET ${fields.join(', ')} 
+            WHERE customization_slot_id = $${paramCount} AND product_id = $1
+            RETURNING ${RETURN_FIELDS}
+        `;
+
+        const res = await pgPool.query(query, values);
+
+        if (!res.rows[0]) {
+            return null;
+        }
+
+        const option : CustomizationOptionResponse = res.rows[0];
+
+        return option;
     }
 
 
     async deleteOption(slotId: number, productId: number): Promise<boolean> {
         const query = 'DELETE FROM customization_slot_option WHERE customization_slot_id = $1 AND product_id = $2';
         const res = await pgPool.query(query, [slotId, productId]);
+
         return (res.rowCount ?? 0) > 0;
     }
 }

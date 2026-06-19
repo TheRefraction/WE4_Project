@@ -1,29 +1,39 @@
 /**
  * account.repository.ts
- * 
- * This file defines the AccountRepository class, which provides methods for interacting with the accounts table in the PostgreSQL database.
- * It uses the pgPool from the PostgreSQL configuration to execute SQL queries.
- * The repository provides methods to find accounts by various criteria, create new accounts, update existing accounts, and delete accounts.
- * It abstracts away the database interactions from the service layer, allowing for cleaner and more maintainable code.
  */
 
 import { pgPool } from '../config/postgres';
 import { Account, UpdateAccountDTO, Role } from '../models/account.model';
 
+const SELECT_FIELDS = `
+    id, 
+    first_name AS "firstName", 
+    last_name AS "lastName", 
+    email, 
+    phone, 
+    password_hash AS "passwordHash",
+    created_at AS "createdAt",
+    updated_at AS "updatedAt", 
+    loyalty_points AS "loyaltyPoints", 
+    role
+`;
+
+const RETURN_FIELDS = `
+    id,
+    first_name AS "firstName",
+    last_name AS "lastName",
+    email,
+    phone,
+    created_at AS "createdAt",
+    updated_at AS "updatedAt", 
+    loyalty_points AS "loyaltyPoints",
+    role
+`;
+
 export class AccountRepository {
     async findAll(role?: Role): Promise<Account[]> {
         let query = `
-            SELECT 
-                id, 
-                first_name AS "firstName", 
-                last_name AS "lastName", 
-                email, 
-                phone, 
-                password_hash AS "passwordHash",
-                created_at AS "createdAt",
-                updated_at AS "updatedAt", 
-                loyalty_points AS "loyaltyPoints", 
-                role
+            SELECT ${SELECT_FIELDS}
             FROM account 
         `;
         
@@ -42,44 +52,34 @@ export class AccountRepository {
 
     async findById(id: number): Promise<Account | null> {
         const query = `
-            SELECT 
-                id, 
-                first_name AS "firstName", 
-                last_name AS "lastName", 
-                email, 
-                phone, 
-                password_hash AS "passwordHash",
-                created_at AS "createdAt",
-                updated_at AS "updatedAt", 
-                loyalty_points AS "loyaltyPoints", 
-                role
+            SELECT ${SELECT_FIELDS}
             FROM account 
             WHERE id = $1
         `;
 
         const res = await pgPool.query(query, [id]);
-        return res.rows[0] || null;
+
+        if (!res.rows[0]) {
+            return null;
+        }
+
+        return res.rows[0];
     }
 
     async findByEmail(email: string): Promise<Account | null> {
         const query = `
-            SELECT 
-                id, 
-                first_name AS "firstName", 
-                last_name AS "lastName", 
-                email, 
-                phone, 
-                password_hash AS "passwordHash",
-                created_at AS "createdAt",
-                updated_at AS "updatedAt", 
-                loyalty_points AS "loyaltyPoints", 
-                role
+            SELECT ${SELECT_FIELDS}
             FROM account 
             WHERE email = $1
         `;
 
         const res = await pgPool.query(query, [email]);
-        return res.rows[0] || null;
+
+        if (!res.rows[0]) {
+            return null;
+        }
+
+        return res.rows[0];
     }
 
     async create(data: Omit<Account, 'id' | 'createdAt' | 'updatedAt' | 'loyaltyPoints' | 'role'>): Promise<Account> {
@@ -95,16 +95,7 @@ export class AccountRepository {
         `
             INSERT INTO account (first_name, last_name, email, phone, password_hash) 
             VALUES ($1, $2, $3, $4, $5) 
-            RETURNING 
-                id,
-                first_name AS "firstName",
-                last_name AS "lastName",
-                email,
-                phone,
-                created_at AS "createdAt",
-                updated_at AS "updatedAt", 
-                loyalty_points AS "loyaltyPoints",
-                role
+            RETURNING ${RETURN_FIELDS}
         `,
             [firstName, lastName, email.toLowerCase(), phone, passwordHash]
         );
@@ -154,21 +145,16 @@ export class AccountRepository {
             `
                 UPDATE account SET ${fields.join(', ')} 
                 WHERE id = $${paramCount} 
-                RETURNING 
-                    id,
-                    first_name AS "firstName",
-                    last_name AS "lastName",
-                    email,
-                    phone,
-                    created_at AS "createdAt",
-                    updated_at AS "updatedAt", 
-                    loyalty_points AS "loyaltyPoints",
-                    role
+                RETURNING ${RETURN_FIELDS}
             `, 
                 values
         );
 
-        return res.rows[0] || null;
+        if (!res.rows[0]) {
+            return null;
+        }
+
+        return res.rows[0];
     }
 
     async delete(id: number): Promise<boolean> {

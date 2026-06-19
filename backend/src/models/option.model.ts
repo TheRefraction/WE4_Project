@@ -12,9 +12,9 @@ export interface CustomizationOption {
 
 export type CreateCustomizationOptionDTO = CustomizationOption;
 
-export type UpdateCustomizationOptionDTO = Partial<Omit<CustomizationOption, 'slotId'>>;
+export type UpdateCustomizationOptionDTO = Pick<CustomizationOption, 'productId'> & 
+    Partial<Omit<CustomizationOption, 'slotId' | 'productId'>>;
 
 export interface CustomizationOptionResponse extends Omit<CustomizationOption, 'slotId'> {
-    name: string;
-    price: number;
+    name?: string;
 }

@@ -3,20 +3,25 @@
  */
 
 import { pgPool } from '../config/postgres';
-import { Supplier, SupplierResponse, CreateSupplierDTO, UpdateSupplierDTO } from '../models/supplier.model';
+import { SupplierResponse, CreateSupplierDTO, UpdateSupplierDTO } from '../models/supplier.model';
+
+const SELECT_FIELDS = `
+    id, 
+    name, 
+    contact_info AS "contactInfo"
+`;
+
+const RETURN_FIELDS = `
+    id, 
+    name, 
+    contact_info AS "contactInfo"
+`;
 
 export class SupplierRepository {
     async findAll(): Promise<SupplierResponse[]> {
         const query = `
-            SELECT 
-                s.id, 
-                s.name, 
-                s.contact_info AS "contactInfo", 
-                COALESCE(COUNT(p.id)::int, 0) AS "productCount"
-            FROM supplier s
-            LEFT JOIN product p ON s.id = p.supplier_id
-            GROUP BY s.id
-            ORDER BY s.name ASC
+            SELECT ${SELECT_FIELDS}
+            FROM supplier
         `;
 
         const res = await pgPool.query(query);
@@ -25,16 +30,9 @@ export class SupplierRepository {
 
     async findById(id: number): Promise<SupplierResponse | null> {
         const query = `
-            SELECT 
-                s.id, 
-                s.name, 
-                s.contact_info AS "contactInfo", 
-                COALESCE(COUNT(p.id)::int, 0) AS "productCount"
-            FROM supplier s
-            LEFT JOIN product p ON s.id = p.supplier_id
-            WHERE s.id = $1
-            GROUP BY s.id
-            ORDER BY s.name ASC
+            SELECT ${SELECT_FIELDS}
+            FROM supplier 
+            WHERE id = $1
         `;
 
         const res = await pgPool.query(query, [id]);
@@ -43,16 +41,9 @@ export class SupplierRepository {
 
     async findByName(name: string): Promise<SupplierResponse | null> {
         const query = `
-            SELECT 
-                s.id, 
-                s.name, 
-                s.contact_info AS "contactInfo", 
-                COALESCE(COUNT(p.id)::int, 0) AS "productCount"
-            FROM supplier s
-            LEFT JOIN product p ON s.id = p.supplier_id
-            WHERE s.name = $1
-            GROUP BY s.id
-            ORDER BY s.name ASC
+            SELECT ${SELECT_FIELDS}
+            FROM supplier
+            WHERE name = $1
         `;
 
         const res = await pgPool.query(query, [name]);
@@ -68,10 +59,7 @@ export class SupplierRepository {
         const query = `
             INSERT INTO supplier (name, contact_info) 
             VALUES ($1, $2) 
-            RETURNING 
-                id, 
-                name, 
-                contact_info AS "contactInfo"
+            RETURNING ${RETURN_FIELDS}
         `;
 
         const res = await pgPool.query(query, [name, JSON.stringify(contactInfo)]);
@@ -101,16 +89,13 @@ export class SupplierRepository {
         const query = `
             UPDATE supplier SET ${fields.join(', ')} 
             WHERE id = $${paramCount} 
-            RETURNING 
-                id, 
-                name, 
-                contact_info AS "contactInfo"
+            RETURNING ${RETURN_FIELDS}
         `;
 
         const res = await pgPool.query(query, values);
         const supplier : SupplierResponse = res.rows[0];
 
-        return supplier|| null;
+        return supplier || null;
     }
 
     async delete(id: number): Promise<boolean> {
@@ -120,7 +105,12 @@ export class SupplierRepository {
     }
 
     async countDependencies(supplierId: number): Promise<number> {
-        const query = 'SELECT COALESCE(COUNT(*)::int, 0) FROM product WHERE supplier_id = $1';
+        const query = `
+            SELECT COALESCE(COUNT(*)::int, 0) 
+            FROM product 
+            WHERE supplier_id = $1
+        `;
+
         const res = await pgPool.query(query, [supplierId]);
 
         return res.rows[0]?.count || 0;

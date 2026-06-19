@@ -1,7 +1,3 @@
-/**
- * payment.repository.ts
- */
-
 import { pgPool } from '../config/postgres';
 import { Payment, UpdatePaymentDTO } from '../models/payment.model'
 

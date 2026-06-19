@@ -22,7 +22,5 @@ export type CreateCustomizationSlotDTO = Omit<CustomizationSlot, 'id'>;
 export type UpdateCustomizationSlotDTO = Partial<Omit<CustomizationSlot, 'id'>>;
 
 export interface CustomizationSlotResponse extends CustomizationSlot {
-    productName: string;
-    categoryName: string;
     options?: CustomizationOptionResponse[]; 
 }

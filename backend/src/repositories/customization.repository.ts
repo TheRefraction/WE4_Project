@@ -1,22 +1,34 @@
-import { pgPool } from '../config/postgres';
-import { CustomizationSlot, CustomizationSlotResponse } from '../models/customization.model';
+/**
+ * customization.repository.ts
+ */
 
-export class CustomizationRepository {
-    async findAllSlots(): Promise<CustomizationSlotResponse[]> {
+import { pgPool } from '../config/postgres';
+import { CustomizationSlotResponse, CreateCustomizationSlotDTO, UpdateCustomizationSlotDTO } from '../models/customization.model';
+
+const SELECT_FIELDS = `
+    id,
+    product_id AS "productId",
+    category_id AS "categoryId",
+    min_select AS "minSelect",
+    max_select AS "maxSelect",
+    display_order AS "displayOrder"
+`;
+
+const RETURN_FIELDS = `
+    id, 
+    product_id AS "productId", 
+    category_id AS "categoryId", 
+    min_select AS "minSelect", 
+    max_select AS "maxSelect", 
+    display_order AS "displayOrder"
+`;
+
+export class CustomizationSlotRepository {
+    async findAll(): Promise<CustomizationSlotResponse[]> {
         const query = `
-            SELECT 
-                cs.id,
-                cs.product_id AS "productId",
-                cs.category_id AS "categoryId",
-                cs.min_select AS "minSelect",
-                cs.max_select AS "maxSelect",
-                cs.display_order AS "displayOrder",
-                p.name AS "productName",
-                c.name AS "categoryName"
-            FROM customization_slot cs
-            LEFT JOIN product p ON cs.product_id = p.id
-            LEFT JOIN category c ON cs.category_id = c.id
-            ORDER BY p.name, c.name, cs.display_order
+            SELECT ${SELECT_FIELDS}
+            FROM customization_slot
+            ORDER BY display_order
         `;
 
         const res = await pgPool.query(query);
@@ -25,35 +37,12 @@ export class CustomizationRepository {
         return slots || [];
     }
 
-    async findAllWithDetails(): Promise<CustomizationSlotResponse[]> {
-        const slots = await this.findAllSlots();
-        
-        return Promise.all(slots.map(async (slot) => {
-            const options = await this.optionRepository.findBySlotId(slot.id);
-            
-            return {
-                ...slot,
-                options: options || [] 
-            };
-        }));
-    }
-
-    async findSlotsByProductId(productId: number): Promise<CustomizationSlotResponse[]> {
+    async findAllByProductId(productId: number): Promise<CustomizationSlotResponse[]> {
         const query = `
-            SELECT 
-                cs.id,
-                cs.product_id AS "productId",
-                cs.category_id AS "categoryId",
-                cs.min_select AS "minSelect",
-                cs.max_select AS "maxSelect",
-                cs.display_order AS "displayOrder",
-                p.name AS "productName",
-                c.name AS "categoryName"
-            FROM customization_slot cs
-            LEFT JOIN product p ON cs.product_id = p.id
-            LEFT JOIN category c ON cs.category_id = c.id
-            WHERE cs.product_id = $1
-            ORDER BY cs.display_order ASC
+            SELECT ${SELECT_FIELDS}
+            FROM customization_slot
+            WHERE product_id = $1
+            ORDER BY display_order
         `;
 
         const res = await pgPool.query(query, [productId]);
@@ -62,75 +51,112 @@ export class CustomizationRepository {
         return slots || [];
     }
 
-    async findSlotById(id: number): Promise<any | null> {
+    async findById(id: number): Promise<CustomizationSlotResponse | null> {
         const query = `
-            SELECT 
-                cs.id,
-                cs.product_id AS "productId",
-                cs.category_id AS "categoryId",
-                cs.min_select AS "minSelect",
-                cs.max_select AS "maxSelect",
-                cs.display_order AS "displayOrder",
-                p.name AS "productName",
-                c.name AS "categoryName"
-            FROM customization_slot cs
-            LEFT JOIN product p ON cs.product_id = p.id
-            LEFT JOIN category c ON cs.category_id = c.id
-            WHERE cs.id = $1
+            SELECT ${SELECT_FIELDS}
+            FROM customization_slot 
+            WHERE id = $1
         `;
+
         const res = await pgPool.query(query, [id]);
-        return res.rows[0] || null;
+
+        if (!res.rows[0]) {
+            return null;
+        }
+
+        const slot : CustomizationSlotResponse = res.rows[0];
+        return slot;
     }
 
-
-    async findSlotByProductAndCategory(productId: number, categoryId: number): Promise<CustomizationSlot | null> {
+    async findByProductAndCategory(productId: number, categoryId: number): Promise<CustomizationSlotResponse | null> {
         const query = `
-            SELECT 
-                id, 
-                product_id AS "productId", 
-                category_id AS "categoryId", 
-                min_select AS "minSelect", 
-                max_select AS "maxSelect", 
-                display_order AS "displayOrder"
+            SELECT ${SELECT_FIELDS}
             FROM customization_slot
             WHERE product_id = $1 AND category_id = $2
         `;
+
         const res = await pgPool.query(query, [productId, categoryId]);
-        return res.rows[0] || null;
+
+        if (!res.rows[0]) {
+            return null;
+        }
+
+        const slot : CustomizationSlotResponse = res.rows[0];
+        return slot;
     }
 
+    async create(data: CreateCustomizationSlotDTO): Promise<CustomizationSlotResponse> {
+        const {
+            productId,
+            categoryId,
+            minSelect,
+            maxSelect,
+            displayOrder
+        } = data;
 
-    async createSlot(data: CreateCustomizationSlotDTO): Promise<CustomizationSlot> {
         const query = `
             INSERT INTO customization_slot (product_id, category_id, min_select, max_select, display_order)
             VALUES ($1, $2, $3, $4, $5)
-            RETURNING id, product_id AS "productId", category_id AS "categoryId", min_select AS "minSelect", max_select AS "maxSelect", display_order AS "displayOrder"
+            RETURNING ${RETURN_FIELDS}
         `;
-        const res = await pgPool.query(query, [
-            data.product_id,
-            data.category_id,
-            data.min_select ?? 0,
-            data.max_select ?? 1,
-            data.display_order ?? 0
-        ]);
-        return res.rows[0];
+
+        const res = await pgPool.query(query, [productId, categoryId, minSelect, maxSelect, displayOrder]);
+        const slot : CustomizationSlotResponse = res.rows[0];
+
+        return slot;
     }
 
+    async update(id: number, data: UpdateCustomizationSlotDTO): Promise<CustomizationSlotResponse | null> {
+        const fields = [];
+        const values = [];
+        let paramCount = 1;
 
-    async updateSlot(id: number, minSelect: number, maxSelect: number, displayOrder: number): Promise<CustomizationSlot | null> {
+        if (data.productId !== undefined) {
+            fields.push(`product_id = $${paramCount++}`);
+            values.push(data.productId);
+        }
+
+        if (data.categoryId !== undefined) {
+            fields.push(`category_id = $${paramCount++}`);
+            values.push(data.categoryId);
+        }
+
+        if (data.minSelect !== undefined) {
+            fields.push(`min_select = $${paramCount++}`);
+            values.push(data.minSelect);
+        }
+
+        if (data.maxSelect !== undefined) {
+            fields.push(`max_select = $${paramCount++}`);
+            values.push(data.maxSelect);
+        }
+
+        if (data.displayOrder !== undefined) {
+            fields.push(`display_order = $${paramCount++}`);
+            values.push(data.displayOrder);
+        }
+
+        if (fields.length === 0) return this.findById(id);
+        values.push(id);
+
         const query = `
-            UPDATE customization_slot
-            SET min_select = $1, max_select = $2, display_order = $3
-            WHERE id = $4
-            RETURNING id, product_id AS "productId", category_id AS "categoryId", min_select AS "minSelect", max_select AS "maxSelect", display_order AS "displayOrder"
+            UPDATE customization_slot SET ${fields.join(', ')} 
+            WHERE id = $${paramCount}
+            RETURNING ${RETURN_FIELDS}
         `;
-        const res = await pgPool.query(query, [minSelect, maxSelect, displayOrder, id]);
-        return res.rows[0] || null;
+
+        const res = await pgPool.query(query, values);
+
+        if (!res.rows[0]) {
+            return null;
+        }
+
+        const slot : CustomizationSlotResponse = res.rows[0];
+
+        return slot;
     }
 
-
-
-    async deleteSlot(id: number): Promise<boolean> {
+    async delete(id: number): Promise<boolean> {
         const res = await pgPool.query('DELETE FROM customization_slot WHERE id = $1', [id]);
         return (res.rowCount ?? 0) > 0;
     }

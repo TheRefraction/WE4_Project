@@ -15,9 +15,9 @@ export interface Product {
     hidden: boolean;
 }
 
-export type CreateProductDTO = Omit<Product, 'id'> & { categoryIds?: number[] };
+export type CreateProductDTO = Omit<Product, 'id'>;
 
-export type UpdateProductDTO = Partial<Omit<Product, 'id'>> & { categoryIds?: number[] };
+export type UpdateProductDTO = Partial<Omit<Product, 'id'>>;
 
 export interface ProductResponse extends Product {
     customizations?: CustomizationSlotResponse[];
