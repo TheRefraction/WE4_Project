@@ -1,0 +1,54 @@
+<div class="auth-page">
+  <div class="auth-container">
+    <div class="auth-header">
+      <span class="auth-eyebrow">Bienvenue</span>
+      <h1 class="auth-title">Connexion</h1>
+      <p class="auth-sub">Rejoignez l’effervescence <span class="highlight">Effes</span></p>
+    </div>
+
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="auth-form">
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input
+          id="email"
+          type="email"
+          formControlName="email"
+          placeholder="votre@email.com"
+          [class.is-invalid]="email?.invalid && email?.touched"
+        />
+        <div class="invalid-feedback" *ngIf="email?.invalid && email?.touched">
+          <span *ngIf="email?.errors?.['required']">L’email est requis</span>
+          <span *ngIf="email?.errors?.['email']">Format d’email invalide</span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="password">Mot de passe</label>
+        <input
+          id="password"
+          type="password"
+          formControlName="password"
+          placeholder="••••••••"
+          [class.is-invalid]="password?.invalid && password?.touched"
+        />
+        <div class="invalid-feedback" *ngIf="password?.invalid && password?.touched">
+          <span *ngIf="password?.errors?.['required']">Le mot de passe est requis</span>
+          <span *ngIf="password?.errors?.['minlength']">6 caractères minimum</span>
+        </div>
+      </div>
+
+      <!-- Erreur globale -->
+      <div class="alert alert-danger" *ngIf="errorMessage">
+        {{ errorMessage }}
+      </div>
+
+      <button type="submit" class="btn-primary" [disabled]="loading">
+        {{ loading ? 'Connexion...' : 'Se connecter' }}
+      </button>
+
+      <p class="auth-switch">
+        Pas encore de compte ? <a routerLink="/register">Inscrivez-vous</a>
+      </p>
+    </form>
+  </div>
+</div>

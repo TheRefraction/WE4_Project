@@ -34,8 +34,8 @@ export class OptionService {
 
     async update(slotId: number, data: UpdateCustomizationOptionDTO): Promise<CustomizationOptionResponse> {
         const exisiting = await this.repo.findBySlotAndProduct(slotId, data.productId);
-        if (exisiting) {
-            throw new AppError('Option already exists', HttpStatus.CONFLICT);
+        if (!exisiting) {
+            throw new AppError('Option not found', HttpStatus.NOT_FOUND);
         }
 
         if (data.displayOrder && data.displayOrder < 0) {
@@ -62,7 +62,7 @@ export class OptionService {
 
         const success = await this.repo.delete(slotId, productId);
         if (!success) {
-            throw new AppError('Failed to delete supplier', HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new AppError('Failed to delete option', HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
         return { success: true };

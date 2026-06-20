@@ -28,9 +28,20 @@ export class PaymentService {
     }
 
     async create(data: CreatePaymentDTO) {
+        let dbMode: any = data.mode;
+        if ((data.mode as any) === 'card') {
+            dbMode = 'credit_card';
+        }
+
         const payment = await this.repository.create({
-            mode: data.mode
+            mode: dbMode,
+            status: data.status || 'paid',
+            paymentDate: data.paymentDate || new Date()
         });
+
+        if (data.invoiceId) {
+            await this.repository.linkInvoice(data.invoiceId, payment.id, 'paid');
+        }
 
         const paymentResponse = await this.mapToResponse(payment);
 
@@ -67,11 +78,11 @@ export class PaymentService {
     private async mapToResponse(payment: any): Promise<Payment> {
         return {
             id: payment.id,
-            paymentDate: payment.paymentDate,
+            paymentDate: payment.paymentDate || payment.PaymentDate || payment.payment_date,
             mode: payment.mode,
             status: payment.status,
-            createdAt: payment.createdAt,
-            updatedAt: payment.updatedAt
+            createdAt: payment.createdAt || payment.CreatedAt || payment.created_at,
+            updatedAt: payment.updatedAt || payment.UpdatedAt || payment.updated_at
         };
     }
 }

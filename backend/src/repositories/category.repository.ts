@@ -35,7 +35,7 @@ export class CategoryRepository {
             SELECT ${SELECT_FIELDS}
             FROM category c
             LEFT JOIN product_category pc ON c.id = pc.category_id
-            WHERE pc.product_id
+            WHERE pc.product_id = $1
             GROUP BY c.id
             ORDER BY c.name ASC
         `;

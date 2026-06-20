@@ -1,6 +1,6 @@
 import { Injectable, signal, computed } from '@angular/core';
-import { Product, Ingredient, Extra } from '../components/product-card.component';
-import { Menu } from '../components/menu-card.component';
+import { Product, Ingredient, Extra } from '../components/product-card/product-card.component';
+import { Menu } from '../components/menu-card/menu-card.component';
 
 
 export interface CartProductEntry {
@@ -9,6 +9,7 @@ export interface CartProductEntry {
   description: string;
   image: string;
   price: number;
+  basePrice: number;
   customization: {
     ingredients: Ingredient[];
     extras: Extra[];
@@ -16,8 +17,11 @@ export interface CartProductEntry {
 }
 
 export interface CartMenuCustomization {
+  slotId: number;
+  slotName: string;
   productId: number;
   productName: string;
+  priceDelta: number;
   ingredients: Ingredient[];
   extras: Extra[];
 }
@@ -82,6 +86,7 @@ export class CartService {
     return `m_${this.hash({
       menuId,
       custs: customizations.map(c => ({
+        slotId: c.slotId,
         pid: c.productId,
         ing: c.ingredients.map(i => ({ id: i.id, on: i.included })),
         ext: c.extras.map(e => ({ id: e.id, on: e.selected })),
@@ -96,9 +101,10 @@ export class CartService {
 
   computeMenuPrice(menu: Menu, customizations: CartMenuCustomization[]): number {
     const extrasTotal = customizations.reduce((total, cust) => {
-      return total + cust.extras
+      const extrasPrice = cust.extras
         .filter(e => e.selected && e.type !== 'size')
         .reduce((s, e) => s + e.price, 0);
+      return total + extrasPrice + (cust.priceDelta || 0);
     }, 0);
     return menu.price + extrasTotal;
   }
@@ -125,6 +131,7 @@ export class CartService {
           description: product.description,
           image: product.image,
           price,
+          basePrice: product.price,
           customization: {
             ingredients: ingredients.map(i => ({ ...i })),
             extras: extras.map(e => ({ ...e })),
@@ -155,11 +162,14 @@ export class CartService {
           id: menu.id,
           name: menu.name,
           description: menu.description,
-          image: menu.image,
+          image: menu.image || menu.pictureUrl || '',
           price,
           customizations: customizations.map(c => ({
+            slotId: c.slotId,
+            slotName: c.slotName,
             productId: c.productId,
             productName: c.productName,
+            priceDelta: c.priceDelta,
             ingredients: c.ingredients.map(i => ({ ...i })),
             extras: c.extras.map(e => ({ ...e })),
           })),
@@ -194,6 +204,7 @@ export class CartService {
         product: {
           ...i.product!,
           price,
+          basePrice: basePrice,
           customization: {
             ingredients: ingredients.map(x => ({ ...x })),
             extras: extras.map(x => ({ ...x })),

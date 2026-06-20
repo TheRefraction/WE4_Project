@@ -6,12 +6,13 @@ import { pgPool } from '../config/postgres';
 import { CustomizationSlotResponse, CreateCustomizationSlotDTO, UpdateCustomizationSlotDTO } from '../models/customization.model';
 
 const SELECT_FIELDS = `
-    id,
-    product_id AS "productId",
-    category_id AS "categoryId",
-    min_select AS "minSelect",
-    max_select AS "maxSelect",
-    display_order AS "displayOrder"
+    cs.id,
+    cs.product_id AS "productId",
+    cs.category_id AS "categoryId",
+    c.name AS "categoryName",
+    cs.min_select AS "minSelect",
+    cs.max_select AS "maxSelect",
+    cs.display_order AS "displayOrder"
 `;
 
 const RETURN_FIELDS = `
@@ -27,8 +28,9 @@ export class CustomizationSlotRepository {
     async findAll(): Promise<CustomizationSlotResponse[]> {
         const query = `
             SELECT ${SELECT_FIELDS}
-            FROM customization_slot
-            ORDER BY display_order
+            FROM customization_slot cs
+            LEFT JOIN category c ON cs.category_id = c.id
+            ORDER BY cs.display_order
         `;
 
         const res = await pgPool.query(query);
@@ -40,9 +42,10 @@ export class CustomizationSlotRepository {
     async findAllByProductId(productId: number): Promise<CustomizationSlotResponse[]> {
         const query = `
             SELECT ${SELECT_FIELDS}
-            FROM customization_slot
-            WHERE product_id = $1
-            ORDER BY display_order
+            FROM customization_slot cs
+            LEFT JOIN category c ON cs.category_id = c.id
+            WHERE cs.product_id = $1
+            ORDER BY cs.display_order
         `;
 
         const res = await pgPool.query(query, [productId]);
@@ -54,8 +57,9 @@ export class CustomizationSlotRepository {
     async findById(id: number): Promise<CustomizationSlotResponse | null> {
         const query = `
             SELECT ${SELECT_FIELDS}
-            FROM customization_slot 
-            WHERE id = $1
+            FROM customization_slot cs
+            LEFT JOIN category c ON cs.category_id = c.id
+            WHERE cs.id = $1
         `;
 
         const res = await pgPool.query(query, [id]);
@@ -71,8 +75,9 @@ export class CustomizationSlotRepository {
     async findByProductAndCategory(productId: number, categoryId: number): Promise<CustomizationSlotResponse | null> {
         const query = `
             SELECT ${SELECT_FIELDS}
-            FROM customization_slot
-            WHERE product_id = $1 AND category_id = $2
+            FROM customization_slot cs
+            LEFT JOIN category c ON cs.category_id = c.id
+            WHERE cs.product_id = $1 AND cs.category_id = $2
         `;
 
         const res = await pgPool.query(query, [productId, categoryId]);

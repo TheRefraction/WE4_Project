@@ -1,5 +1,5 @@
-import { Ingredient, Extra, Product } from './components/product-card.component';
-import { Menu } from './components/menu-card.component'
+import { Ingredient, Extra, Product } from './components/product-card/product-card.component';
+import { Menu } from './components/menu-card/menu-card.component';
 
 export const INGREDIENTS: Ingredient[] = [
     { id: 1, name: 'Salade', included: true },

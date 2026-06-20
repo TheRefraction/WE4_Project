@@ -1,0 +1,221 @@
+$fire: #E8390E;
+$coal: #1A1208;
+$ash: #2E2416;
+$cream: #F5ECD7;
+$muted: #9C8E7A;
+$page-bg: #0F0C08;
+$error: #e05c5c;
+$success: #4caf7d;
+
+.detail-page-container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 2rem;
+  font-family: 'DM Sans', sans-serif;
+  color: $cream;
+}
+
+.detail-header {
+  margin-bottom: 2rem;
+}
+
+.back-link {
+  background: transparent;
+  border: 1px solid $ash;
+  color: $muted;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  transition: all 0.2s;
+
+  &:hover {
+    color: $cream;
+    border-color: $cream;
+  }
+}
+
+.product-detail-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3rem;
+  background: $coal;
+  border: 1px solid $ash;
+  border-radius: 8px;
+  padding: 2.5rem;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+    padding: 1.5rem;
+  }
+}
+
+.product-image-section {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: $page-bg;
+  border-radius: 6px;
+  border: 1px solid $ash;
+  overflow: hidden;
+  height: 380px;
+
+  img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    transition: transform 0.3s;
+
+    &:hover {
+      transform: scale(1.05);
+    }
+  }
+}
+
+.product-info-section {
+  display: flex;
+  flex-direction: column;
+}
+
+.info-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 0.75rem;
+}
+
+.product-name {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 2.5rem;
+  margin: 0;
+  letter-spacing: 0.04em;
+  color: $cream;
+}
+
+.product-price {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 2.2rem;
+  color: $fire;
+  letter-spacing: 0.02em;
+}
+
+.product-description {
+  color: $muted;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  margin-bottom: 2rem;
+}
+
+.customisation-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  margin-bottom: 2.5rem;
+  border-top: 1px solid $ash;
+  padding-top: 1.5rem;
+}
+
+.custom-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.custom-title {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: $muted;
+  margin: 0;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.chip {
+  background: transparent;
+  border: 1px solid $ash;
+  color: $muted;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.8rem;
+  padding: 0.4rem 0.85rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+
+  &:hover {
+    color: $cream;
+    border-color: $cream;
+  }
+
+  &.active {
+    background: rgba($fire, 0.08);
+    border-color: $fire;
+    color: $cream;
+  }
+}
+
+.chip-price-add {
+  font-size: 0.7rem;
+  color: $fire;
+  font-weight: 700;
+}
+
+.chip-price-rem {
+  font-size: 0.7rem;
+  color: $muted;
+}
+
+.chip-price {
+  font-size: 0.7rem;
+  color: lighten($fire, 15%);
+  font-weight: 700;
+}
+
+.btn-fire {
+  background: $fire;
+  color: $cream;
+  border: none;
+  border-radius: 4px;
+  padding: 0.9rem;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.1s;
+  width: 100%;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba($fire, 0.25);
+
+  &:hover {
+    background: darken($fire, 8%);
+  }
+
+  &:active {
+    transform: scale(0.98);
+  }
+
+  &.added {
+    background: $success;
+    box-shadow: 0 4px 12px rgba($success, 0.25);
+  }
+}
+
+.loading-state {
+  text-align: center;
+  padding: 5rem;
+  color: $muted;
+  font-size: 1.1rem;
+}

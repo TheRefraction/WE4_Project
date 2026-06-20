@@ -22,6 +22,9 @@ import { ProductRepository } from './repositories/product.repository';
 import { ProductService } from './services/product.service';
 import { ProductFacade } from './services/product.facade';
 import { ProductController } from './controllers/product.controller';
+import { MenuRepository } from './repositories/menu.repository';
+import { MenuService } from './services/menu.service';
+import { MenuController } from './controllers/menu.controller';
 
 export const accountRepository = new AccountRepository();
 export const accountService = new AccountService(accountRepository);
@@ -49,3 +52,7 @@ export const productRepository = new ProductRepository();
 export const productService = new ProductService(productRepository);
 export const productFacade = new ProductFacade(productService, customizationFacade, categoryService, supplierService);
 export const productController = new ProductController(productService, productFacade);
+
+export const menuRepository = new MenuRepository();
+export const menuService = new MenuService(menuRepository, productFacade);
+export const menuController = new MenuController(menuService);

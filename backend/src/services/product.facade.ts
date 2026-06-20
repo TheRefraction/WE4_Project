@@ -36,4 +36,9 @@ export class ProductFacade {
 
         return fullProduct;
     }
+
+    async getAllFullProducts(): Promise<ProductResponse[]> {
+        const products = await this.productSvc.getAll();
+        return Promise.all(products.map(prod => this.getFullProduct(prod.id)));
+    }
 }

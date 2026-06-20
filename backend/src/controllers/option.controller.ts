@@ -28,7 +28,7 @@ export class OptionController extends BaseController {
         try {
             const slotId = parseInt(req.params.id);
 
-            const opt = await this.optSvc.getBySlotAndProduct(slotId, req.body);
+            const opt = await this.optSvc.getBySlotAndProduct(slotId, req.body.productId);
 
             this.sendResponse(res, HttpStatus.OK, 'Option retrieved', opt);
         } catch(error){
@@ -62,7 +62,7 @@ export class OptionController extends BaseController {
         try {
             const slotId = parseInt(req.params.id);
 
-            await this.slotFcd.removeOptionFromSlot(slotId, req.body);
+            await this.slotFcd.removeOptionFromSlot(slotId, req.body.productId);
 
             this.sendResponse(res, HttpStatus.OK, 'Option removed successfully');  
         }catch(error){

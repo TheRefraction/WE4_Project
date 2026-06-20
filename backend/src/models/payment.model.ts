@@ -33,7 +33,10 @@ export interface Payment {
 }
 
 export interface CreatePaymentDTO {
+    invoiceId: number;
     mode: PaymentMode;
+    paymentDate?: Date;
+    status?: PaymentStatus;
 }
 
 export interface UpdatePaymentDTO {

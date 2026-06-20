@@ -35,21 +35,30 @@ export class PaymentRepository {
         return res.rows[0] || null;
     }
 
-    async create(data: Omit<Payment, 'id' | 'paymentDate' | 'status' | 'createdAt' | 'updatedAt'>): Promise<Payment> {
-        const {
-            mode
-        } = data;
+    async create(data: { mode: string; status?: string; paymentDate?: Date }): Promise<Payment> {
+        const mode = data.mode;
+        const status = data.status || 'paid';
+        const paymentDate = data.paymentDate || new Date();
 
         const res = await pgPool.query(
-        `
-            INSERT INTO payment (mode)
-            VALUES ($1)
-            RETURNING *;
-        `, 
-            [mode]
+            `
+                INSERT INTO payment (mode, status, payment_date)
+                VALUES ($1, $2, $3)
+                RETURNING *;
+            `, 
+            [mode, status, paymentDate]
         );
 
         return res.rows[0];
+    }
+
+    async linkInvoice(invoiceId: number, paymentId: number, status: string = 'paid'): Promise<void> {
+        const query = `
+            UPDATE invoice
+            SET payment_id = $1, status = $2, updated_at = NOW()
+            WHERE id = $3;
+        `;
+        await pgPool.query(query, [paymentId, status, invoiceId]);
     }
 
     async update(id: number, data: UpdatePaymentDTO): Promise<Payment | null> {

@@ -1,0 +1,27 @@
+<nav class="navbar">
+  <div class="navbar-container">
+    <a class="navbar-brand" routerLink="/">EFFES KEBAB</a>
+
+    <button class="navbar-toggle" (click)="menuOpen = !menuOpen" [class.open]="menuOpen" aria-label="Toggle navigation">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+
+    <ul class="navbar-links" [class.open]="menuOpen">
+      <li><a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Accueil</a></li>
+
+      @if (accountService.isLoggedIn()) {
+        <li><a routerLink="/shop" routerLinkActive="active">Commander</a></li>
+        <li><a routerLink="/cart" routerLinkActive="active">Panier</a></li>
+        <li><a routerLink="/account" routerLinkActive="active">Mon Compte</a></li>
+        <li class="signout">
+          <a href="javascript:void(0)" (click)="onLogout()">Déconnexion</a>
+        </li>
+      } @else {
+        <li><a routerLink="/login" routerLinkActive="active">Connexion</a></li>
+        <li class="cta"><a routerLink="/register">Inscription</a></li>
+      }
+    </ul>
+  </div>
+</nav>
