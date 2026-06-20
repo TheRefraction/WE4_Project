@@ -9,6 +9,10 @@ import { env } from '../config/env';
 import { AccountRepository } from '../repositories/account.repository';
 import { CreateAccountDTO, UpdateAccountDTO, AccountResponse, Role } from '../models/account.model';
 import { AppError } from '../middlewares/error.middleware';
+import { HttpStatus } from '../utils/httpStatus';
+
+const passwordMinLength = 6;
+const passwordSalt = 10;
 
 export class AccountService {
     constructor(private repo: AccountRepository) {}
@@ -21,14 +25,14 @@ export class AccountService {
 
     async getById(id: number): Promise<AccountResponse | null> {
         const account = await this.repo.findById(id);
-        if (!account) throw new AppError('Account not found', 404);
+        if (!account) throw new AppError('Account not found', HttpStatus.NOT_FOUND);
 
         return this.mapToResponse(account);
     }
 
     async getByEmail(email: string): Promise<AccountResponse | null> {
         const account = await this.repo.findByEmail(email);
-        if (!account) throw new AppError('Account not found', 404);
+        if (!account) throw new AppError('Account not found', HttpStatus.NOT_FOUND);
 
         return this.mapToResponse(account);
     }
@@ -40,14 +44,14 @@ export class AccountService {
         const existingAccount = await this.repo.findByEmail(data.email);
 
         if (existingAccount) {
-            throw new AppError('Email already in use', 409);
+            throw new AppError('Email already in use', HttpStatus.CONFLICT);
         }
 
-        if (data.password.length < 6) {
-            throw new AppError('Password must be at least 6 characters long', 400);
+        if (data.password.length < passwordMinLength) {
+            throw new AppError('Password must be at least 6 characters long', HttpStatus.BAD_REQUEST);
         }
 
-        const passwordHash = await bcrypt.hash(data.password, 10);
+        const passwordHash = await bcrypt.hash(data.password, passwordSalt);
 
         const account = await this.repo.create({
             firstName: data.firstName,
@@ -73,13 +77,13 @@ export class AccountService {
         const account = await this.repo.findByEmail(email);
 
         if (!account) {
-            throw new AppError('Invalid email or password', 401);
+            throw new AppError('Invalid email or password', HttpStatus.UNAUTHORIZED);
         }
 
         const isPasswordValid = await bcrypt.compare(password, account.passwordHash);
 
         if (!isPasswordValid) {
-            throw new AppError('Invalid email or password', 401);
+            throw new AppError('Invalid email or password', HttpStatus.UNAUTHORIZED);
         }
 
         const accountResponse = await this.mapToResponse(account);
@@ -95,53 +99,53 @@ export class AccountService {
         const account = await this.repo.findById(id);
 
         if (!account) {
-            throw new AppError('Account not found', 404);
+            throw new AppError('Account not found', HttpStatus.NOT_FOUND);
         }
 
         const requesterAccount = await this.repo.findById(requesterId);
 
         if (!requesterAccount) {
-            throw new AppError('Requester account not found', 404);
+            throw new AppError('Requester account not found', HttpStatus.NOT_FOUND);
         }
 
         const isAdmin = requesterAccount.role === Role.Admin;
 
         if (account.id !== requesterId && !isAdmin) {
-            throw new AppError('Permission denied', 403);
+            throw new AppError('Permission denied', HttpStatus.FORBIDDEN);
         }
 
         // Only an admin can change roles, and only to a valid Role value
         if (data.role !== undefined) {
             if (!isAdmin) {
-                throw new AppError('Permission denied', 403);
+                throw new AppError('Permission denied', HttpStatus.FORBIDDEN);
             }
 
             if (!Object.values(Role).includes(data.role)) {
-                throw new AppError('Invalid role value', 400);
+                throw new AppError('Invalid role value', HttpStatus.BAD_REQUEST);
             }
 
             if (account.id === requesterId && data.role !== Role.Admin) {
-                throw new AppError('Admins cannot demote themselves', 400);
+                throw new AppError('Admins cannot demote themselves', HttpStatus.BAD_REQUEST);
             }
         }
 
         if (data.password) {
-            if (data.password.length < 6) {
-                throw new AppError('Password must be at least 6 characters long', 400);
+            if (data.password.length < passwordMinLength) {
+                throw new AppError('Password must be at least 6 characters long', HttpStatus.BAD_REQUEST);
             }
 
-            data.password = await bcrypt.hash(data.password, 10);
+            data.password = await bcrypt.hash(data.password, passwordSalt);
         }
 
         if (data.email && data.email !== account.email) {
             const existingAccount = await this.repo.findByEmail(data.email);
             if (existingAccount) {
-                throw new AppError('Email already in use', 409);
+                throw new AppError('Email already in use', HttpStatus.CONFLICT);
             }
         }
 
         const updatedAccount = await this.repo.update(id, data);
-        if (!updatedAccount) throw new AppError('Failed to update account', 500);
+        if (!updatedAccount) throw new AppError('Failed to update account', HttpStatus.INTERNAL_SERVER_ERROR);
 
         return this.mapToResponse(updatedAccount);
     }
@@ -150,23 +154,23 @@ export class AccountService {
         const account = await this.repo.findById(id);
 
         if (!account) {
-            throw new AppError('Account not found', 404);
+            throw new AppError('Account not found', HttpStatus.NOT_FOUND);
         }
 
         const requesterAccount = await this.repo.findById(requesterId);
 
         if (!requesterAccount) {
-            throw new AppError('Requester account not found', 404);
+            throw new AppError('Requester account not found', HttpStatus.NOT_FOUND);
         }
 
         const isAdmin = requesterAccount.role === Role.Admin;
 
         if (account.id !== requesterId && !isAdmin) {
-            throw new AppError('Permission denied', 403);
+            throw new AppError('Permission denied', HttpStatus.FORBIDDEN);
         }
 
         const success = await this.repo.delete(id);
-        if (!success) throw new AppError('Failed to delete account', 500);
+        if (!success) throw new AppError('Failed to delete account', HttpStatus.INTERNAL_SERVER_ERROR);
 
         return { success: success };
     }

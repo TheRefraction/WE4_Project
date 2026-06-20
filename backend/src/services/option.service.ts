@@ -1,6 +1,7 @@
 import { CustomizationOptionResponse, CreateCustomizationOptionDTO, UpdateCustomizationOptionDTO } from '../models/option.model';
 import { CustomizationOptionRepository } from '../repositories/option.repository';
 import { AppError } from '../middlewares/error.middleware';
+import { HttpStatus } from '../utils/httpStatus';
 
 export class OptionService {
     constructor(private repo: CustomizationOptionRepository){ }
@@ -12,7 +13,7 @@ export class OptionService {
 
     async getBySlotAndProduct(slotId: number, productId: number): Promise<CustomizationOptionResponse | null> {
         const res = await this.repo.findBySlotAndProduct(slotId, productId);
-        if (!res) throw new AppError('Option not found', 404);
+        if (!res) throw new AppError('Option not found', HttpStatus.NOT_FOUND);
 
         return this.mapToResponse(res);
     }
@@ -20,11 +21,11 @@ export class OptionService {
     async create(data: CreateCustomizationOptionDTO): Promise<CustomizationOptionResponse> {
         const exisiting = await this.repo.findBySlotAndProduct(data.slotId, data.productId);
         if (exisiting) {
-            throw new AppError('Option already exists', 409);
+            throw new AppError('Option already exists', HttpStatus.CONFLICT);
         }
 
         if (data.displayOrder < 0) {
-            throw new AppError('Display order cannot be negative', 400);
+            throw new AppError('Display order cannot be negative', HttpStatus.BAD_REQUEST);
         }
 
         const res = await this.repo.create(data.slotId, data);
@@ -34,16 +35,16 @@ export class OptionService {
     async update(slotId: number, data: UpdateCustomizationOptionDTO): Promise<CustomizationOptionResponse> {
         const exisiting = await this.repo.findBySlotAndProduct(slotId, data.productId);
         if (exisiting) {
-            throw new AppError('Option already exists', 409);
+            throw new AppError('Option already exists', HttpStatus.CONFLICT);
         }
 
         if (data.displayOrder && data.displayOrder < 0) {
-            throw new AppError('Display order cannot be negative', 400);
+            throw new AppError('Display order cannot be negative', HttpStatus.BAD_REQUEST);
         }
 
         const upd = await this.repo.update(slotId, data);
         if (!upd) {
-            throw new AppError('Failed to update option', 500);
+            throw new AppError('Failed to update option', HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
         return this.mapToResponse(upd);
@@ -51,17 +52,17 @@ export class OptionService {
 
     async delete(slotId: number, productId: number): Promise<{ success: boolean }> {
         const res = await this.repo.findBySlotAndProduct(slotId, productId);
-        if (!res) throw new AppError('Option not found', 404);
+        if (!res) throw new AppError('Option not found', HttpStatus.NOT_FOUND);
 
         /* FIXME 
         const productCount = await this.repo.countDependencies(id);
         if (productCount > 0) {
-            throw new AppError('Cannot delete supplier with associated products', 409);
+            throw new AppError('Cannot delete supplier with associated products', HttpStatus.CONFLICT);
         }*/
 
         const success = await this.repo.delete(slotId, productId);
         if (!success) {
-            throw new AppError('Failed to delete supplier', 500);
+            throw new AppError('Failed to delete supplier', HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
         return { success: true };

@@ -1,92 +1,98 @@
-import { Request, Response } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import { ProductService } from '../services/product.service';
-import { CreateProductDTO, UpdateProductDTO } from '../models/product.model';
+import { ProductFacade } from '../services/product.facade';
+import { BaseController } from './base.controller';
+import { HttpStatus } from '../utils/httpStatus';
 
-const productService = new ProductService();
+export class ProductController extends BaseController {
+    constructor(
+        private productSvc: ProductService, 
+        private productFcd: ProductFacade
+    ) {
+        super();
+    }
 
-export class ProductController {
-
-    async getAll(req: Request, res: Response): Promise<void> {
+    async getAll(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
-            const products = await productService.getAllProductsWithDetails();
-            res.status(200).json({ 
-                success: true, 
-                message: "Products retrieved successfully", 
-                data: products });
-        } catch (error: any) {
-            
-            res.status(500).json({ success: false, error: error.message });
+            const products = await this.productSvc.getAll();
+
+            this.sendResponse(res, HttpStatus.OK, 'Products retrieved successfully', products);
+        } catch (error) {
+            next(error);
         }
     }
 
-    async getById(req: Request, res: Response): Promise<void> {
+    async getById(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
-            const id = parseInt(req.params.id, 10);
-            if (isNaN(id)) { res.status(400).json({ 
-                success: false, 
-                error: "Invalid product ID" }); return; }
+            const id = parseInt(req.params.id);
+            if (isNaN(id)) { 
+                this.sendResponse(res, HttpStatus.BAD_REQUEST, 'Invalid product ID');
+                return; 
+            }
 
-            const product = await productService.getProductById(id);
-            res.status(200).json({ 
-                success: true, 
-                data: product });
-        } catch (error: any) {
+            const product = await this.productSvc.getById(id);
             
-            res.status(error.message === 'Product not found' ? 404 : 500).json({ 
-                success: false, 
-                error: error.message });
+            this.sendResponse(res, HttpStatus.OK, 'Product retrieved', product);
+        } catch (error) {
+            next(error);
         }
     }
 
-    async create(req: Request, res: Response): Promise<void> {
+    async getFullProduct(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
-            const dto: CreateProductDTO = req.body;
-            const newProduct = await productService.createProduct(dto);
-            res.status(201).json({ 
-                success: true, 
-                message: "Product created successfully", 
-                data: newProduct });
-        } catch (error: any) {
+            const id = parseInt(req.params.id);
+            if (isNaN(id)) { 
+                this.sendResponse(res, HttpStatus.BAD_REQUEST, 'Invalid product ID');
+                return; 
+            }
+
+            const product = await this.productFcd.getFullProduct(id);
             
-            res.status(error.message.includes('does not exist') ? 400 : 500).json({ 
-                success: false, 
-                error: error.message });
+            this.sendResponse(res, HttpStatus.OK, 'Product retrieved', product);
+        } catch (error) {
+            next(error);
         }
     }
 
-    async update(req: Request, res: Response): Promise<void> {
+    async create(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
-            const id = parseInt(req.params.id, 10);
-            if (isNaN(id)) { res.status(400).json({ success: false, error: "Invalid product ID" }); return; }
+            const result = await this.productSvc.create(req.body);
 
-            const dto: UpdateProductDTO = req.body;
-            const updatedProduct = await productService.updateProduct(id, dto);
-            res.status(200).json({ 
-                success: true,
-                 message: "Product updated successfully", 
-                 data: updatedProduct });
-        } catch (error: any) {
-           
-            res.status(error.message.includes('does not exist') ? 400 : error.message === 'Product not found' ? 404 : 500).json({ success: false, error: error.message });
+            this.sendResponse(res, HttpStatus.CREATED, 'Product created successfully', result);
+        } catch (error) {
+            next(error);
         }
     }
 
-    async delete(req: Request, res: Response): Promise<void> {
+    async update(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
-            const id = parseInt(req.params.id, 10);
-            if (isNaN(id)) { res.status(400).json({ 
-                success: false, 
-                error: "Invalid product ID" }); return; }
+            const id = parseInt(req.params.id);
+            if (isNaN(id)) { 
+                this.sendResponse(res, HttpStatus.BAD_REQUEST, 'Invalid product ID');
+                return; 
+            }
 
-            await productService.deleteProduct(id);
-            res.status(200).json({ 
-                success: true, 
-                message: "Product deleted successfully" });
-        } catch (error: any) {
-            
-            res.status(error.message === 'Product not found' ? 404 : 500).json({ 
-                success: false, 
-                error: error.message });
+            const result = await this.productSvc.update(id, req.body);
+
+            this.sendResponse(res, HttpStatus.OK, 'Product updated successfully', result);
+        } catch (error) {
+           next(error);
+        }
+    }
+
+    async delete(req: Request, res: Response, next: NextFunction): Promise<void> {
+        try {
+            const id = parseInt(req.params.id);
+            if (isNaN(id)) { 
+                this.sendResponse(res, HttpStatus.BAD_REQUEST, 'Invalid product ID');
+                return; 
+            }
+
+            await this.productSvc.delete(id);
+
+            this.sendResponse(res, HttpStatus.OK, 'Product deleted successfully');
+        } catch (error) {
+            next(error);
         }
     }
 }

@@ -1,90 +1,74 @@
 import { Request, Response, NextFunction } from 'express';
 import { CategoryService } from '../services/category.service';
+import { BaseController } from './base.controller';
+import { HttpStatus } from '../utils/httpStatus';
 
-const categoryService = new CategoryService();
-
-export class CategoryController {
-
+export class CategoryController extends BaseController {
+    constructor(private categorySvc: CategoryService) { super(); }
 
     async getAll(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
-            const categories = await categoryService.getAllCategories();
-            res.status(200).json({
-                success: true,
-                data: categories
-            });
+            const categories = await this.categorySvc.getAll();
+
+            this.sendResponse(res, HttpStatus.OK, 'Categories retrieved', categories);
         } catch (error) {
             next(error);
         }
     }
-
 
     async getById(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
             const id = parseInt(req.params.id, 10);
             if (isNaN(id)) {
-                res.status(400).json({ success: false, message: 'Invalid category ID' });
+                this.sendResponse(res, HttpStatus.BAD_REQUEST, 'Invalid category ID');
                 return;
             }
 
-            const category = await categoryService.getCategoryById(id);
-            res.status(200).json({
-                success: true,
-                data: category
-            });
+            const category = await this.categorySvc.getById(id);
+
+            this.sendResponse(res, HttpStatus.OK, 'Category retrieved', category);
         } catch (error) {
             next(error);
         }
     }
-
 
     async create(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
-            const newCategory = await categoryService.createCategory(req.body);
-            res.status(201).json({
-                success: true,
-                message: 'Category created successfully',
-                data: newCategory
-            });
+            const newCategory = await this.categorySvc.create(req.body);
+
+            this.sendResponse(res, HttpStatus.CREATED, 'Category created successfully', newCategory);
         } catch (error) {
             next(error);
         }
     }
-
 
     async update(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
-            const id = parseInt(req.params.id, 10);
+            const id = parseInt(req.params.id);
             if (isNaN(id)) {
-                res.status(400).json({ success: false, message: 'Invalid category ID' });
+                this.sendResponse(res, HttpStatus.BAD_REQUEST, 'Invalid category ID');
                 return;
             }
 
-            const updatedCategory = await categoryService.updateCategory(id, req.body);
-            res.status(200).json({
-                success: true,
-                message: 'Category updated successfully',
-                data: updatedCategory
-            });
+            const updatedCategory = await this.categorySvc.update(id, req.body);
+
+            this.sendResponse(res, HttpStatus.OK, 'Category updated', updatedCategory);
         } catch (error) {
             next(error);
         }
     }
 
-
     async delete(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
-            const id = parseInt(req.params.id, 10);
+            const id = parseInt(req.params.id);
             if (isNaN(id)) {
-                res.status(400).json({ success: false, message: 'Invalid category ID' });
+                this.sendResponse(res, HttpStatus.BAD_REQUEST, 'Invalid category ID');
                 return;
             }
 
-            const result = await categoryService.deleteCategory(id);
-            res.status(200).json({
-                success: true,
-                message: 'Category deleted successfully'
-            });
+            const result = await this.categorySvc.delete(id);
+
+            this.sendResponse(res, HttpStatus.OK, 'Category deleted successfully');
         } catch (error) {
             next(error);
         }

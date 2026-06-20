@@ -1,18 +1,16 @@
 import { Request, Response, NextFunction } from 'express';
 import { SupplierService } from '../services/supplier.service';
+import { BaseController } from './base.controller';
+import { HttpStatus } from '../utils/httpStatus';
 
-const supplierService = new SupplierService();
-
-export class SupplierController {
+export class SupplierController extends BaseController {
+    constructor(private supplierSvc: SupplierService) { super(); }
 
     async getAll(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
-            const result = await supplierService.getAllSuppliers();
-            res.json({ 
-                success: true, 
-                message: 'Suppliers retrieved successfully',
-                data: result, 
-                count: result.length });
+            const result = await this.supplierSvc.getAll();
+
+            this.sendResponse(res, HttpStatus.OK, 'Suppliers retrieved successfully', result);
         } catch (error) {
             next(error);
         }
@@ -21,18 +19,15 @@ export class SupplierController {
     async getById(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
             const id = req.params.id;
-            const result = await supplierService.getSupplierById(parseInt(id, 10));
-
-            if (!result) {
-                res.status(404).json({ 
-                    success: false, 
-                    message: 'Supplier not found' });
+            const sanId : number = parseInt(id);
+            if (isNaN(sanId)) {
+                this.sendResponse(res, HttpStatus.BAD_REQUEST, 'Invalid supplier ID');
                 return;
             }
-            res.json({ 
-                success: true, 
-                message: 'Supplier retrieved successfully', 
-                data: result });
+
+            const result = await this.supplierSvc.getById(sanId);
+
+            this.sendResponse(res, HttpStatus.OK, 'Supplier retrieved successfully', result);
         } catch (error) {
             next(error);
         }
@@ -40,11 +35,9 @@ export class SupplierController {
 
     async create(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
-            const result = await supplierService.createSupplier(req.body);
-            res.status(201).json({ 
-                success: true, 
-                message: 'Supplier created successfully', 
-                data: result });
+            const result = await this.supplierSvc.create(req.body);
+
+            this.sendResponse(res, HttpStatus.CREATED, 'Supplier created successfully', result);
         } catch (error) {
             next(error);
         }
@@ -53,11 +46,15 @@ export class SupplierController {
     async update(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
             const { id } = req.params;
-            const result = await supplierService.updateSupplier(parseInt(id, 10), req.body);
-            res.json({ 
-                success: true, 
-                message: 'Supplier updated successfully', 
-                data: result });
+            const sanId = parseInt(id);
+            if (isNaN(sanId)) {
+                this.sendResponse(res, HttpStatus.BAD_REQUEST, 'Invalid supplier ID');
+                return;
+            }
+
+            const result = await this.supplierSvc.update(sanId, req.body);
+
+            this.sendResponse(res, HttpStatus.OK, 'Supplier updated successfully', result);
         } catch (error) {
             next(error);
         }
@@ -66,10 +63,15 @@ export class SupplierController {
     async delete(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
             const { id } = req.params;
-            await supplierService.deleteSupplier(parseInt(id, 10));
-            res.status(204).json({ 
-                success: true, 
-                message: 'Supplier deleted successfully' });
+            const sanId = parseInt(id);
+            if (isNaN(sanId)) {
+                this.sendResponse(res, HttpStatus.BAD_REQUEST, 'Invalid supplier ID');
+                return;
+            }
+
+            await this.supplierSvc.delete(sanId);
+
+            this.sendResponse(res, HttpStatus.OK, 'Supplier deleted successfully');
         } catch (error) {
             next(error);
         }

@@ -1,6 +1,7 @@
 import { ProductRepository } from '../repositories/product.repository';
 import { ProductResponse, CreateProductDTO, UpdateProductDTO } from '../models/product.model';
 import { AppError } from '../middlewares/error.middleware';
+import { HttpStatus } from '../utils/httpStatus';
 
 export class ProductService {
     constructor(private repo: ProductRepository) {}
@@ -13,14 +14,14 @@ export class ProductService {
     async getById(id: number): Promise<ProductResponse> {
         const product = await this.repo.findById(id);
         if (!product) {
-            throw new AppError('Product not found', 404);
+            throw new AppError('Product not found', HttpStatus.NOT_FOUND);
         }
 
         return this.mapToResponse(product);
     }
 
     async create(dto: CreateProductDTO): Promise<ProductResponse> {
-        if (dto.price < 0) throw new AppError('Invalid price', 400);
+        if (dto.price < 0) throw new AppError('Invalid price', HttpStatus.BAD_REQUEST);
 
         const prod = await this.repo.create(dto);
         return this.mapToResponse(prod);
@@ -29,13 +30,13 @@ export class ProductService {
     async update(id: number, dto: UpdateProductDTO): Promise<ProductResponse> {
         const existing = await this.repo.findById(id);
         if (!existing) {
-            throw new AppError('Product not found', 404);
+            throw new AppError('Product not found', HttpStatus.NOT_FOUND);
         }
 
-        if (dto.price && dto.price < 0) throw new AppError('Invalid price', 400);
+        if (dto.price && dto.price < 0) throw new AppError('Invalid price', HttpStatus.BAD_REQUEST);
 
         const prod = await this.repo.update(id, dto);
-        if (!prod) throw new AppError('Failed to update product', 500);
+        if (!prod) throw new AppError('Failed to update product', HttpStatus.INTERNAL_SERVER_ERROR);
 
         return this.mapToResponse(prod);
     }
@@ -43,7 +44,7 @@ export class ProductService {
     async delete(id: number): Promise<{success: boolean}> {
         const existingProduct = await this.repo.findById(id);
         if (!existingProduct) {
-            throw new AppError('Product not found', 404);
+            throw new AppError('Product not found', HttpStatus.NOT_FOUND);
         }
 
         const success = await this.repo.delete(id);

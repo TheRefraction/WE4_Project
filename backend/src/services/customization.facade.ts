@@ -3,6 +3,7 @@ import { CustomizationSlotResponse } from '../models/customization.model';
 import { CustomizationService } from './customization.service';
 import { OptionService } from './option.service';
 import { AppError } from '../middlewares/error.middleware';
+import { HttpStatus } from '../utils/httpStatus';
 
 export class CustomizationFacade {
     constructor(private slotSvc: CustomizationService, private optionSvc: OptionService) {}
@@ -45,12 +46,12 @@ export class CustomizationFacade {
     async addOptionToSlot(dto: CreateCustomizationOptionDTO): Promise<CustomizationSlotResponse> {
         const slot = await this.slotSvc.getById(dto.slotId);
         if (!slot){
-            throw new AppError('Target customization slot not found', 404);
+            throw new AppError('Target customization slot not found', HttpStatus.NOT_FOUND);
         }
 
         const option = await this.optionSvc.create(dto);
         if (!option) {
-            throw new AppError('The option could not be added to the slot', 500);
+            throw new AppError('The option could not be added to the slot', HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
         return await this.getFullSlotById(dto.slotId);
@@ -60,7 +61,7 @@ export class CustomizationFacade {
     async removeOptionFromSlot(slotId: number, productId: number): Promise <{success: boolean}> {
         const option = await this.optionSvc.getBySlotAndProduct(slotId, productId);
         if (!option) {
-            throw new AppError('Target option not found in this customization slot', 404);
+            throw new AppError('Target option not found in this customization slot', HttpStatus.NOT_FOUND);
         }
 
         const success = await this.optionSvc.delete(slotId, productId);

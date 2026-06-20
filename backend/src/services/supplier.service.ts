@@ -1,6 +1,7 @@
 import { SupplierRepository } from '../repositories/supplier.repository';
 import { CreateSupplierDTO, UpdateSupplierDTO, SupplierResponse } from '../models/supplier.model';
 import { AppError } from '../middlewares/error.middleware';
+import { HttpStatus } from '../utils/httpStatus';
 
 export class SupplierService {
     constructor(private repo: SupplierRepository) {}
@@ -12,7 +13,7 @@ export class SupplierService {
 
     async getById(id: number): Promise<SupplierResponse | null> {
         const supplier = await this.repo.findById(id);
-        if (!supplier) throw new AppError('Supplier not found', 404);
+        if (!supplier) throw new AppError('Supplier not found', HttpStatus.NOT_FOUND);
 
         return this.mapToResponse(supplier);
     }
@@ -20,7 +21,7 @@ export class SupplierService {
     async create(data: CreateSupplierDTO): Promise<SupplierResponse> {
         const existingSupplier = await this.repo.findByName(data.name);
         if (existingSupplier) {
-            throw new AppError('Supplier with this name already exists', 409);
+            throw new AppError('Supplier with this name already exists', HttpStatus.CONFLICT);
         }
 
         const supplier = await this.repo.create(data);
@@ -30,7 +31,7 @@ export class SupplierService {
     async update(id: number, data: UpdateSupplierDTO): Promise<SupplierResponse> {
         const existingSupplier = await this.repo.findById(id);
         if (!existingSupplier) {
-            throw new AppError('Supplier not found', 404);
+            throw new AppError('Supplier not found', HttpStatus.NOT_FOUND);
         }
 
         // Make sure to not lose data if only one attribute of contact is modified
@@ -43,7 +44,7 @@ export class SupplierService {
 
         const updatedSupplier = await this.repo.update(id, data);
         if (!updatedSupplier) {
-            throw new AppError('Failed to update supplier', 500);
+            throw new AppError('Failed to update supplier', HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
         return this.mapToResponse(updatedSupplier);
@@ -52,17 +53,17 @@ export class SupplierService {
     async delete(id: number): Promise<{ success: boolean }> {
         const supplier = await this.repo.findById(id);
         if (!supplier) {
-            throw new AppError('Supplier not found', 404);
+            throw new AppError('Supplier not found', HttpStatus.NOT_FOUND);
         }
 
         const productCount = await this.repo.countDependencies(id);
         if (productCount > 0) {
-            throw new AppError('Cannot delete supplier with associated products', 409);
+            throw new AppError('Cannot delete supplier with associated products', HttpStatus.CONFLICT);
         }
 
         const success = await this.repo.delete(id);
         if (!success) {
-            throw new AppError('Failed to delete supplier', 500);
+            throw new AppError('Failed to delete supplier', HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
         return { success: true };

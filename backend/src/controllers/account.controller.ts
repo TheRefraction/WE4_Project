@@ -1,29 +1,22 @@
 /**
  * account.controller.ts
- * 
- * This file defines the AccountController class, which handles HTTP requests related to user accounts.
- * It uses the AccountService to perform business logic and interacts with the AccountRepository for database operations.
- * The controller provides endpoints for creating accounts, logging in, updating account information, and retrieving account details.
- * It also includes error handling to ensure that appropriate responses are sent back to the client in case of any issues.
  */
 
 import { Request, Response, NextFunction } from 'express';
+import { BaseController } from './base.controller';
 import { Role } from '../models/account.model';
 import { AccountService } from '../services/account.service';
 import { AuthRequest } from '../middlewares/auth.middleware';
+import { HttpStatus } from '../utils/httpStatus';
 
-const accountService = new AccountService();
+export class AccountController extends BaseController {
+    constructor(private service: AccountService) { super(); }
 
-export class AccountController {
     async register(req: Request, res: Response, next: NextFunction) {
         try {
-            const result = await accountService.register(req.body);
+            const result = await this.service.register(req.body);
 
-            res.status(201).json({
-                success: true,
-                message: 'Account created successfully',
-                data: result
-            });
+            this.sendResponse(res, HttpStatus.CREATED, 'Account created succesfully', result);
         } catch (error) {
             next(error);
         }
@@ -33,13 +26,9 @@ export class AccountController {
         try {
             const { email, password } = req.body;
 
-            const result = await accountService.login(email, password);
+            const result = await this.service.login(email, password);
 
-            res.json({ 
-                success: true,
-                message: 'Login successful',
-                data: result
-            });
+            this.sendResponse(res, HttpStatus.OK, 'Login successful', result);
         } catch (error) {
             next(error);
         }
@@ -49,13 +38,9 @@ export class AccountController {
         try {
             const userId = req.user!.userId;
 
-            const result = await accountService.getAccountById(userId);
+            const result = await this.service.getById(userId);
 
-            res.json({ 
-                success: true,
-                message: 'Account retrieved successfully',
-                data: result
-            });
+            this.sendResponse(res, HttpStatus.OK, 'Account retrieved successfully', result);
         } catch (error) {
             next(error);
         }
@@ -64,14 +49,15 @@ export class AccountController {
     async getAccountById(req: Request, res: Response, next: NextFunction) {
         try {
             const { id } = req.params;
+            const sanId = parseInt(id);
+            if (isNaN(sanId)) {
+                this.sendResponse(res, HttpStatus.BAD_REQUEST, 'Invalid account ID');
+                return;
+            }
 
-            const result = await accountService.getAccountById(parseInt(id));
+            const result = await this.service.getById(sanId);
 
-            res.json({ 
-                success: true,
-                message: 'Account retrieved successfully',
-                data: result
-            });
+            this.sendResponse(res, HttpStatus.OK, 'Account retrieved successfully', result);
         } catch (error) {
             next(error);
         }
@@ -80,10 +66,7 @@ export class AccountController {
     async getAllAccounts(req: AuthRequest, res: Response, next: NextFunction) {
         try {
             if (req.user!.role !== Role.Admin) {
-                res.status(403).json({
-                    success: false,
-                    message: 'Permission denied'
-                });
+                this.sendResponse(res, HttpStatus.FORBIDDEN, 'Permission denied');
                 return;
             }
 
@@ -91,19 +74,14 @@ export class AccountController {
 
             if (role !== undefined) {
                 if (typeof role !== 'string' || !Object.values(Role).includes(role as Role)) {
-                    res.status(400).json({ success: false, message: 'Invalid role filter' });
+                    this.sendResponse(res, HttpStatus.BAD_REQUEST, 'Invalid role filter');
                     return;
                 }
             }
 
-            const result = await accountService.getAllAccounts(role as Role | undefined);
+            const result = await this.service.getAll(role as Role | undefined);
 
-            res.json({ 
-                success: true,
-                message: 'Accounts retrieved successfully',
-                data: result,
-                count: result.length
-            });
+            this.sendResponse(res, HttpStatus.OK, 'Accounts retrieved successfully', result);
         } catch (error) {
             next(error);
         }
@@ -114,13 +92,15 @@ export class AccountController {
             const { id } = req.params;
             const userId = req.user!.userId;
 
-            const result = await accountService.updateAccount(parseInt(id), req.body, userId);
+            const sanId = parseInt(id);
+            if (isNaN(sanId)) {
+                this.sendResponse(res, HttpStatus.BAD_REQUEST, 'Invalid account ID');
+                return;
+            }
 
-            res.json({ 
-                success: true,
-                message: 'Account updated successfully',
-                data: result
-            });
+            const result = await this.service.update(sanId, req.body, userId);
+
+            this.sendResponse(res, HttpStatus.OK, 'Account updated successfully', result);
         } catch (error) {
             next(error);
         }
@@ -131,12 +111,15 @@ export class AccountController {
             const { id } = req.params;
             const userId = req.user!.userId;
 
-            await accountService.deleteAccount(parseInt(id), userId);
+            const sanId = parseInt(id);
+            if (isNaN(sanId)) {
+                this.sendResponse(res, HttpStatus.BAD_REQUEST, 'Invalid account ID');
+                return;
+            }
 
-            res.status(200).json({
-                success: true,
-                message: 'Account deleted successfully'
-            });
+            await this.service.delete(sanId, userId);
+
+            this.sendResponse(res, HttpStatus.OK, 'Account deleted successfully');
         } catch (error) {
             next(error);
         }
