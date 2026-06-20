@@ -18,12 +18,12 @@ $muted: #9C8E7A;
   display: flex;
   flex-direction: column;
   z-index: 1;
-  height: 470px;
+  min-height: 470px;
+  height: auto;
 
   &.expanded {
     z-index: 11;
     border-color: $fire;
-    height: unset;
   }
 }
 
@@ -77,10 +77,61 @@ $muted: #9C8E7A;
   &:hover img { transform: scale(1.04); }
 }
 
-.menu-products {
-  flex: 1;
-  // Les product-card enfants en mode inMenu sont inline, pas de overflow caché
-  overflow: visible;
+.menu-slots {
+  padding: 0 1rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.menu-slot-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  border-bottom: 1px solid rgba($ash, 0.5);
+  padding-bottom: 0.75rem;
+
+  &:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+}
+
+.slot-label {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: $muted;
+  font-weight: 600;
+}
+
+.slot-select-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.slot-select {
+  width: 100%;
+  background: $ash;
+  border: 1px solid rgba($cream, 0.1);
+  color: $cream;
+  padding: 0.5rem;
+  border-radius: 4px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.85rem;
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.2s;
+
+  &:focus {
+    border-color: $fire;
+  }
+
+  option {
+    background: $coal;
+    color: $cream;
+  }
 }
 
 .toggle-btn {
@@ -105,6 +156,12 @@ $muted: #9C8E7A;
   .arrow {
     transition: transform 0.2s;
     &.open { transform: rotate(180deg); }
+  }
+
+  &.inline-btn {
+    border-top: none;
+    margin-top: 0.25rem;
+    padding: 0.4rem 0;
   }
 }
 

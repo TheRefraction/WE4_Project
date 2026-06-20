@@ -1,5 +1,6 @@
 import { Component, Input, Output, EventEmitter, signal, computed, inject } from '@angular/core';
 import { CommonModule, NgTemplateOutlet } from '@angular/common';
+import { Router } from '@angular/router';
 import { CartService } from '../services/cart.service';
 
 export interface Ingredient {
@@ -24,6 +25,7 @@ export interface Product {
   image: string;
   ingredients: Ingredient[];
   extras: Extra[];
+  categoryIds?: number[];
 }
 
 @Component({
@@ -35,6 +37,7 @@ export interface Product {
 })
 export class ProductCardComponent {
   private cartService = inject(CartService);
+  private router = inject(Router);
 
   @Input() product!: Product;
   @Input() inMenu: boolean = false;
@@ -106,6 +109,12 @@ export class ProductCardComponent {
       this.expanded.set(false);
       this.resetToDefaults();
     }, 1200);
+  }
+
+  viewDetails() {
+    if (!this.inMenu) {
+      this.router.navigate(['/product', this.product.id]);
+    }
   }
 
   fallbackImage(event: Event) {

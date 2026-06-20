@@ -147,10 +147,10 @@ export class CartComponent {
           });
 
           return {
-            name: 'Sélection',
+            name: cust.slotName,
             item: {
               name: cust.productName,
-              delta: 0,
+              delta: cust.priceDelta,
               quantity: 1,
               options
             }

@@ -1,5 +1,51 @@
 <main class="shop">
 
+  <!-- Search and Filter Bar -->
+  <section class="shop-filter-bar">
+    <div class="search-input-wrapper">
+      <input
+        type="text"
+        placeholder="Rechercher un produit, ingrédient..."
+        [value]="searchQuery()"
+        (input)="onSearchInput($event)"
+        class="search-input"
+      />
+    </div>
+
+    <div class="sort-select-wrapper">
+      <select (change)="onSortChange($event)" class="sort-select">
+        <option value="">Trier par défaut</option>
+        <option value="name-asc">Nom (A-Z)</option>
+        <option value="name-desc">Nom (Z-A)</option>
+        <option value="price-asc">Prix croissant</option>
+        <option value="price-desc">Prix décroissant</option>
+      </select>
+    </div>
+  </section>
+
+  <!-- Categories Horizontal Filter Tags -->
+  @if (categories().length > 0) {
+    <section class="categories-filter-tags">
+      <button
+        class="tag-btn"
+        [class.active]="selectedCategoryId() === null"
+        (click)="selectCategory(null)"
+      >
+        Tous
+      </button>
+      @for (cat of categories(); track cat.id) {
+        <button
+          class="tag-btn"
+          [class.active]="selectedCategoryId() === cat.id"
+          (click)="selectCategory(cat.id)"
+        >
+          {{ cat.name }}
+        </button>
+      }
+    </section>
+  }
+
+  <!-- Standalone Products Section -->
   <section class="items-subsection products-title">
     <h1>Produits simples</h1>
   </section>
@@ -7,12 +53,18 @@
   @if (anyExpanded()) {
     <div class="backdrop" (click)="closeAll()"></div>
   }
-  <div class="items-grid">
-    @for (product of shop.products; track product.id) {
-      <app-product-card [product]="product" />
-    }
-  </div>
+  
+  @if (filteredProducts().length === 0) {
+    <div class="no-items-found">Aucun produit ne correspond à vos critères.</div>
+  } @else {
+    <div class="items-grid">
+      @for (product of filteredProducts(); track product.id) {
+        <app-product-card [product]="product" />
+      }
+    </div>
+  }
 
+  <!-- Menus Section -->
   <section class="items-subsection menus-title">
     <h1>Menus</h1>
   </section>
@@ -20,10 +72,15 @@
   @if (anyExpanded()) {
     <div class="backdrop" (click)="closeAll()"></div>
   }
-  <div class="items-grid">
-    @for (menu of shop.menus; track menu.id) {
-      <app-menu-card [menu] = "menu" />
-    }
-  </div>
+  
+  @if (filteredMenus().length === 0) {
+    <div class="no-items-found">Aucun menu ne correspond à vos critères.</div>
+  } @else {
+    <div class="items-grid">
+      @for (menu of filteredMenus(); track menu.id) {
+        <app-menu-card [menu]="menu" />
+      }
+    </div>
+  }
 
 </main>

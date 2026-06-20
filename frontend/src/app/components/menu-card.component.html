@@ -1,6 +1,6 @@
-<article class="menu-card" [class.expanded]="expandedProductId !== null">
+<article class="menu-card" [class.expanded]="expandedSlotId() !== null">
   <div class="menu-image">
-    <img [src]="menu.image" [alt]="menu.name" (error)="fallbackImage($event)" />
+    <img [src]="menu.image || menu.pictureUrl" [alt]="menu.name" (error)="fallbackImage($event)" />
   </div>
 
   <div class="menu-header">
@@ -11,22 +11,45 @@
     <span class="menu-price">{{ menuPrice() }}€</span>
   </div>
 
-  <div class="menu-products">
-    @for (product of menu.products; track product.id) {
-      <button
-        class="toggle-btn"
-        (click)="expandedProductId = expandedProductId === product.id ? null : product.id"
-      >
-        {{ product.name }}
-        <span class="arrow" [class.open]="expandedProductId === product.id">▾</span>
-      </button>
-      @if (expandedProductId === product.id) {
-        <app-product-card
-          [product]="product"
-          [inMenu]="true"
-          (customizationChange)="onProductCustomizationChange(product.id, $event)"
-        />
-      }
+  <div class="menu-slots">
+    @for (slot of slots(); track slot.id) {
+      <div class="menu-slot-section">
+        <label class="slot-label">{{ slot.name }}</label>
+        
+        <div class="slot-select-wrapper">
+          <select 
+            [value]="selectedProductIds().get(slot.id)" 
+            (change)="onSlotProductChange(slot.id, parseInt($any($event.target).value))"
+            class="slot-select"
+          >
+            @for (prod of slot.products; track prod.id) {
+              <option [value]="prod.id">
+                {{ prod.name }}
+                @if (prod.priceDelta > 0) { (+{{ prod.priceDelta.toFixed(2) }}€) }
+                @else if (prod.priceDelta < 0) { ({{ prod.priceDelta.toFixed(2) }}€) }
+              </option>
+            }
+          </select>
+        </div>
+
+        @if (getSelectedProductForSlot(slot.id); as selectedProduct) {
+          <button
+            class="toggle-btn inline-btn"
+            (click)="expandedSlotId.set(expandedSlotId() === slot.id ? null : slot.id)"
+          >
+            Personnaliser le produit
+            <span class="arrow" [class.open]="expandedSlotId() === slot.id">▾</span>
+          </button>
+          
+          @if (expandedSlotId() === slot.id) {
+            <app-product-card
+              [product]="selectedProduct"
+              [inMenu]="true"
+              (customizationChange)="onProductCustomizationChange(slot.id, $event)"
+            />
+          }
+        }
+      </div>
     }
   </div>
 

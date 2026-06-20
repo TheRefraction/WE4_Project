@@ -42,6 +42,30 @@ export class MenuRepository {
         return res.rows || [];
     }
 
+    async findSlotsByMenuId(menuId: number): Promise<any[]> {
+        const query = `
+            SELECT id, name, min_select AS "minSelect", max_select AS "maxSelect", display_order AS "displayOrder"
+            FROM menu_slot
+            WHERE menu_id = $1
+            ORDER BY display_order ASC
+        `;
+        const res = await pgPool.query(query, [menuId]);
+        return res.rows || [];
+    }
+
+    async findProductsBySlotId(slotId: number): Promise<any[]> {
+        const query = `
+            SELECT p.id, p.name, p.description, p.price, p.supplier_id AS "supplierId", p.hidden,
+                   msp.price_delta AS "priceDelta", msp.is_default AS "isDefault", msp.display_order AS "displayOrder"
+            FROM menu_slot_product msp
+            JOIN product p ON msp.product_id = p.id
+            WHERE msp.menu_slot_id = $1
+            ORDER BY msp.display_order ASC
+        `;
+        const res = await pgPool.query(query, [slotId]);
+        return res.rows || [];
+    }
+
     async create(data: CreateMenuDTO): Promise<Menu> {
         const client = await pgPool.connect();
         try {

@@ -1,12 +1,12 @@
 <article class="product-card" [class.expanded]="expanded()" [class.in-menu]="inMenu">
 
   @if (!inMenu) {
-    <div class="product-image">
+    <div class="product-image" (click)="viewDetails()" style="cursor: pointer;">
       <img [src]="product.image" [alt]="product.name" (error)="fallbackImage($event)" />
     </div>
     <div class="product-header">
       <div>
-        <h3 class="product-name">{{ product.name }}</h3>
+        <h3 class="product-name" (click)="viewDetails()" style="cursor: pointer;">{{ product.name }}</h3>
         <p class="product-description">{{ product.description }}</p>
       </div>
       <span class="product-price">{{ totalPrice() }}€</span>

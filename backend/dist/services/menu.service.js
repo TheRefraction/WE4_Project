@@ -46,6 +46,26 @@ class MenuService {
         return { success };
     }
     async mapToResponse(menu) {
+        const slotsRaw = await this.repo.findSlotsByMenuId(menu.id);
+        const slots = await Promise.all(slotsRaw.map(async (slot) => {
+            const slotProdsRaw = await this.repo.findProductsBySlotId(slot.id);
+            const products = await Promise.all(slotProdsRaw.map(async (sp) => {
+                const fullProd = await this.productFcd.getFullProduct(sp.id);
+                return {
+                    ...fullProd,
+                    priceDelta: parseFloat(sp.priceDelta || 0),
+                    isDefault: sp.isDefault
+                };
+            }));
+            return {
+                id: slot.id,
+                name: slot.name,
+                minSelect: slot.minSelect,
+                maxSelect: slot.maxSelect,
+                displayOrder: slot.displayOrder,
+                products
+            };
+        }));
         const productsRaw = await this.repo.findProductsByMenuId(menu.id);
         const products = await Promise.all(productsRaw.map(prod => this.productFcd.getFullProduct(prod.id)));
         return {
@@ -55,7 +75,8 @@ class MenuService {
             price: parseFloat(menu.price),
             hidden: menu.hidden,
             pictureUrl: menu.pictureUrl ?? null,
-            products
+            products,
+            slots
         };
     }
 }

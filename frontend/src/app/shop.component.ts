@@ -2,15 +2,10 @@
  * shop.component.ts
  */
 
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, signal, computed } from '@angular/core';
 import { ProductCardComponent, Product, Ingredient, Extra } from './components/product-card.component';
 import { MenuCardComponent, Menu } from './components/menu-card.component';
 import { ProductService } from './services/product.service';
-
-export interface Shop {
-  products: Product[],
-  menus: Menu[]
-}
 
 @Component({
   selector: 'shop',
@@ -20,10 +15,14 @@ export interface Shop {
   styleUrl: './shop.component.scss',
 })
 export class ShopComponent implements OnInit {
-  shop: Shop = {
-    products: [],
-    menus: []
-  };
+  allProducts = signal<Product[]>([]);
+  allMenus = signal<Menu[]>([]);
+  categories = signal<any[]>([]);
+
+  // Filter & Sort States
+  searchQuery = signal<string>('');
+  selectedCategoryId = signal<number | null>(null);
+  sortBy = signal<string>('');
 
   anyExpanded = signal(false);
 
@@ -31,24 +30,103 @@ export class ShopComponent implements OnInit {
 
   ngOnInit() {
     this.loadShopData();
+    this.loadCategories();
+  }
+
+  loadCategories() {
+    this.productService.getCategories().subscribe({
+      next: (res) => {
+        this.categories.set(res.data || []);
+      },
+      error: (err) => console.error('Failed to load categories:', err)
+    });
   }
 
   loadShopData() {
     this.productService.getProducts(false).subscribe({
       next: (resProduct) => {
         const mappedProducts = (resProduct.data || []).map(p => this.mapProduct(p));
-        this.shop.products = mappedProducts;
+        this.allProducts.set(mappedProducts);
 
         this.productService.getMenus(false).subscribe({
           next: (resMenu) => {
             const mappedMenus = (resMenu.data || []).map(m => this.mapMenu(m));
-            this.shop.menus = mappedMenus;
+            this.allMenus.set(mappedMenus);
           },
           error: (err) => console.error('Failed to load menus:', err)
         });
       },
       error: (err) => console.error('Failed to load products:', err)
     });
+  }
+
+  // Reactive Computed Filters
+  filteredProducts = computed(() => {
+    let list = [...this.allProducts()];
+
+    // Category Filter
+    const catId = this.selectedCategoryId();
+    if (catId !== null) {
+      list = list.filter(p => p.categoryIds && p.categoryIds.includes(catId));
+    }
+
+    // Search Query Filter
+    const query = this.searchQuery().toLowerCase().trim();
+    if (query) {
+      list = list.filter(p => p.name.toLowerCase().includes(query) || p.description.toLowerCase().includes(query));
+    }
+
+    // Sorting
+    const sortType = this.sortBy();
+    if (sortType === 'name-asc') {
+      list.sort((a, b) => a.name.localeCompare(b.name));
+    } else if (sortType === 'name-desc') {
+      list.sort((a, b) => b.name.localeCompare(a.name));
+    } else if (sortType === 'price-asc') {
+      list.sort((a, b) => a.price - b.price);
+    } else if (sortType === 'price-desc') {
+      list.sort((a, b) => b.price - a.price);
+    }
+
+    return list;
+  });
+
+  filteredMenus = computed(() => {
+    let list = [...this.allMenus()];
+
+    // Search query also filters menus
+    const query = this.searchQuery().toLowerCase().trim();
+    if (query) {
+      list = list.filter(m => m.name.toLowerCase().includes(query) || m.description.toLowerCase().includes(query));
+    }
+
+    // Sorting
+    const sortType = this.sortBy();
+    if (sortType === 'name-asc') {
+      list.sort((a, b) => a.name.localeCompare(b.name));
+    } else if (sortType === 'name-desc') {
+      list.sort((a, b) => b.name.localeCompare(a.name));
+    } else if (sortType === 'price-asc') {
+      list.sort((a, b) => a.price - b.price);
+    } else if (sortType === 'price-desc') {
+      list.sort((a, b) => b.price - a.price);
+    }
+
+    return list;
+  });
+
+  onSearchInput(event: Event) {
+    const input = event.target as HTMLInputElement;
+    this.searchQuery.set(input.value);
+  }
+
+  selectCategory(catId: number | null) {
+    this.selectedCategoryId.set(catId);
+  }
+
+  onSortChange(event: Event) {
+    const select = event.target as HTMLSelectElement;
+    this.sortBy.set(select.value);
   }
 
   private mapProduct(backendProduct: any): Product {
@@ -97,7 +175,8 @@ export class ShopComponent implements OnInit {
       price: parseFloat(backendProduct.price),
       image: backendProduct.pictureUrl || '',
       ingredients,
-      extras
+      extras,
+      categoryIds: (backendProduct.categories || []).map((c: any) => c.id)
     };
   }
 
