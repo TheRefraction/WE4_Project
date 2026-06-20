@@ -12,7 +12,7 @@ export class OptionController extends BaseController {
         super(); 
     }
 
-    async getAllBySlotId(req: Request, res: Response, next : NextFunction): Promise<void>{
+    getAllBySlotId = async (req: Request, res: Response, next : NextFunction): Promise<void> => {
         try {
             const slotId = parseInt(req.params.id);
 
@@ -24,7 +24,7 @@ export class OptionController extends BaseController {
         }
     }
 
-    async getBySlotAndProduct(req: Request, res: Response, next : NextFunction): Promise<void>{
+    getBySlotAndProduct = async (req: Request, res: Response, next : NextFunction): Promise<void> => {
         try {
             const slotId = parseInt(req.params.id);
 
@@ -36,7 +36,7 @@ export class OptionController extends BaseController {
         }
     }
 
-    async create(req: Request, res: Response, next: NextFunction): Promise <void>{
+    create = async (req: Request, res: Response, next: NextFunction): Promise <void> => {
         try{
             const result = await this.slotFcd.addOptionToSlot(req.body);
 
@@ -46,7 +46,7 @@ export class OptionController extends BaseController {
         }
     }
 
-    async update(req: Request, res: Response, next: NextFunction): Promise<void> {
+    update = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         try {
             const slotId = parseInt (req.params.id);
 
@@ -58,7 +58,7 @@ export class OptionController extends BaseController {
         }
     }
 
-    async delete(req: Request, res: Response, next: NextFunction): Promise<void>{
+    delete = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         try {
             const slotId = parseInt(req.params.id);
 

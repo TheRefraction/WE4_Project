@@ -12,7 +12,7 @@ import { HttpStatus } from '../utils/httpStatus';
 export class AccountController extends BaseController {
     constructor(private service: AccountService) { super(); }
 
-    async register(req: Request, res: Response, next: NextFunction) {
+    register = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         try {
             const result = await this.service.register(req.body);
 
@@ -22,7 +22,7 @@ export class AccountController extends BaseController {
         }
     }
 
-    async login(req: Request, res: Response, next: NextFunction) {
+    login = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         try {
             const { email, password } = req.body;
 
@@ -34,7 +34,7 @@ export class AccountController extends BaseController {
         }
     }
 
-    async getProfile(req: AuthRequest, res: Response, next: NextFunction) {
+    getProfile = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
         try {
             const userId = req.user!.userId;
 
@@ -46,7 +46,7 @@ export class AccountController extends BaseController {
         }
     }
 
-    async getAccountById(req: Request, res: Response, next: NextFunction) {
+    getAccountById = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         try {
             const id = parseInt(req.params.id);
 
@@ -58,7 +58,7 @@ export class AccountController extends BaseController {
         }
     }
 
-    async getAllAccounts(req: AuthRequest, res: Response, next: NextFunction) {
+    getAllAccounts = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
         try {
             if (req.user!.role !== Role.Admin) {
                 this.sendResponse(res, HttpStatus.FORBIDDEN, 'Permission denied');
@@ -82,13 +82,14 @@ export class AccountController extends BaseController {
         }
     }
 
-    async updateAccount(req: AuthRequest, res: Response, next: NextFunction) {
+    updateAccount = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
         try {
             const id = parseInt(req.params.id);
             const userId = req.user?.userId;
 
             if (!userId) {
-                return res.status(HttpStatus.UNAUTHORIZED).json({ message: 'User not authenticated' });
+                res.status(HttpStatus.UNAUTHORIZED).json({ message: 'User not authenticated' });
+                return;
             }
 
             const result = await this.service.update(id, req.body, userId);
@@ -99,13 +100,14 @@ export class AccountController extends BaseController {
         }
     }
 
-    async deleteAccount(req: AuthRequest, res: Response, next: NextFunction) {
+    deleteAccount = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
         try {
             const id = parseInt(req.params.id);
             const userId = req.user?.userId;
 
             if (!userId) {
-                return res.status(HttpStatus.UNAUTHORIZED).json({ message: 'User not authenticated' });
+                res.status(HttpStatus.UNAUTHORIZED).json({ message: 'User not authenticated' });
+                return;
             }
 
             await this.service.delete(id, userId);
