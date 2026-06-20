@@ -1,7 +1,7 @@
 import { Component, Input, signal, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ProductCardComponent, Product, Ingredient, Extra } from './product-card.component';
-import { CartService, CartMenuCustomization } from '../services/cart.service';
+import { ProductCardComponent, Product, Ingredient, Extra } from '../product-card/product-card.component';
+import { CartService, CartMenuCustomization } from '../../services/cart.service';
 
 export interface MenuSlot {
   id: number;

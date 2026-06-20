@@ -5,9 +5,9 @@
 import { Component, OnInit, signal, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { ProductService } from './services/product.service';
-import { CartService } from './services/cart.service';
-import { Product, Ingredient, Extra } from './components/product-card.component';
+import { ProductService } from '../../services/product.service';
+import { CartService } from '../../services/cart.service';
+import { Product, Ingredient, Extra } from '../../components/product-card/product-card.component';
 
 @Component({
   selector: 'app-product-detail',

@@ -2,9 +2,9 @@ import { Component, signal, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { CartService, CartItem } from './services/cart.service';
-import { OrderService } from './services/order.service';
-import { AccountService } from './services/account.service';
+import { CartService, CartItem } from '../../services/cart.service';
+import { OrderService } from '../../services/order.service';
+import { AccountService } from '../../services/account.service';
 
 @Component({
   selector: 'app-cart',

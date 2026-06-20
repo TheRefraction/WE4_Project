@@ -1,11 +1,7 @@
-/**
- * shop.component.ts
- */
-
 import { Component, OnInit, signal, computed } from '@angular/core';
-import { ProductCardComponent, Product, Ingredient, Extra } from './components/product-card.component';
-import { MenuCardComponent, Menu } from './components/menu-card.component';
-import { ProductService } from './services/product.service';
+import { ProductCardComponent, Product, Ingredient, Extra } from '../../components/product-card/product-card.component';
+import { MenuCardComponent, Menu } from '../../components/menu-card/menu-card.component';
+import { ProductService } from '../../services/product.service';
 
 @Component({
   selector: 'shop',
@@ -182,13 +178,26 @@ export class ShopComponent implements OnInit {
 
   private mapMenu(backendMenu: any): Menu {
     const products = (backendMenu.products || []).map((prod: any) => this.mapProduct(prod));
+    const slots = (backendMenu.slots || []).map((slot: any) => ({
+      id: slot.id,
+      name: slot.name,
+      minSelect: slot.minSelect,
+      maxSelect: slot.maxSelect,
+      displayOrder: slot.displayOrder,
+      products: (slot.products || []).map((sp: any) => ({
+        ...this.mapProduct(sp),
+        priceDelta: parseFloat(sp.priceDelta || 0),
+        isDefault: sp.isDefault
+      }))
+    }));
     return {
       id: backendMenu.id,
       name: backendMenu.name,
       description: backendMenu.description || '',
       price: parseFloat(backendMenu.price),
       image: backendMenu.pictureUrl || '',
-      products
+      products,
+      slots
     };
   }
 

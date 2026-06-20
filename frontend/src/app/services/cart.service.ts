@@ -1,6 +1,6 @@
 import { Injectable, signal, computed } from '@angular/core';
-import { Product, Ingredient, Extra } from '../components/product-card.component';
-import { Menu } from '../components/menu-card.component';
+import { Product, Ingredient, Extra } from '../components/product-card/product-card.component';
+import { Menu } from '../components/menu-card/menu-card.component';
 
 
 export interface CartProductEntry {

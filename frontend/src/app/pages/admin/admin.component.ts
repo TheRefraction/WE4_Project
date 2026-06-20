@@ -6,9 +6,9 @@ import { Component, signal, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { ProductService } from './services/product.service';
-import { AccountService } from './services/account.service';
-import { OrderService } from './services/order.service';
+import { ProductService } from '../../services/product.service';
+import { AccountService } from '../../services/account.service';
+import { OrderService } from '../../services/order.service';
 
 export type AdminTab = 'products' | 'menus' | 'categories' | 'users' | 'orders';
 

@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { AbstractControl, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { AccountService, RegisterData } from './services/account.service';
+import { AccountService, RegisterData } from '../../services/account.service';
 import { CommonModule } from '@angular/common';
 
 @Component({

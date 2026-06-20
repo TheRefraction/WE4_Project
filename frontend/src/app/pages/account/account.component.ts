@@ -5,7 +5,7 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { AccountService } from './services/account.service';
+import { AccountService } from '../../services/account.service';
 
 @Component({
   selector: 'app-account',

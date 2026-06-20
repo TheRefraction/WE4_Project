@@ -1,7 +1,7 @@
 import { Component, Input, Output, EventEmitter, signal, computed, inject } from '@angular/core';
 import { CommonModule, NgTemplateOutlet } from '@angular/common';
 import { Router } from '@angular/router';
-import { CartService } from '../services/cart.service';
+import { CartService } from '../../services/cart.service';
 
 export interface Ingredient {
   id: number;
