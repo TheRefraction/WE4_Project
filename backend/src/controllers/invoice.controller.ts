@@ -6,7 +6,7 @@ const invoiceService = new InvoiceService();
 export class InvoiceController {
 
 
-    async create(req: Request, res: Response, next: NextFunction) {
+    create = async (req: Request, res: Response, next: NextFunction) => {
         try {
             const invoiceData = req.body;
             const createdInvoice = await invoiceService.createInvoice(invoiceData);
@@ -24,9 +24,9 @@ export class InvoiceController {
     }
 
 
-    async getById(req: Request, res: Response, next: NextFunction) {
+    getById = async(req: Request, res: Response, next: NextFunction) => {
         try {
-            const invoiceId = parseInt(req.params.id, 10);
+            const invoiceId = parseInt(req.params.id);
             const fullInvoice = await invoiceService.getInvoiceData(invoiceId);
 
             res.status(200).json({

@@ -6,7 +6,7 @@ import { HttpStatus } from '../utils/httpStatus';
 export class SupplierController extends BaseController {
     constructor(private supplierSvc: SupplierService) { super(); }
 
-    async getAll(req: Request, res: Response, next: NextFunction): Promise<void> {
+    getAll = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         try {
             const result = await this.supplierSvc.getAll();
 
@@ -16,7 +16,7 @@ export class SupplierController extends BaseController {
         }
     }
 
-    async getById(req: Request, res: Response, next: NextFunction): Promise<void> {
+    getById = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         try {
             const id = req.params.id;
             const sanId : number = parseInt(id);
@@ -29,7 +29,7 @@ export class SupplierController extends BaseController {
         }
     }
 
-    async create(req: Request, res: Response, next: NextFunction): Promise<void> {
+    create = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         try {
             const result = await this.supplierSvc.create(req.body);
 
@@ -39,7 +39,7 @@ export class SupplierController extends BaseController {
         }
     }
 
-    async update(req: Request, res: Response, next: NextFunction): Promise<void> {
+    update = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         try {
             const { id } = req.params;
             const sanId = parseInt(id);
@@ -52,7 +52,7 @@ export class SupplierController extends BaseController {
         }
     }
 
-    async delete(req: Request, res: Response, next: NextFunction): Promise<void> {
+    delete = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         try {
             const { id } = req.params;
             const sanId = parseInt(id);

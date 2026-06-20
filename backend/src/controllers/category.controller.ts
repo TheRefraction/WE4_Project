@@ -6,7 +6,7 @@ import { HttpStatus } from '../utils/httpStatus';
 export class CategoryController extends BaseController {
     constructor(private categorySvc: CategoryService) { super(); }
 
-    async getAll(req: Request, res: Response, next: NextFunction): Promise<void> {
+    getAll = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         try {
             const categories = await this.categorySvc.getAll();
 
@@ -16,7 +16,7 @@ export class CategoryController extends BaseController {
         }
     }
 
-    async getById(req: Request, res: Response, next: NextFunction): Promise<void> {
+    getById = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         try {
             const id = parseInt(req.params.id);
 
@@ -28,7 +28,7 @@ export class CategoryController extends BaseController {
         }
     }
 
-    async create(req: Request, res: Response, next: NextFunction): Promise<void> {
+    create = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         try {
             const newCategory = await this.categorySvc.create(req.body);
 
@@ -38,7 +38,7 @@ export class CategoryController extends BaseController {
         }
     }
 
-    async update(req: Request, res: Response, next: NextFunction): Promise<void> {
+    update = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         try {
             const id = parseInt(req.params.id);
 
@@ -50,7 +50,7 @@ export class CategoryController extends BaseController {
         }
     }
 
-    async delete(req: Request, res: Response, next: NextFunction): Promise<void> {
+    delete = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         try {
             const id = parseInt(req.params.id);
 

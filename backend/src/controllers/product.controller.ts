@@ -12,7 +12,7 @@ export class ProductController extends BaseController {
         super();
     }
 
-    async getAll(req: Request, res: Response, next: NextFunction): Promise<void> {
+    getAll = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         try {
             const products = await this.productSvc.getAll();
 
@@ -22,7 +22,7 @@ export class ProductController extends BaseController {
         }
     }
 
-    async getById(req: Request, res: Response, next: NextFunction): Promise<void> {
+    getById = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         try {
             const id = parseInt(req.params.id);
 
@@ -34,7 +34,7 @@ export class ProductController extends BaseController {
         }
     }
 
-    async getFullProduct(req: Request, res: Response, next: NextFunction): Promise<void> {
+    getFullProduct = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         try {
             const id = parseInt(req.params.id);
 
@@ -46,7 +46,7 @@ export class ProductController extends BaseController {
         }
     }
 
-    async create(req: Request, res: Response, next: NextFunction): Promise<void> {
+    create = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         try {
             const result = await this.productSvc.create(req.body);
 
@@ -56,7 +56,7 @@ export class ProductController extends BaseController {
         }
     }
 
-    async update(req: Request, res: Response, next: NextFunction): Promise<void> {
+    update = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         try {
             const id = parseInt(req.params.id);
 
@@ -68,7 +68,7 @@ export class ProductController extends BaseController {
         }
     }
 
-    async delete(req: Request, res: Response, next: NextFunction): Promise<void> {
+    delete = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         try {
             const id = parseInt(req.params.id);
 

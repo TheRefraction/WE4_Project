@@ -12,7 +12,7 @@ export class CustomizationController extends BaseController {
         super(); 
     }
 
-    async getAll(req: Request, res : Response, next : NextFunction): Promise<void> {
+    getAll = async(req: Request, res : Response, next : NextFunction): Promise<void> => {
         try {
             const slots = await this.slotSvc.getAll();
 
@@ -22,7 +22,7 @@ export class CustomizationController extends BaseController {
         }
     }
 
-    async getAllByProductId(req: Request, res: Response, next : NextFunction): Promise<void>{
+    getAllByProductId = async (req: Request, res: Response, next : NextFunction): Promise<void> => {
         try {
             const productId = parseInt(req.params.id);
 
@@ -34,7 +34,7 @@ export class CustomizationController extends BaseController {
         }
     }
 
-    async getFullSlotsByProductId(req: Request, res: Response, next: NextFunction): Promise<void> {
+    getFullSlotsByProductId = async(req: Request, res: Response, next: NextFunction): Promise<void> => {
         try {
             const productId = parseInt(req.params.id);
 
@@ -46,7 +46,7 @@ export class CustomizationController extends BaseController {
         }
     }
 
-    async getbyId(req: Request, res : Response, next : NextFunction): Promise<void> {
+    getbyId = async(req: Request, res : Response, next : NextFunction): Promise<void> => {
         try {
             const id = parseInt(req.params.id);
 
@@ -58,7 +58,7 @@ export class CustomizationController extends BaseController {
         }
     }
 
-    async getFullSlotById(req: Request, res: Response, next : NextFunction): Promise<void> {
+    getFullSlotById = async (req: Request, res: Response, next : NextFunction): Promise<void> => {
         try {
             const id = parseInt(req.params.id);
 
@@ -70,7 +70,7 @@ export class CustomizationController extends BaseController {
         }
     }   
 
-    async create(req: Request, res : Response, next: NextFunction): Promise<void>{
+    create = async (req: Request, res : Response, next: NextFunction): Promise<void> => {
         try {
             const slot = await this.slotSvc.create(req.body);
 
@@ -80,7 +80,7 @@ export class CustomizationController extends BaseController {
         }
     }
 
-    async update(req: Request, res: Response, next: NextFunction): Promise<void> {
+    update = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         try {
             const id = parseInt(req.params.id);
 
@@ -92,7 +92,7 @@ export class CustomizationController extends BaseController {
         }
     }
 
-    async delete(req: Request, res: Response, next: NextFunction): Promise<void>{
+    delete = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         try {
             const id = parseInt(req.params.id);
 
