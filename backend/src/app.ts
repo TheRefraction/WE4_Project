@@ -48,9 +48,9 @@ class App {
   }
 
   private initializeRoutes(): void {
-    this.app.use('/', routes);
+    this.app.use('/api', routes);
     
-    this.app.get('/health', (req: Request, res: Response) => {
+    this.app.get('/api/health', (req: Request, res: Response) => {
       res.json({ status: 'OK', timestamp: new Date() });
     });
   }
