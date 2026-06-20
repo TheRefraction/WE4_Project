@@ -11,7 +11,7 @@ export const env = {
 
     // PostgreSQL
     PG_HOST: process.env.POSTGRES_HOST || 'localhost',
-    PG_PORT: parseInt(process.env.POSTGRES_PORT) || 5432,
+    PG_PORT: Number(process.env.POSTGRES_PORT) || 5432,
     PG_DB: process.env.POSTGRES_DB || '',
     PG_USER: process.env.POSTGRES_APP_USER || '',
     PG_PASSWORD: process.env.POSTGRES_APP_PASSWORD || '',
