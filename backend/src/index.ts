@@ -1,44 +1,25 @@
-import 'dotenv/config';
-import express from 'express';
-import cors from 'cors';
-import helmet from 'helmet';
-import { connectPostgres } from './config/postgres';
-import { connectMongo } from './config/mongo';
-import router from './routes';
-import { errorHandler } from './middlewares/errorHandler';
+import app from './app';
+import { env } from './config/env';
 
-const app = express();
 const PORT = 3000;
-const allowedOrigins = new Set(
-  (process.env.CORS_ORIGINS || '*')
-    .split(',')
-    .map(origin => origin.trim())
-    .filter(Boolean)
-);
 
+(async () => {
+  await app.init();
 
-app.use(helmet());
-app.use(cors({
-  origin: (origin, callback) => {
-    if (!origin || allowedOrigins.has(origin)) {
-      callback(null, true);
-      return;
-    }
-    callback(new Error('Origin not allowed'));
-  },
-  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true,
-}));
-app.use(express.json());
+  const server = app.getApp().listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+    console.log(`Environment: ${env.NODE_ENV}`);
+    console.log(`Health check: http://localhost:${PORT}/health`);
+  });
 
-app.use('/api', router);
-app.use(errorHandler);
+  const gracefulShutdown = () => {
+    console.log('Received shutdown signal, closing server...');
+    server.close(async () => {
+        console.log('HTTP server closed');
+        process.exit(0);
+    });
+  };
 
-const start = async () => {
-  await connectPostgres();
-  await connectMongo();
-  app.listen(PORT, () => console.log(`Serving on port ${PORT}`));
-};
-
-start().catch(console.error);
+  process.on('SIGTERM', gracefulShutdown);
+  process.on('SIGINT', gracefulShutdown);
+})();
