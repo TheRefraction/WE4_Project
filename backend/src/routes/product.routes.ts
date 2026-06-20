@@ -20,11 +20,11 @@ const productValidation = {
         body('hidden').notEmpty().withMessage('hidden is required').isBoolean().withMessage('hidden must be a boolean')
     ],
     UPDATE: [
-        body('name').optional().withMessage('Product name is required').isLength({ max: 128 }).withMessage('Name cannot exceed 128 characters'),
+        body('name').optional().isLength({ max: 128 }).withMessage('Name cannot exceed 128 characters'),
         body('description').optional(),
         body('price').optional().isFloat({ min: 0 }).withMessage('Price must be a positive number'),
         body('supplierId').optional().isInt().withMessage('supplierId must be a number'),
-        body('hidden').optional().withMessage('hidden is required').isBoolean().withMessage('hidden must be a boolean')
+        body('hidden').optional().isBoolean().withMessage('hidden must be a boolean')
     ]
 };
 
