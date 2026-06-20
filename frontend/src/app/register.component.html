@@ -1,0 +1,110 @@
+<div class="auth-page">
+  <div class="auth-container">
+    <div class="auth-header">
+      <span class="auth-eyebrow">Rejoignez-nous</span>
+      <h1 class="auth-title">Inscription</h1>
+      <p class="auth-sub">Créez votre compte <span class="highlight">Effes</span></p>
+    </div>
+
+    <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="auth-form">
+      <div class="form-row">
+        <div class="form-group half">
+          <label for="firstName">Prénom</label>
+          <input
+            id="firstName"
+            type="text"
+            formControlName="firstName"
+            placeholder="Jean"
+            [class.is-invalid]="firstName?.invalid && firstName?.touched"
+          />
+          <div class="invalid-feedback" *ngIf="firstName?.invalid && firstName?.touched">
+            Le prénom est requis
+          </div>
+        </div>
+
+        <div class="form-group half">
+          <label for="lastName">Nom</label>
+          <input
+            id="lastName"
+            type="text"
+            formControlName="lastName"
+            placeholder="Dupont"
+            [class.is-invalid]="lastName?.invalid && lastName?.touched"
+          />
+          <div class="invalid-feedback" *ngIf="lastName?.invalid && lastName?.touched">
+            Le nom est requis
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input
+          id="email"
+          type="email"
+          formControlName="email"
+          placeholder="votre@email.com"
+          [class.is-invalid]="email?.invalid && email?.touched"
+        />
+        <div class="invalid-feedback" *ngIf="email?.invalid && email?.touched">
+          <span *ngIf="email?.errors?.['required']">L’email est requis</span>
+          <span *ngIf="email?.errors?.['email']">Format d’email invalide</span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="phone">Téléphone (optionnel)</label>
+        <input
+          id="phone"
+          type="tel"
+          formControlName="phone"
+          placeholder="+33 6 12 34 56 78"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="password">Mot de passe</label>
+        <input
+          id="password"
+          type="password"
+          formControlName="password"
+          placeholder="••••••••"
+          [class.is-invalid]="password?.invalid && password?.touched"
+        />
+        <div class="invalid-feedback" *ngIf="password?.invalid && password?.touched">
+          <span *ngIf="password?.errors?.['required']">Le mot de passe est requis</span>
+          <span *ngIf="password?.errors?.['minlength']">6 caractères minimum</span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="confirmPassword">Confirmer le mot de passe</label>
+        <input
+          id="confirmPassword"
+          type="password"
+          formControlName="confirmPassword"
+          placeholder="••••••••"
+          [class.is-invalid]="registerForm.hasError('mismatch') && confirmPassword?.touched"
+        />
+        <div class="invalid-feedback" *ngIf="registerForm.hasError('mismatch') && confirmPassword?.touched">
+          Les mots de passe ne correspondent pas
+        </div>
+      </div>
+
+      <div class="alert alert-danger" *ngIf="errorMessage">
+        {{ errorMessage }}
+      </div>
+      <div class="alert alert-success" *ngIf="successMessage">
+        {{ successMessage }}
+      </div>
+
+      <button type="submit" class="btn-primary" [disabled]="loading">
+        {{ loading ? 'Inscription...' : 'Créer mon compte' }}
+      </button>
+
+      <p class="auth-switch">
+        Déjà inscrit ? <a routerLink="/login">Connectez-vous</a>
+      </p>
+    </form>
+  </div>
+</div>

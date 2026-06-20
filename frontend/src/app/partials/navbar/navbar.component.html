@@ -9,16 +9,19 @@
     </button>
 
     <ul class="navbar-links" [class.open]="menuOpen">
-      <li><a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Home</a></li>
-      <li><a routerLink="/shop" routerLinkActive="active">Order</a></li>
-      @if (userId) {
-        <li><a routerLink="/cart" routerLinkActive="active">Cart</a></li>
-        <li><a routerLink="/account" routerLinkActive="active">My account</a></li>
+      <li><a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Accueil</a></li>
+
+      @if (accountService.isLoggedIn()) {
+        <li><a routerLink="/shop" routerLinkActive="active">Commander</a></li>
+        <li><a routerLink="/cart" routerLinkActive="active">Panier</a></li>
+        <li><a routerLink="/account" routerLinkActive="active">Mon Compte</a></li>
         <li><a routerLink="/invoices" routerLinkActive="active">Invoices</a></li>
-        <li class="signout"><a routerLink="/sign-out">Sign out</a></li>
+        <li class="signout">
+          <a href="javascript:void(0)" (click)="onLogout()">Déconnexion</a>
+        </li>
       } @else {
-        <li><a routerLink="/sign-in" routerLinkActive="active">Sign in</a></li>
-        <li class="cta"><a routerLink="/sign-up">Sign up</a></li>
+        <li><a routerLink="/login" routerLinkActive="active">Connexion</a></li>
+        <li class="cta"><a routerLink="/register">Inscription</a></li>
       }
     </ul>
   </div>

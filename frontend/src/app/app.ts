@@ -18,7 +18,7 @@ export class App implements OnInit {
   constructor(private readonly http: HttpClient) {}
 
   ngOnInit(): void {
-    this.http.get<{ status: string; postgres: string; mongo: string }>('/api/health')
+    this.http.get<{ status: string; postgres: string; mongo: string }>('/health')
       .subscribe({
         next: (response) => this.health.set(JSON.stringify(response)),
         error: () => this.error.set('health check failed')

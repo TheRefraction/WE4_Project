@@ -1,6 +1,7 @@
-import { Component, Input } from '@angular/core';
+import { Component } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { AccountService } from '../../services/account.service';
 
 @Component({
   selector: 'app-navbar',
@@ -10,6 +11,16 @@ import { CommonModule } from '@angular/common';
   styleUrl: './navbar.component.scss',
 })
 export class NavbarComponent {
-  @Input() userId: string | null = null;
   menuOpen = false;
+
+  constructor(public accountService: AccountService) {}
+
+  onLogout(): void {
+    this.accountService.logout();
+    this.menuOpen = false;
+  }
+
+  get isLoggedIn(): boolean {
+    return this.accountService.isLoggedIn();
+  }
 }
