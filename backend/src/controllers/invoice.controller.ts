@@ -37,4 +37,31 @@ export class InvoiceController {
             next(error);
         }
     }
+
+    getAll = async(req: Request, res: Response, next: NextFunction) => {
+        try {
+            const invoices = await invoiceService.getAllInvoices();
+            res.status(200).json({
+                success: true,
+                message: "Invoices retrieved successfully",
+                data: invoices
+            });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    updateStatus = async(req: Request, res: Response, next: NextFunction) => {
+        try {
+            const id = parseInt(req.params.id);
+            const { status } = req.body;
+            await invoiceService.updateInvoiceStatus(id, status);
+            res.status(200).json({
+                success: true,
+                message: "Invoice status updated successfully"
+            });
+        } catch (error) {
+            next(error);
+        }
+    }
 }

@@ -106,4 +106,24 @@ export class InvoiceRepository {
             items: mongoResult ? mongoResult.items : []
         };
     }
+
+    async findAllInvoices(): Promise<any[]> {
+        const query = `
+            SELECT id, account_id AS "customerId", amount, billing_address AS "billingAddress", status, payment_id AS "paymentId", created_at AS "createdAt"
+            FROM invoice
+            ORDER BY created_at DESC;
+        `;
+        const res = await pgPool.query(query);
+        return res.rows;
+    }
+
+    async updateInvoiceStatus(invoiceId: number, status: string): Promise<boolean> {
+        const query = `
+            UPDATE invoice
+            SET status = $1, updated_at = NOW()
+            WHERE id = $2;
+        `;
+        const res = await pgPool.query(query, [status, invoiceId]);
+        return (res.rowCount ?? 0) > 0;
+    }
 }

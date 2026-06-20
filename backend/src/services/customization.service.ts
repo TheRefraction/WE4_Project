@@ -74,6 +74,7 @@ export class CustomizationService {
             id: data.id,
             productId: data.productId,
             categoryId: data.categoryId,
+            categoryName: data.categoryName,
             minSelect: data.minSelect,
             maxSelect: data.maxSelect,
             displayOrder: data.displayOrder,

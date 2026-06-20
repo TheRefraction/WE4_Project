@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { CartService, CartItem } from './services/cart.service';
+import { OrderService } from './services/order.service';
+import { AccountService } from './services/account.service';
 
 @Component({
   selector: 'app-cart',
@@ -15,6 +17,8 @@ export class CartComponent {
   private fb = inject(FormBuilder);
   private router = inject(Router);
   cartService = inject(CartService);
+  private orderService = inject(OrderService);
+  private accountService = inject(AccountService);
 
   items = this.cartService.items;
   total = this.cartService.total;
@@ -28,7 +32,7 @@ export class CartComponent {
     email:       ['', [Validators.required, Validators.email]],
     address:     ['', Validators.required],
     city:        ['', Validators.required],
-    zip:         ['', Validators.required],
+    zip:       ['', Validators.required],
     cardNumber:  ['', [Validators.required, Validators.pattern(/^\d{16}$/)]],
     cardExpiry:  ['', [Validators.required, Validators.pattern(/^(0[1-9]|1[0-2])\/\d{2}$/)]],
     cardCvc:     ['', [Validators.required, Validators.pattern(/^\d{3,4}$/)]],
@@ -65,29 +69,128 @@ export class CartComponent {
       return;
     }
 
-    const order = {
-      customer: {
-        firstName: this.checkoutForm.value.firstName,
-        lastName:  this.checkoutForm.value.lastName,
-        email:     this.checkoutForm.value.email,
-        address:   this.checkoutForm.value.address,
-        city:      this.checkoutForm.value.city,
-        zip:       this.checkoutForm.value.zip,
+    if (!this.accountService.isLoggedIn()) {
+      alert('Veuillez vous connecter pour passer commande.');
+      this.router.navigate(['/login']);
+      return;
+    }
+
+    const customerId = this.accountService.currentUser?.id || 1;
+
+    const itemsMapped = this.items().map((item: any) => {
+      if (item.type === 'product') {
+        const prod = item.product;
+        const options: any[] = [];
+        
+        prod.customization.ingredients.forEach((ing: any) => {
+          if (!ing.included) {
+            options.push({
+              name: 'Ingrédient',
+              item: {
+                name: `Sans ${ing.name}`,
+                delta: 0,
+                quantity: 1
+              }
+            });
+          }
+        });
+
+        prod.customization.extras.forEach((ext: any) => {
+          if (ext.selected) {
+            options.push({
+              name: ext.type === 'size' ? 'Taille' : ext.type === 'sauce' ? 'Sauce' : 'Supplément',
+              item: {
+                name: ext.name,
+                delta: ext.price,
+                quantity: 1
+              }
+            });
+          }
+        });
+
+        return {
+          type: 'product',
+          name: prod.name,
+          price: prod.price,
+          quantity: item.quantity,
+          options
+        };
+      } else {
+        const menu = item.menu;
+        const slots = menu.customizations.map((cust: any) => {
+          const options: any[] = [];
+          
+          cust.ingredients.forEach((ing: any) => {
+            if (!ing.included) {
+              options.push({
+                name: 'Ingrédient',
+                item: {
+                  name: `Sans ${ing.name}`,
+                  delta: 0,
+                  quantity: 1
+                }
+              });
+            }
+          });
+
+          cust.extras.forEach((ext: any) => {
+            if (ext.selected) {
+              options.push({
+                name: ext.type === 'size' ? 'Taille' : ext.type === 'sauce' ? 'Sauce' : 'Supplément',
+                item: {
+                  name: ext.name,
+                  delta: ext.price,
+                  quantity: 1
+                }
+              });
+            }
+          });
+
+          return {
+            name: cust.productName,
+            item: {
+              name: cust.productName,
+              delta: 0,
+              quantity: 1,
+              options
+            }
+          };
+        });
+
+        return {
+          type: 'menu',
+          name: menu.name,
+          price: menu.price,
+          quantity: item.quantity,
+          slots
+        };
+      }
+    });
+
+    const backendOrder = {
+      customerId,
+      amount: this.total(),
+      billingAddress: {
+        street: this.checkoutForm.value.address || '',
+        city: this.checkoutForm.value.city || '',
+        zip: this.checkoutForm.value.zip || '',
+        country: 'France'
       },
-      payment: {
-        cardNumber: this.checkoutForm.value.cardNumber,
-        cardExpiry: this.checkoutForm.value.cardExpiry,
-        cardCvc:    this.checkoutForm.value.cardCvc,
-      },
-      items: this.items(),
-      total: this.total(),
+      items: itemsMapped
     };
 
-    console.log('[Order] Commande soumise :', order);
-
-    this.cartService.clearCart();
-    this.checkoutForm.reset();
-    this.step.set('confirm');
+    this.orderService.placeOrder(backendOrder).subscribe({
+      next: (res) => {
+        console.log('[Order] Commande soumise avec succès, ID:', res.data.id);
+        this.cartService.clearCart();
+        this.checkoutForm.reset();
+        this.step.set('confirm');
+      },
+      error: (err) => {
+        console.error('[Order] Erreur de commande:', err);
+        alert("Une erreur s'est produite lors de la soumission de la commande. Veuillez réessayer.");
+      }
+    });
   }
 
   restartShopping() {

@@ -27,7 +27,16 @@ router.use(authMiddleware);
 // create facture
 router.post('/', createInvoiceValidation, validateRequest, invoiceController.create);
 
+// get all factures
+router.get('/', invoiceController.getAll);
+
 // get facture details
 router.get('/:id', getInvoiceValidation, validateRequest, invoiceController.getById);
+
+// update status
+router.patch('/:id/status', [
+    param('id').isInt().withMessage('Invoice ID in URL must be an integer'),
+    body('status').notEmpty().withMessage('status is required')
+], validateRequest, invoiceController.updateStatus);
 
 export default router;

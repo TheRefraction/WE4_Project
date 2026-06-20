@@ -15,7 +15,7 @@ export interface Account {
 
 export interface LoginResponse {
   token: string;
-  user: Account;
+  account: Account;
 }
 
 export interface RegisterData {
@@ -30,14 +30,20 @@ export interface RegisterData {
   providedIn: 'root'
 })
 export class AccountService {
-  private apiUrl = 'http://localhost:3000/api/v1';
+  private apiUrl = '/api/v1';
   private currentUserSubject = new BehaviorSubject<Account | null>(null);
   public currentUser$ = this.currentUserSubject.asObservable();
 
   constructor(private http: HttpClient, private router: Router) {
     const saved = localStorage.getItem('currentUser');
     if (saved) {
-      this.currentUserSubject.next(JSON.parse(saved));
+      try {
+        this.currentUserSubject.next(JSON.parse(saved));
+      } catch (e) {
+        console.error('Error parsing currentUser from localStorage', e);
+        localStorage.removeItem('currentUser');
+        localStorage.removeItem('token');
+      }
     }
   }
 
@@ -90,8 +96,8 @@ export class AccountService {
 
   private setSession(loginData: LoginResponse) {
     localStorage.setItem('token', loginData.token);
-    localStorage.setItem('currentUser', JSON.stringify(loginData.user));
-    this.currentUserSubject.next(loginData.user);
+    localStorage.setItem('currentUser', JSON.stringify(loginData.account));
+    this.currentUserSubject.next(loginData.account);
   }
 
   logout() {

@@ -5,6 +5,7 @@
     <nav class="admin-nav">
       <button class="nav-btn" [class.active]="activeTab() === 'products'" (click)="activeTab.set('products')">Produits</button>
       <button class="nav-btn" [class.active]="activeTab() === 'menus'" (click)="activeTab.set('menus')">Menus</button>
+      <button class="nav-btn" [class.active]="activeTab() === 'categories'" (click)="activeTab.set('categories')">Catégories</button>
       <button class="nav-btn" [class.active]="activeTab() === 'users'" (click)="activeTab.set('users')">Utilisateurs</button>
       <button class="nav-btn" [class.active]="activeTab() === 'orders'" (click)="activeTab.set('orders')">Factures</button>
     </nav>
@@ -23,7 +24,7 @@
           <thead>
             <tr>
               <th>Nom</th>
-              <th>Description</th>
+              <th>Description / Catégories</th>
               <th class="col-price">Prix</th>
               <th class="col-actions"></th>
             </tr>
@@ -32,9 +33,19 @@
             @for (product of products(); track product.id) {
               <tr>
                 <td class="td-name">{{ product.name }}</td>
-                <td class="td-desc">{{ product.description }}</td>
+                <td class="td-desc">
+                  <div>{{ product.description }}</div>
+                  @if (product.categories && product.categories.length > 0) {
+                    <div class="product-category-badges">
+                      @for (cat of product.categories; track cat.id) {
+                        <span class="category-badge">{{ cat.name }}</span>
+                      }
+                    </div>
+                  }
+                </td>
                 <td class="td-price">{{ product.price.toFixed(2) }}€</td>
                 <td class="td-actions">
+                  <button class="action-btn customize" (click)="openSlotManager(product)">Personnaliser</button>
                   <button class="action-btn edit" (click)="openEditProduct(product)">Modifier</button>
                   <button class="action-btn delete" (click)="askDelete(product.id, 'product')">Supprimer</button>
                 </td>
@@ -70,6 +81,37 @@
                 <td class="td-actions">
                   <button class="action-btn edit" (click)="openEditMenu(menu)">Modifier</button>
                   <button class="action-btn delete" (click)="askDelete(menu.id, 'menu')">Supprimer</button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </section>
+    }
+
+    @if (activeTab() === 'categories') {
+      <section class="admin-section">
+        <div class="section-header">
+          <h2 class="section-title">Catégories <span class="count-badge">{{ categories().length }}</span></h2>
+          <button class="btn-fire" (click)="openCreateCategory()">+ Nouvelle catégorie</button>
+        </div>
+
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Nom</th>
+              <th>Produits liés</th>
+              <th class="col-actions"></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (cat of categories(); track cat.id) {
+              <tr>
+                <td class="td-name">{{ cat.name }}</td>
+                <td class="td-desc">{{ cat.productCount || 0 }} produits associés</td>
+                <td class="td-actions">
+                  <button class="action-btn edit" (click)="openEditCategory(cat)">Modifier</button>
+                  <button class="action-btn delete" (click)="askDelete(cat.id, 'category')">Supprimer</button>
                 </td>
               </tr>
             }
@@ -233,7 +275,7 @@
 
 @if (showProductForm()) {
   <div class="modal-overlay" (click)="cancelProductForm()">
-    <div class="modal" (click)="$event.stopPropagation()">
+    <div class="modal modal-md" (click)="$event.stopPropagation()">
       <h3 class="modal-title">{{ editingProduct() ? 'Modifier le produit' : 'Nouveau produit' }}</h3>
 
       <form [formGroup]="productForm" (ngSubmit)="submitProduct()" class="modal-form">
@@ -258,6 +300,22 @@
           <div class="form-field">
             <label>Image (URL)</label>
             <input type="text" formControlName="image" placeholder="/assets/images/..." />
+          </div>
+        </div>
+
+        <div class="form-field">
+          <label>Catégories du produit</label>
+          <div class="product-checkboxes">
+            @for (cat of categories(); track cat.id) {
+              <label class="checkbox-label" [class.checked]="productCategorySelection().has(cat.id)">
+                <input
+                  type="checkbox"
+                  [checked]="productCategorySelection().has(cat.id)"
+                  (change)="toggleProductCategory(cat.id)"
+                />
+                {{ cat.name }}
+              </label>
+            }
           </div>
         </div>
 
@@ -320,11 +378,197 @@
   </div>
 }
 
+@if (showCategoryForm()) {
+  <div class="modal-overlay" (click)="cancelCategoryForm()">
+    <div class="modal modal-sm" (click)="$event.stopPropagation()">
+      <h3 class="modal-title">{{ editingCategory() ? 'Modifier la catégorie' : 'Nouvelle catégorie' }}</h3>
+
+      <form [formGroup]="categoryForm" (ngSubmit)="submitCategory()" class="modal-form">
+        <div class="form-field" [class.error]="fieldInvalid(categoryForm, 'name')">
+          <label>Nom de la catégorie</label>
+          <input type="text" formControlName="name" placeholder="Boissons, Sauces, Ingrédients, ..." />
+          @if (fieldInvalid(categoryForm, 'name')) { <span class="error-msg">Requis</span> }
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn-ghost" (click)="cancelCategoryForm()">Annuler</button>
+          <button type="submit" class="btn-fire">{{ editingCategory() ? 'Enregistrer' : 'Créer' }}</button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
+
+@if (showSlotManager()) {
+  <div class="modal-overlay" (click)="showSlotManager.set(false)">
+    <div class="modal modal-lg" (click)="$event.stopPropagation()">
+      <div class="modal-header-actions">
+        <h3 class="modal-title">Personnalisations : {{ selectedSlotProduct()?.name }}</h3>
+        <button class="btn-fire" (click)="openCreateSlot()">+ Nouveau Slot</button>
+      </div>
+
+      <div class="slot-manager-content">
+        @if (slots().length === 0) {
+          <div class="no-slots">Aucun slot de personnalisation configuré pour ce produit.</div>
+        } @else {
+          <div class="slots-grid">
+            @for (slot of slots(); track slot.id) {
+              <div class="slot-card">
+                <div class="slot-card-header">
+                  <div>
+                    <h4 class="slot-category-name">{{ slot.categoryName || 'Catégorie #' + slot.categoryId }}</h4>
+                    <span class="slot-select-limits">Sélection : {{ slot.minSelect }} - {{ slot.maxSelect }} · Ordre : {{ slot.displayOrder }}</span>
+                  </div>
+                  <div class="slot-actions">
+                    <button class="icon-btn-edit" (click)="openEditSlot(slot)">Modifier</button>
+                    <button class="icon-btn-delete" (click)="deleteSlot(slot.id)">Supprimer</button>
+                  </div>
+                </div>
+
+                <div class="slot-options-list">
+                  <div class="options-header">
+                    <h5>Options</h5>
+                    <button class="btn-add-option" (click)="openCreateOption(slot)">+ Ajouter</button>
+                  </div>
+
+                  @if (!slot.options || slot.options.length === 0) {
+                    <div class="no-options">Aucune option.</div>
+                  } @else {
+                    <table class="options-table">
+                      <thead>
+                        <tr>
+                          <th>Nom</th>
+                          <th>Delta (€)</th>
+                          <th>Défaut</th>
+                          <th>Ordre</th>
+                          <th></th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        @for (opt of slot.options; track opt.productId) {
+                          <tr>
+                            <td>{{ opt.name || 'Produit #' + opt.productId }}</td>
+                            <td>+{{ opt.priceDelta }}€</td>
+                            <td>{{ opt.isDefault ? 'Oui' : 'Non' }}</td>
+                            <td>{{ opt.displayOrder }}</td>
+                            <td class="options-actions">
+                              <button class="opt-btn edit" (click)="openEditOption(slot, opt)">✏️</button>
+                              <button class="opt-btn delete" (click)="deleteOption(slot, opt.productId)">🗑️</button>
+                            </td>
+                          </tr>
+                        }
+                      </tbody>
+                    </table>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn-ghost" (click)="showSlotManager.set(false)">Fermer</button>
+      </div>
+    </div>
+  </div>
+}
+
+@if (showSlotForm()) {
+  <div class="modal-overlay" (click)="showSlotForm.set(false)" style="z-index: 1010;">
+    <div class="modal modal-sm" (click)="$event.stopPropagation()">
+      <h3 class="modal-title">{{ editingSlot() ? 'Modifier le slot' : 'Nouveau slot' }}</h3>
+
+      <form [formGroup]="slotForm" (ngSubmit)="submitSlot()" class="modal-form">
+        <div class="form-field" [class.error]="fieldInvalid(slotForm, 'categoryId')">
+          <label>Groupe d'options (Catégorie)</label>
+          <select formControlName="categoryId" class="form-select">
+            @for (cat of categories(); track cat.id) {
+              <option [value]="cat.id">{{ cat.name }}</option>
+            }
+          </select>
+          @if (fieldInvalid(slotForm, 'categoryId')) { <span class="error-msg">Requis</span> }
+        </div>
+
+        <div class="form-row">
+          <div class="form-field" [class.error]="fieldInvalid(slotForm, 'minSelect')">
+            <label>Min Sélection</label>
+            <input type="number" formControlName="minSelect" min="0" />
+            @if (fieldInvalid(slotForm, 'minSelect')) { <span class="error-msg">Requis</span> }
+          </div>
+          <div class="form-field" [class.error]="fieldInvalid(slotForm, 'maxSelect')">
+            <label>Max Sélection</label>
+            <input type="number" formControlName="maxSelect" min="0" />
+            @if (fieldInvalid(slotForm, 'maxSelect')) { <span class="error-msg">Requis</span> }
+          </div>
+        </div>
+
+        <div class="form-field" [class.error]="fieldInvalid(slotForm, 'displayOrder')">
+          <label>Ordre d'affichage</label>
+          <input type="number" formControlName="displayOrder" min="0" />
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn-ghost" (click)="showSlotForm.set(false)">Annuler</button>
+          <button type="submit" class="btn-fire">{{ editingSlot() ? 'Enregistrer' : 'Créer' }}</button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
+
+@if (showOptionForm()) {
+  <div class="modal-overlay" (click)="showOptionForm.set(false)" style="z-index: 1020;">
+    <div class="modal modal-sm" (click)="$event.stopPropagation()">
+      <h3 class="modal-title">{{ editingOption() ? 'Modifier l\'option' : 'Ajouter une option' }}</h3>
+
+      <form [formGroup]="optionForm" (ngSubmit)="submitOption()" class="modal-form">
+        <div class="form-field" [class.error]="fieldInvalid(optionForm, 'productId')">
+          <label>Produit Option</label>
+          @if (editingOption()) {
+            <input type="text" readonly [value]="editingOption().name || 'Option'" class="form-input-readonly" />
+          } @else {
+            <select formControlName="productId" class="form-select">
+              @for (prod of getEligibleOptionProducts(currentSlot()); track prod.id) {
+                <option [value]="prod.id">{{ prod.name }} ({{ prod.price.toFixed(2) }}€)</option>
+              }
+            </select>
+          }
+          @if (fieldInvalid(optionForm, 'productId')) { <span class="error-msg">Requis</span> }
+        </div>
+
+        <div class="form-field" [class.error]="fieldInvalid(optionForm, 'priceDelta')">
+          <label>Différence de prix (+€)</label>
+          <input type="number" formControlName="priceDelta" step="0.10" min="0" />
+          @if (fieldInvalid(optionForm, 'priceDelta')) { <span class="error-msg">Requis</span> }
+        </div>
+
+        <div class="form-field checkbox-field">
+          <label class="checkbox-label flex-row">
+            <input type="checkbox" formControlName="isDefault" />
+            Sélectionné par défaut
+          </label>
+        </div>
+
+        <div class="form-field" [class.error]="fieldInvalid(optionForm, 'displayOrder')">
+          <label>Ordre d'affichage</label>
+          <input type="number" formControlName="displayOrder" min="0" />
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn-ghost" (click)="showOptionForm.set(false)">Annuler</button>
+          <button type="submit" class="btn-fire">{{ editingOption() ? 'Enregistrer' : 'Créer' }}</button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
+
 @if (deleteConfirmId() !== null) {
   <div class="modal-overlay" (click)="cancelDelete()">
     <div class="modal modal-sm" (click)="$event.stopPropagation()">
       <h3 class="modal-title">Confirmer la suppression</h3>
-      <p class="modal-text">Cette action est irréversible.</p>
+      <p class="modal-text">Cette action est irréversible et supprimera également les associations dépendantes.</p>
       <div class="modal-actions">
         <button class="btn-ghost" (click)="cancelDelete()">Annuler</button>
         <button class="btn-delete" (click)="confirmDelete()">Supprimer</button>

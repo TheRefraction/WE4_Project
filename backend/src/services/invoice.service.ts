@@ -11,7 +11,7 @@ export class InvoiceService {
 
     async createInvoice(invoiceData: any ): Promise<Invoice>{
         const {items} = invoiceData;
-        if (!items || items.lenght === 0 ){
+        if (!items || items.length === 0 ){
             throw new Error(" Can't create invoice because cart is empty");
         }
         return await this.invoiceRepository.createInvoiceWithItems(invoiceData);
@@ -29,5 +29,20 @@ export class InvoiceService {
         }
 
         return fullInvoice
+    }
+
+    async getAllInvoices() {
+        const invoices = await this.invoiceRepository.findAllInvoices();
+        return Promise.all(invoices.map(async (invoice) => {
+            const details = await this.invoiceRepository.findInvoiceWithDetails(invoice.id);
+            return details;
+        }));
+    }
+
+    async updateInvoiceStatus(invoiceId: number, status: string) {
+        if (!invoiceId) {
+            throw new Error("invoice ID is required");
+        }
+        return await this.invoiceRepository.updateInvoiceStatus(invoiceId, status);
     }
 }
