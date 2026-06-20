@@ -111,7 +111,7 @@ export class CartComponent {
         return {
           type: 'product',
           name: prod.name,
-          price: prod.price,
+          price: prod.basePrice || prod.price,
           quantity: item.quantity,
           options
         };
@@ -147,7 +147,7 @@ export class CartComponent {
           });
 
           return {
-            name: cust.productName,
+            name: 'Sélection',
             item: {
               name: cust.productName,
               delta: 0,
@@ -181,10 +181,21 @@ export class CartComponent {
 
     this.orderService.placeOrder(backendOrder).subscribe({
       next: (res) => {
-        console.log('[Order] Commande soumise avec succès, ID:', res.data.id);
-        this.cartService.clearCart();
-        this.checkoutForm.reset();
-        this.step.set('confirm');
+        const invoiceId = res.data.id;
+        console.log('[Order] Commande soumise avec succès, ID:', invoiceId);
+
+        this.orderService.makePayment(invoiceId, 'card').subscribe({
+          next: () => {
+            console.log('[Order] Paiement établi avec succès pour invoice:', invoiceId);
+            this.cartService.clearCart();
+            this.checkoutForm.reset();
+            this.step.set('confirm');
+          },
+          error: (payErr) => {
+            console.error('[Order] Erreur de paiement:', payErr);
+            alert("Une erreur s'est produite lors du paiement. Veuillez réessayer.");
+          }
+        });
       },
       error: (err) => {
         console.error('[Order] Erreur de commande:', err);

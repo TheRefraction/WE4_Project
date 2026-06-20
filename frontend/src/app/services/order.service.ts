@@ -43,4 +43,16 @@ export class OrderService {
       { headers: this.authHeaders }
     );
   }
+
+  makePayment(invoiceId: number, mode: string): Observable<{ success: boolean; message: string }> {
+    return this.http.post<{ success: boolean; message: string }>(
+      `${this.apiUrl}/payments`,
+      {
+        invoiceId,
+        mode,
+        date: new Date().toISOString()
+      },
+      { headers: this.authHeaders }
+    );
+  }
 }

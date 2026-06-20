@@ -9,6 +9,7 @@ export interface CartProductEntry {
   description: string;
   image: string;
   price: number;
+  basePrice: number;
   customization: {
     ingredients: Ingredient[];
     extras: Extra[];
@@ -125,6 +126,7 @@ export class CartService {
           description: product.description,
           image: product.image,
           price,
+          basePrice: product.price,
           customization: {
             ingredients: ingredients.map(i => ({ ...i })),
             extras: extras.map(e => ({ ...e })),
@@ -194,6 +196,7 @@ export class CartService {
         product: {
           ...i.product!,
           price,
+          basePrice: basePrice,
           customization: {
             ingredients: ingredients.map(x => ({ ...x })),
             extras: extras.map(x => ({ ...x })),
