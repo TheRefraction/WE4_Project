@@ -1,90 +1,112 @@
-<article class="product-card" [class.expanded]="expanded()">
+<article class="product-card" [class.expanded]="expanded()" [class.in-menu]="inMenu">
 
-  <div class="product-image">
-    <img [src]="product.image" [alt]="product.name" (error)="fallbackImage($event)" />
-  </div>
-
-  <div class="product-header">
-    <div>
-      <h3 class="product-name">{{ product.name }}</h3>
-      <p class="product-description">{{ product.description }}</p>
+  @if (!inMenu) {
+    <div class="product-image">
+      <img [src]="product.image" [alt]="product.name" (error)="fallbackImage($event)" />
     </div>
-    <span class="product-price">{{ totalPrice() }}€</span>
-  </div>
+    <div class="product-header">
+      <div>
+        <h3 class="product-name">{{ product.name }}</h3>
+        <p class="product-description">{{ product.description }}</p>
+      </div>
+      <span class="product-price">{{ totalPrice() }}€</span>
+    </div>
+    <button class="toggle-btn" (click)="expanded.set(!expanded())">
+      {{ expanded() ? 'Fermer' : 'Personnaliser' }}
+      <span class="arrow" [class.open]="expanded()">▾</span>
+    </button>
+  }
 
-  <button class="toggle-btn" (click)="expanded.set(!expanded())">
-    {{ expanded() ? 'Fermer' : 'Personnaliser' }}
-    <span class="arrow" [class.open]="expanded()">▾</span>
-  </button>
-
-  @if (expanded()) {
+  @if (!inMenu && expanded()) {
     <div class="customisation">
-
-      <div class="custom-section">
-        <h4 class="custom-title">Ingrédients</h4>
-        <div class="chips">
-          @for (ingredient of ingredients(); track ingredient.id) {
-            <button
-              class="chip"
-              [class.active]="ingredient.included"
-              (click)="toggleIngredient(ingredient.id)"
-            >
-              {{ ingredient.included ? '✓' : '✕' }} {{ ingredient.name }}
-            </button>
-          }
-        </div>
-      </div>
-
-      <div class="custom-section">
-        <h4 class="custom-title">Taille</h4>
-        <div class="chips">
-          @for (size of sizes; track size.id) {
-            <button
-              class="chip"
-              [class.active]="size.selected"
-              (click)="toggleSize(size.id)"
-            >
-              {{ size.name }}
-              @if (size.price > 0) { <span class="chip-price-add">+{{ size.price.toFixed(2) }}€</span> }
-              @if (size.price < 0) { <span class="chip-price-rem">{{ size.price.toFixed(2) }}€</span> }
-            </button>
-          }
-        </div>
-      </div>
-
-      <div class="custom-section">
-        <h4 class="custom-title">Suppléments</h4>
-        <div class="chips">
-          @for (extra of supplements; track extra.id) {
-            <button
-              class="chip"
-              [class.active]="extra.selected"
-              (click)="toggleExtra(extra.id)"
-            >
-              {{ extra.name }}
-              @if (extra.price > 0) { <span class="chip-price">+{{ extra.price.toFixed(2) }}€</span> }
-            </button>
-          }
-        </div>
-      </div>
-
-      <div class="custom-section">
-        <h4 class="custom-title">Sauces</h4>
-        <div class="chips">
-          @for (sauce of sauces; track sauce.id) {
-            <button
-              class="chip"
-              [class.active]="sauce.selected"
-              (click)="toggleExtra(sauce.id)"
-            >
-              {{ sauce.name }}
-            </button>
-          }
-        </div>
-      </div>
-
+      <ng-container *ngTemplateOutlet="chipsContent" />
     </div>
   }
-  <button class="btn-fire">Ajouter au panier — {{ totalPrice() }}€</button>
+
+  @if (inMenu) {
+    <div class="customisation-inline">
+      <ng-container *ngTemplateOutlet="chipsContent" />
+    </div>
+  }
+
+  @if (!inMenu) {
+    <button
+      class="btn-fire"
+      [class.added]="addedFeedback()"
+      (click)="addToCart()"
+    >
+      {{ addedFeedback() ? '✓ Ajouté !' : 'Ajouter au panier — ' + totalPrice() + '€' }}
+    </button>
+  }
 
 </article>
+
+<ng-template #chipsContent>
+  @if (ingredients().length > 0) {
+    <div class="custom-section">
+      <h4 class="custom-title">Ingrédients</h4>
+      <div class="chips">
+        @for (ingredient of ingredients(); track ingredient.id) {
+          <button
+            class="chip"
+            [class.active]="ingredient.included"
+            (click)="toggleIngredient(ingredient.id)"
+          >
+            {{ ingredient.included ? '✓' : '✕' }} {{ ingredient.name }}
+          </button>
+        }
+      </div>
+    </div>
+  }
+  @if (sizes.length > 0) {
+    <div class="custom-section">
+      <h4 class="custom-title">Taille</h4>
+      <div class="chips">
+        @for (size of sizes; track size.id) {
+          <button
+            class="chip"
+            [class.active]="size.selected"
+            (click)="toggleSize(size.id)"
+          >
+            {{ size.name }}
+            @if (size.price > 0) { <span class="chip-price-add">+{{ size.price.toFixed(2) }}€</span> }
+            @if (size.price < 0) { <span class="chip-price-rem">{{ size.price.toFixed(2) }}€</span> }
+          </button>
+        }
+      </div>
+    </div>
+  }
+  @if (supplements.length > 0) {
+    <div class="custom-section">
+      <h4 class="custom-title">Suppléments</h4>
+      <div class="chips">
+        @for (extra of supplements; track extra.id) {
+          <button
+            class="chip"
+            [class.active]="extra.selected"
+            (click)="toggleExtra(extra.id)"
+          >
+            {{ extra.name }}
+            @if (extra.price > 0) { <span class="chip-price">+{{ extra.price.toFixed(2) }}€</span> }
+          </button>
+        }
+      </div>
+    </div>
+  }
+  @if (sauces.length > 0) {
+    <div class="custom-section">
+      <h4 class="custom-title">Sauces</h4>
+      <div class="chips">
+        @for (sauce of sauces; track sauce.id) {
+          <button
+            class="chip"
+            [class.active]="sauce.selected"
+            (click)="toggleExtra(sauce.id)"
+          >
+            {{ sauce.name }}
+          </button>
+        }
+      </div>
+    </div>
+  }
+</ng-template>

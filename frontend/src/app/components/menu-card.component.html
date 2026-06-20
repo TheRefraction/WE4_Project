@@ -1,0 +1,40 @@
+<article class="menu-card" [class.expanded]="expandedProductId !== null">
+  <div class="menu-image">
+    <img [src]="menu.image" [alt]="menu.name" (error)="fallbackImage($event)" />
+  </div>
+
+  <div class="menu-header">
+    <div>
+      <h3 class="menu-name">{{ menu.name }}</h3>
+      <p class="menu-description">{{ menu.description }}</p>
+    </div>
+    <span class="menu-price">{{ menuPrice() }}€</span>
+  </div>
+
+  <div class="menu-products">
+    @for (product of menu.products; track product.id) {
+      <button
+        class="toggle-btn"
+        (click)="expandedProductId = expandedProductId === product.id ? null : product.id"
+      >
+        {{ product.name }}
+        <span class="arrow" [class.open]="expandedProductId === product.id">▾</span>
+      </button>
+      @if (expandedProductId === product.id) {
+        <app-product-card
+          [product]="product"
+          [inMenu]="true"
+          (customizationChange)="onProductCustomizationChange(product.id, $event)"
+        />
+      }
+    }
+  </div>
+
+  <button
+    class="btn-fire"
+    [class.added]="addedFeedback()"
+    (click)="addToCart()"
+  >
+    {{ addedFeedback() ? '✓ Menu ajouté !' : 'Ajouter au panier — ' + menuPrice() + '€' }}
+  </button>
+</article>

@@ -1,5 +1,29 @@
-<main>
-  <div class="products-grid">
-    <app-product-card/>
+<main class="shop">
+
+  <section class="items-subsection products-title">
+    <h1>Produits simples</h1>
+  </section>
+
+  @if (anyExpanded()) {
+    <div class="backdrop" (click)="closeAll()"></div>
+  }
+  <div class="items-grid">
+    @for (product of shop.products; track product.id) {
+      <app-product-card [product]="product" />
+    }
   </div>
+
+  <section class="items-subsection menus-title">
+    <h1>Menus</h1>
+  </section>
+
+  @if (anyExpanded()) {
+    <div class="backdrop" (click)="closeAll()"></div>
+  }
+  <div class="items-grid">
+    @for (menu of shop.menus; track menu.id) {
+      <app-menu-card [menu] = "menu" />
+    }
+  </div>
+
 </main>

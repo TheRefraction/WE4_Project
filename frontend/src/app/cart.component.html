@@ -1,0 +1,196 @@
+<div class="cart-page">
+
+  @if (step() === 'cart') {
+    <div class="cart-view">
+      <h2 class="cart-title">
+        Mon panier
+        @if (itemCount() > 0) {
+          <span class="cart-badge">{{ itemCount() }}</span>
+        }
+      </h2>
+
+      @if (items().length === 0) {
+        <div class="cart-empty">
+          <p>Votre panier est vide.</p>
+        </div>
+      }
+
+      @if (items().length > 0) {
+        <ul class="cart-list">
+          @for (item of items(); track item.cartItemId) {
+            <li class="cart-item">
+
+              <div class="item-header">
+                <div class="item-meta">
+                  <span class="item-badge" [class.badge-menu]="item.type === 'menu'">
+                    {{ item.type === 'menu' ? 'Menu' : 'Produit' }}
+                  </span>
+                  <strong class="item-name">
+                    {{ item.type === 'product' ? item.product!.name : item.menu!.name }}
+                  </strong>
+                </div>
+                <div class="item-right">
+                  <div class="qty-control">
+                    <button class="qty-btn" (click)="cartService.decrementItem(item.cartItemId)">−</button>
+                    <span class="qty-val">{{ item.quantity }}</span>
+                    <button class="qty-btn" (click)="cartService.incrementItem(item.cartItemId)">+</button>
+                  </div>
+                  <span class="item-price">
+                    {{ ((item.type === 'product' ? item.product!.price : item.menu!.price) * item.quantity).toFixed(2) }}€
+                  </span>
+                  <button class="remove-btn" (click)="cartService.removeItem(item.cartItemId)">✕</button>
+                </div>
+              </div>
+
+              @if (item.type === 'product') {
+                <div class="item-summary">
+                  @if (summaryIngredients(item.product!.customization.ingredients)) {
+                    <span class="summary-tag removed">{{ summaryIngredients(item.product!.customization.ingredients) }}</span>
+                  }
+                  @if (summaryExtras(item.product!.customization.extras)) {
+                    <span class="summary-tag">{{ summaryExtras(item.product!.customization.extras) }}</span>
+                  }
+                </div>
+              }
+
+              @if (item.type === 'menu') {
+                <div class="item-summary">
+                  @for (cust of item.menu!.customizations; track cust.productId) {
+                    <div class="menu-product-summary">
+                      <span class="menu-product-label">{{ cust.productName }}</span>
+                      @if (summaryIngredients(cust.ingredients)) {
+                        <span class="summary-tag removed">{{ summaryIngredients(cust.ingredients) }}</span>
+                      }
+                      @if (summaryExtras(cust.extras)) {
+                        <span class="summary-tag">{{ summaryExtras(cust.extras) }}</span>
+                      }
+                    </div>
+                  }
+                </div>
+              }
+
+            </li>
+          }
+        </ul>
+
+        <div class="cart-footer">
+          <div class="cart-total">
+            <span>Total</span>
+            <strong>{{ total().toFixed(2) }}€</strong>
+          </div>
+          <button class="btn-fire" (click)="goToCheckout()">
+            Commander — {{ total().toFixed(2) }}€
+          </button>
+          <button class="btn-ghost" (click)="cartService.clearCart()">Vider le panier</button>
+        </div>
+      }
+    </div>
+  }
+
+  @if (step() === 'checkout') {
+    <div class="checkout-view">
+      <button class="back-btn" (click)="backToCart()">← Retour au panier</button>
+      <h2 class="cart-title">Finaliser la commande</h2>
+
+      <form class="checkout-form" [formGroup]="checkoutForm" (ngSubmit)="submitOrder()">
+
+        <fieldset class="form-section">
+          <legend class="section-legend">Coordonnées</legend>
+
+          <div class="form-row">
+            <div class="form-field" [class.error]="fieldInvalid('firstName')">
+              <label>Prénom</label>
+              <input type="text" formControlName="firstName" placeholder="Jean" />
+              @if (fieldInvalid('firstName')) { <span class="error-msg">Requis</span> }
+            </div>
+            <div class="form-field" [class.error]="fieldInvalid('lastName')">
+              <label>Nom</label>
+              <input type="text" formControlName="lastName" placeholder="Dupont" />
+              @if (fieldInvalid('lastName')) { <span class="error-msg">Requis</span> }
+            </div>
+          </div>
+
+          <div class="form-field" [class.error]="fieldInvalid('email')">
+            <label>Email</label>
+            <input type="email" formControlName="email" placeholder="jean@example.com" />
+            @if (fieldInvalid('email')) { <span class="error-msg">Email invalide</span> }
+          </div>
+
+          <div class="form-field" [class.error]="fieldInvalid('address')">
+            <label>Adresse</label>
+            <input type="text" formControlName="address" placeholder="12 rue de la Paix" />
+            @if (fieldInvalid('address')) { <span class="error-msg">Requis</span> }
+          </div>
+
+          <div class="form-row">
+            <div class="form-field" [class.error]="fieldInvalid('city')">
+              <label>Ville</label>
+              <input type="text" formControlName="city" placeholder="Belfort" />
+              @if (fieldInvalid('city')) { <span class="error-msg">Requis</span> }
+            </div>
+            <div class="form-field" [class.error]="fieldInvalid('zip')">
+              <label>Code postal</label>
+              <input type="text" formControlName="zip" placeholder="90000" />
+              @if (fieldInvalid('zip')) { <span class="error-msg">Requis</span> }
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset class="form-section">
+          <legend class="section-legend">Paiement</legend>
+
+          <div class="form-field" [class.error]="fieldInvalid('cardNumber')">
+            <label>Numéro de carte</label>
+            <input
+              type="text"
+              formControlName="cardNumber"
+              placeholder="1234567812345678"
+              maxlength="16"
+              (input)="formatCardNumber($event)"
+            />
+            @if (fieldInvalid('cardNumber')) { <span class="error-msg">16 chiffres requis</span> }
+          </div>
+
+          <div class="form-row">
+            <div class="form-field" [class.error]="fieldInvalid('cardExpiry')">
+              <label>Expiration</label>
+              <input
+                type="text"
+                formControlName="cardExpiry"
+                placeholder="MM/AA"
+                maxlength="5"
+                (input)="formatExpiry($event)"
+              />
+              @if (fieldInvalid('cardExpiry')) { <span class="error-msg">Format MM/AA</span> }
+            </div>
+            <div class="form-field" [class.error]="fieldInvalid('cardCvc')">
+              <label>CVC</label>
+              <input type="text" formControlName="cardCvc" placeholder="123" maxlength="4" />
+              @if (fieldInvalid('cardCvc')) { <span class="error-msg">3-4 chiffres</span> }
+            </div>
+          </div>
+        </fieldset>
+
+        <div class="order-summary">
+          <span>Total à payer</span>
+          <strong>{{ total().toFixed(2) }}€</strong>
+        </div>
+
+        <button type="submit" class="btn-fire">
+          Confirmer et payer — {{ total().toFixed(2) }}€
+        </button>
+
+      </form>
+    </div>
+  }
+
+  @if (step() === 'confirm') {
+    <div class="confirm-view">
+      <div class="confirm-icon">✓</div>
+      <h2 class="confirm-title">Commande confirmée !</h2>
+      <p class="confirm-sub">Votre commande a été enregistrée. Merci !</p>
+      <button class="btn-fire" (click)="restartShopping()">Retour à la carte</button>
+    </div>
+  }
+
+</div>
