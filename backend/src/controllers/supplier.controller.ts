@@ -20,10 +20,6 @@ export class SupplierController extends BaseController {
         try {
             const id = req.params.id;
             const sanId : number = parseInt(id);
-            if (isNaN(sanId)) {
-                this.sendResponse(res, HttpStatus.BAD_REQUEST, 'Invalid supplier ID');
-                return;
-            }
 
             const result = await this.supplierSvc.getById(sanId);
 
@@ -47,10 +43,6 @@ export class SupplierController extends BaseController {
         try {
             const { id } = req.params;
             const sanId = parseInt(id);
-            if (isNaN(sanId)) {
-                this.sendResponse(res, HttpStatus.BAD_REQUEST, 'Invalid supplier ID');
-                return;
-            }
 
             const result = await this.supplierSvc.update(sanId, req.body);
 
@@ -64,10 +56,6 @@ export class SupplierController extends BaseController {
         try {
             const { id } = req.params;
             const sanId = parseInt(id);
-            if (isNaN(sanId)) {
-                this.sendResponse(res, HttpStatus.BAD_REQUEST, 'Invalid supplier ID');
-                return;
-            }
 
             await this.supplierSvc.delete(sanId);
 

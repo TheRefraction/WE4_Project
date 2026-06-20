@@ -2,12 +2,12 @@ import { Router } from 'express';
 import { body, param } from 'express-validator';
 
 import { Role } from '../models/account.model';
-import { AccountController } from '../controllers/account.controller';
 import { authMiddleware } from '../middlewares/auth.middleware';
 import { validateRequest } from '../middlewares/validation.middleware';
 
+import { accountController } from '../container';
+
 const router = Router();
-const accountController = new AccountController();
 
 const idValidation = [param('id').isInt().withMessage('Invalid id')];
 

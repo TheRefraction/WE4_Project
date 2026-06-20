@@ -25,10 +25,6 @@ export class ProductController extends BaseController {
     async getById(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
             const id = parseInt(req.params.id);
-            if (isNaN(id)) { 
-                this.sendResponse(res, HttpStatus.BAD_REQUEST, 'Invalid product ID');
-                return; 
-            }
 
             const product = await this.productSvc.getById(id);
             
@@ -41,10 +37,6 @@ export class ProductController extends BaseController {
     async getFullProduct(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
             const id = parseInt(req.params.id);
-            if (isNaN(id)) { 
-                this.sendResponse(res, HttpStatus.BAD_REQUEST, 'Invalid product ID');
-                return; 
-            }
 
             const product = await this.productFcd.getFullProduct(id);
             
@@ -67,10 +59,6 @@ export class ProductController extends BaseController {
     async update(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
             const id = parseInt(req.params.id);
-            if (isNaN(id)) { 
-                this.sendResponse(res, HttpStatus.BAD_REQUEST, 'Invalid product ID');
-                return; 
-            }
 
             const result = await this.productSvc.update(id, req.body);
 
@@ -83,10 +71,6 @@ export class ProductController extends BaseController {
     async delete(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
             const id = parseInt(req.params.id);
-            if (isNaN(id)) { 
-                this.sendResponse(res, HttpStatus.BAD_REQUEST, 'Invalid product ID');
-                return; 
-            }
 
             await this.productSvc.delete(id);
 

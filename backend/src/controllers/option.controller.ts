@@ -1,70 +1,72 @@
+import {Request, Response, NextFunction} from 'express';
+import { BaseController } from './base.controller';
+import { HttpStatus } from '../utils/httpStatus';
+import { CustomizationFacade } from '../services/customization.facade';
+import { OptionService } from '../services/option.service';
 
-    //options slots controller
+export class OptionController extends BaseController {
+    constructor(
+        private optSvc: OptionService, 
+        private slotFcd: CustomizationFacade
+    ) { 
+        super(); 
+    }
 
-    async addOption(req: Request, res: Response, next: NextFunction): Promise <void>{
+    async getAllBySlotId(req: Request, res: Response, next : NextFunction): Promise<void>{
+        try {
+            const slotId = parseInt(req.params.id);
+
+            const opt = await this.optSvc.getAllBySlotId(slotId);
+
+            this.sendResponse(res, HttpStatus.OK, 'Option retrieved', opt);
+        } catch(error){
+            next(error);
+        }
+    }
+
+    async getBySlotAndProduct(req: Request, res: Response, next : NextFunction): Promise<void>{
+        try {
+            const slotId = parseInt(req.params.id);
+
+            const opt = await this.optSvc.getBySlotAndProduct(slotId, req.body);
+
+            this.sendResponse(res, HttpStatus.OK, 'Option retrieved', opt);
+        } catch(error){
+            next(error);
+        }
+    }
+
+    async create(req: Request, res: Response, next: NextFunction): Promise <void>{
         try{
-            const slotId = parseInt (req.params.slotId, 10)
-            if (isNaN(slotId)){
-                res.status(400).json({
-                    success: false,
-                    message: 'Invalid slot ID'
-                });
-                return;
-            }
-            const newOption = await customizationService.addOptionToSlot(slotId, req.body);
-            res.status(201).json({
-                success: true,
-                message : 'Option added successfully',
-                data : newOption
-            });
+            const result = await this.slotFcd.addOptionToSlot(req.body);
+
+            this.sendResponse(res, HttpStatus.CREATED, 'Option added successfully', result);
         }catch (error){
             next(error);
         }
     }
 
-
-    async updateOption(req: Request, res: Response, next: NextFunction): Promise<void> {
+    async update(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
-            const slotId = parseInt (req.params.slotId,10);
-            const productId = parseInt(req.params.productId,10);
-            if (isNaN(slotId) || isNaN(productId)){
-                res.status(400).json({
-                    success: false,
-                    message: 'Invalid slot or product ID'
-                });
-                return;
-            }
-            const {priceDelta, isDefault, displayOrder} = req.body;
-            const updatedOption = await customizationService.updateOption(slotId, productId, priceDelta, isDefault, displayOrder);
+            const slotId = parseInt (req.params.id);
 
-            res.status(200).json({
-                success: true, 
-                message: 'Option updated successfully',
-                data: updatedOption
-            });
+            const result = await this.optSvc.update(slotId, req.body);
+
+            this.sendResponse(res, HttpStatus.OK, 'Option updated successfully', result)
         }catch(error){
             next(error);
         }
     }
 
-
-    async removeOption(req: Request, res: Response, next: NextFunction): Promise<void>{
+    async delete(req: Request, res: Response, next: NextFunction): Promise<void>{
         try {
-            const slotId = parseInt(req.params.slotId, 10);
-            const productId = parseInt(req.params.productId, 10);
-            if (isNaN(slotId) || isNaN(productId)){
-                res.status(400).json({
-                    success: false,
-                    message: 'Invalid slot or product ID'
-                });
-                return;
-            }
-            await customizationService.removeOptionFromSlot(slotId, productId);
-            res.status(200).json({
-                success: true,
-                message: 'Option removed from slot successfully'
-            });   
+            const slotId = parseInt(req.params.id);
+
+            await this.slotFcd.removeOptionFromSlot(slotId, req.body);
+
+            this.sendResponse(res, HttpStatus.OK, 'Option removed successfully');  
         }catch(error){
             next(error);
         }
     }
+}

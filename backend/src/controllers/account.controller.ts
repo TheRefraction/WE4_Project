@@ -48,14 +48,9 @@ export class AccountController extends BaseController {
 
     async getAccountById(req: Request, res: Response, next: NextFunction) {
         try {
-            const { id } = req.params;
-            const sanId = parseInt(id);
-            if (isNaN(sanId)) {
-                this.sendResponse(res, HttpStatus.BAD_REQUEST, 'Invalid account ID');
-                return;
-            }
+            const id = parseInt(req.params.id);
 
-            const result = await this.service.getById(sanId);
+            const result = await this.service.getById(id);
 
             this.sendResponse(res, HttpStatus.OK, 'Account retrieved successfully', result);
         } catch (error) {
@@ -89,16 +84,14 @@ export class AccountController extends BaseController {
 
     async updateAccount(req: AuthRequest, res: Response, next: NextFunction) {
         try {
-            const { id } = req.params;
-            const userId = req.user!.userId;
+            const id = parseInt(req.params.id);
+            const userId = req.user?.userId;
 
-            const sanId = parseInt(id);
-            if (isNaN(sanId)) {
-                this.sendResponse(res, HttpStatus.BAD_REQUEST, 'Invalid account ID');
-                return;
+            if (!userId) {
+                return res.status(HttpStatus.UNAUTHORIZED).json({ message: 'User not authenticated' });
             }
 
-            const result = await this.service.update(sanId, req.body, userId);
+            const result = await this.service.update(id, req.body, userId);
 
             this.sendResponse(res, HttpStatus.OK, 'Account updated successfully', result);
         } catch (error) {
@@ -108,16 +101,14 @@ export class AccountController extends BaseController {
 
     async deleteAccount(req: AuthRequest, res: Response, next: NextFunction) {
         try {
-            const { id } = req.params;
-            const userId = req.user!.userId;
+            const id = parseInt(req.params.id);
+            const userId = req.user?.userId;
 
-            const sanId = parseInt(id);
-            if (isNaN(sanId)) {
-                this.sendResponse(res, HttpStatus.BAD_REQUEST, 'Invalid account ID');
-                return;
+            if (!userId) {
+                return res.status(HttpStatus.UNAUTHORIZED).json({ message: 'User not authenticated' });
             }
 
-            await this.service.delete(sanId, userId);
+            await this.service.delete(id, userId);
 
             this.sendResponse(res, HttpStatus.OK, 'Account deleted successfully');
         } catch (error) {

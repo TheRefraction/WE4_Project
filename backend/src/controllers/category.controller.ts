@@ -18,11 +18,7 @@ export class CategoryController extends BaseController {
 
     async getById(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
-            const id = parseInt(req.params.id, 10);
-            if (isNaN(id)) {
-                this.sendResponse(res, HttpStatus.BAD_REQUEST, 'Invalid category ID');
-                return;
-            }
+            const id = parseInt(req.params.id);
 
             const category = await this.categorySvc.getById(id);
 
@@ -45,10 +41,6 @@ export class CategoryController extends BaseController {
     async update(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
             const id = parseInt(req.params.id);
-            if (isNaN(id)) {
-                this.sendResponse(res, HttpStatus.BAD_REQUEST, 'Invalid category ID');
-                return;
-            }
 
             const updatedCategory = await this.categorySvc.update(id, req.body);
 
@@ -61,10 +53,6 @@ export class CategoryController extends BaseController {
     async delete(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
             const id = parseInt(req.params.id);
-            if (isNaN(id)) {
-                this.sendResponse(res, HttpStatus.BAD_REQUEST, 'Invalid category ID');
-                return;
-            }
 
             const result = await this.categorySvc.delete(id);
 

@@ -24,11 +24,7 @@ export class CustomizationController extends BaseController {
 
     async getAllByProductId(req: Request, res: Response, next : NextFunction): Promise<void>{
         try {
-            const productId = parseInt(req.params.productId);
-            if (isNaN(productId)) {
-                this.sendResponse(res, HttpStatus.BAD_REQUEST, 'Invalid slot ID');
-                return;
-            }
+            const productId = parseInt(req.params.id);
 
             const slots = await this.slotSvc.getAllByProductId(productId);
 
@@ -38,14 +34,48 @@ export class CustomizationController extends BaseController {
         }
     }
 
-    
+    async getFullSlotsByProductId(req: Request, res: Response, next: NextFunction): Promise<void> {
+        try {
+            const productId = parseInt(req.params.id);
+
+            const slots = await this.slotFcd.getFullSlotsByProductId(productId);
+
+            this.sendResponse(res, HttpStatus.OK, 'Slots retrieved', slots);
+        } catch(error){
+            next(error);
+        }
+    }
+
+    async getbyId(req: Request, res : Response, next : NextFunction): Promise<void> {
+        try {
+            const id = parseInt(req.params.id);
+
+            const slot = await this.slotSvc.getById(id);
+
+            this.sendResponse(res, HttpStatus.OK, 'Slot retrieved', slot);
+        }catch(error){
+            next(error);
+        }
+    }
+
+    async getFullSlotById(req: Request, res: Response, next : NextFunction): Promise<void> {
+        try {
+            const id = parseInt(req.params.id);
+
+            const slot = await this.slotFcd.getFullSlotById(id);
+
+            this.sendResponse(res, HttpStatus.OK, 'Full slot retrieved', slot);
+        } catch(error){
+            next(error);
+        }
+    }   
 
     async create(req: Request, res : Response, next: NextFunction): Promise<void>{
         try {
             const slot = await this.slotSvc.create(req.body);
 
             this.sendResponse(res, HttpStatus.CREATED, 'Slot created succesfully', slot);
-        }catch (error){
+        } catch (error){
             next(error);
         }
     }
@@ -53,15 +83,11 @@ export class CustomizationController extends BaseController {
     async update(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
             const id = parseInt(req.params.id);
-            if (isNaN(id)) {
-                this.sendResponse(res, HttpStatus.BAD_REQUEST, 'Invalid slot ID');
-                return;
-            }
 
             const slot = await this.slotSvc.update(id, req.body);
             
             this.sendResponse(res, HttpStatus.OK, 'Slot updated succesfully', slot);
-        }catch (error){
+        } catch (error){
             next(error);
         }
     }
@@ -69,10 +95,6 @@ export class CustomizationController extends BaseController {
     async delete(req: Request, res: Response, next: NextFunction): Promise<void>{
         try {
             const id = parseInt(req.params.id);
-            if (isNaN(id)) {
-                this.sendResponse(res, HttpStatus.BAD_REQUEST, 'Invalid slot ID');
-                return;
-            }
 
             await this.slotSvc.delete(id);
 
