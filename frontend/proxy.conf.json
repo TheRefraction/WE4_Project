@@ -1,6 +1,6 @@
 {
   "/api": {
-    "target": "http://backend-dev:3000",
+    "target": "http://backend-dev:3000/api",
     "secure": false,
     "changeOrigin": true
   }

@@ -13,12 +13,12 @@ const API_VERSION = 'v1';
 const router = Router();
 
 // Version 1
-router.use(`/api/${API_VERSION}`, accountRoutes);
-router.use(`/api/${API_VERSION}/customizations`, customizationRoutes);
-router.use(`/api/${API_VERSION}/suppliers`, supplierRoutes);
-router.use(`/api/${API_VERSION}/products`, productRoutes);
-router.use(`/api/${API_VERSION}/categories`, categoryRoutes);
-/*router.use(`/api/${API_VERSION}/payments`, paymentRoutes);
-router.use(`/api/${API_VERSION}/invoices`, invoiceRoutes);*/
+router.use(`/${API_VERSION}`, accountRoutes);
+router.use(`/${API_VERSION}/customizations`, customizationRoutes);
+router.use(`/${API_VERSION}/suppliers`, supplierRoutes);
+router.use(`/${API_VERSION}/products`, productRoutes);
+router.use(`/${API_VERSION}/categories`, categoryRoutes);
+/*router.use(`/${API_VERSION}/payments`, paymentRoutes);
+router.use(`/${API_VERSION}/invoices`, invoiceRoutes);*/
 
 export default router;
