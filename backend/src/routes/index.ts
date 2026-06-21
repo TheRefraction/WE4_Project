@@ -7,7 +7,6 @@ import categoryRoutes from './category.routes';
 import customizationRoutes from './customization.routes';
 import paymentRoutes from './payment.routes';
 import invoiceRoutes from './invoice.routes';
-import menuRoutes from './menu.routes';
 
 const API_VERSION = 'v1';
 
@@ -20,7 +19,6 @@ router.use(`/${API_VERSION}/products`, productRoutes);
 router.use(`/${API_VERSION}/categories`, categoryRoutes);
 router.use(`/${API_VERSION}/payments`, paymentRoutes);
 router.use(`/${API_VERSION}/invoices`, invoiceRoutes);
-router.use(`/${API_VERSION}/menus`, menuRoutes);
 router.use(`/${API_VERSION}`, accountRoutes);
 
 export default router;
