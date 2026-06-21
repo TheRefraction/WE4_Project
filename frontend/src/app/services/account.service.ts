@@ -72,7 +72,14 @@ export class AccountService {
   updateProfile(id: number, data: Partial<Account> & { password?: string }): Observable<{ success: boolean; message: string; data: Account }> {
     return this.http.put<{ success: boolean; message: string; data: Account }>(`${this.apiUrl}/profile/${id}`, data, {
       headers: this.authHeaders()
-    });
+    }).pipe(
+      tap(response => {
+        if (response.success && response.data && this.currentUser?.id === id) {
+          localStorage.setItem('currentUser', JSON.stringify(response.data));
+          this.currentUserSubject.next(response.data);
+        }
+      })
+    );
   }
 
   deleteAccount(id: number): Observable<{ success: boolean; message: string }> {

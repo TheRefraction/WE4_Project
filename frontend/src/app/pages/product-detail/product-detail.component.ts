@@ -23,22 +23,25 @@ export class ProductDetailComponent implements OnInit {
   private cartService = inject(CartService);
 
   product = signal<Product | null>(null);
-  ingredients = signal<Ingredient[]>([]);
-  extras = signal<Extra[]>([]);
+  selectedOptions = signal<Record<number, Record<number, number>>>({}); // slotId -> { productId -> quantity }
   addedFeedback = signal(false);
 
   totalPrice = computed(() => {
     const prod = this.product();
     if (!prod) return '0.00';
-    const extrasTotal = this.extras()
-      .filter(e => e.selected)
-      .reduce((sum, e) => sum + e.price, 0);
-    return (prod.price + extrasTotal).toFixed(2);
+    let price = prod.price;
+    const selection = this.selectedOptions();
+    if (prod.customizations) {
+      for (const slot of prod.customizations) {
+        const slotSelections = selection[slot.id] || {};
+        for (const opt of slot.options) {
+          const qty = slotSelections[opt.productId] || 0;
+          price += parseFloat(opt.priceDelta || '0') * qty;
+        }
+      }
+    }
+    return price.toFixed(2);
   });
-
-  get sizes() { return this.extras().filter(e => e.type === 'size'); }
-  get supplements() { return this.extras().filter(e => e.type === 'supplement'); }
-  get sauces() { return this.extras().filter(e => e.type === 'sauce'); }
 
   ngOnInit() {
     this.route.paramMap.subscribe(params => {
@@ -56,8 +59,7 @@ export class ProductDetailComponent implements OnInit {
         if (res.data) {
           const mapped = this.mapProduct(res.data);
           this.product.set(mapped);
-          this.ingredients.set(mapped.ingredients.map(i => ({ ...i })));
-          this.extras.set(mapped.extras.map(e => ({ ...e })));
+          this.resetToDefaults(mapped);
         } else {
           alert('Produit non trouvé.');
           this.router.navigate(['/shop']);
@@ -70,78 +72,179 @@ export class ProductDetailComponent implements OnInit {
     });
   }
 
-  private mapProduct(backendProduct: any): Product {
-    const ingredients: Ingredient[] = [];
-    const extras: Extra[] = [];
-
-    if (backendProduct.customizations && Array.isArray(backendProduct.customizations)) {
-      for (const slot of backendProduct.customizations) {
-        const catName = (slot.categoryName || '').toLowerCase();
-        if (catName === 'ingrédients' || catName === 'ingredients') {
-          if (slot.options && Array.isArray(slot.options)) {
-            for (const opt of slot.options) {
-              ingredients.push({
-                id: opt.productId,
-                name: opt.name,
-                included: opt.isDefault
-              });
-            }
-          }
-        } else {
-          if (slot.options && Array.isArray(slot.options)) {
-            for (const opt of slot.options) {
-              let type: 'supplement' | 'size' | 'sauce' = 'supplement';
-              if (catName === 'taille' || catName === 'size') {
-                type = 'size';
-              } else if (catName === 'sauces' || catName === 'sauce') {
-                type = 'sauce';
-              }
-              extras.push({
-                id: opt.productId,
-                name: opt.name,
-                price: parseFloat(opt.priceDelta),
-                selected: opt.isDefault,
-                type: type
-              });
-            }
-          }
+  private resetToDefaults(prod: Product) {
+    const defaults: Record<number, Record<number, number>> = {};
+    if (prod.customizations) {
+      for (const slot of prod.customizations) {
+        defaults[slot.id] = {};
+        for (const opt of slot.options) {
+          defaults[slot.id][opt.productId] = opt.isDefault ? 1 : 0;
         }
       }
     }
+    this.selectedOptions.set(defaults);
+  }
 
+  getOptionQuantity(slotId: number, optionId: number): number {
+    const slotSelections = this.selectedOptions()[slotId];
+    return slotSelections ? (slotSelections[optionId] || 0) : 0;
+  }
+
+  isOptionSelected(slotId: number, optionId: number): boolean {
+    return this.getOptionQuantity(slotId, optionId) > 0;
+  }
+
+  getSlotTotalQuantity(slot: any): number {
+    const slotSelections = this.selectedOptions()[slot.id] || {};
+    return Object.values(slotSelections).reduce((sum, qty) => sum + qty, 0);
+  }
+
+  isSlotAtMax(slot: any): boolean {
+    return this.getSlotTotalQuantity(slot) >= slot.maxSelect;
+  }
+
+  incrementOption(slot: any, opt: any) {
+    const slotId = slot.id;
+    const optionId = opt.productId;
+    const total = this.getSlotTotalQuantity(slot);
+    if (total < slot.maxSelect) {
+      this.selectedOptions.update(map => {
+        const slotSelections = { ...(map[slotId] || {}) };
+        slotSelections[optionId] = (slotSelections[optionId] || 0) + 1;
+        return {
+          ...map,
+          [slotId]: slotSelections
+        };
+      });
+    }
+  }
+
+  decrementOption(slot: any, opt: any) {
+    const slotId = slot.id;
+    const optionId = opt.productId;
+    const currentQty = this.getOptionQuantity(slotId, optionId);
+    if (currentQty > 0) {
+      this.selectedOptions.update(map => {
+        const slotSelections = { ...(map[slotId] || {}) };
+        slotSelections[optionId] = currentQty - 1;
+        return {
+          ...map,
+          [slotId]: slotSelections
+        };
+      });
+    }
+  }
+
+  toggleOption(slot: any, opt: any) {
+    const slotId = slot.id;
+    const optionId = opt.productId;
+    const currentQty = this.getOptionQuantity(slotId, optionId);
+
+    if (slot.maxSelect === 1) {
+      if (currentQty > 0) {
+        if (slot.minSelect === 1) {
+          return;
+        }
+        this.selectedOptions.update(map => ({
+          ...map,
+          [slotId]: { [optionId]: 0 }
+        }));
+      } else {
+        this.selectedOptions.update(map => ({
+          ...map,
+          [slotId]: { [optionId]: 1 }
+        }));
+      }
+    } else {
+      if (currentQty > 0) {
+        this.decrementOption(slot, opt);
+      } else {
+        this.incrementOption(slot, opt);
+      }
+    }
+  }
+
+  isIngredientSlot(slot: any): boolean {
+    return (slot.categoryName || '').toLowerCase().includes('ingred');
+  }
+
+  parseFloat(val: any): number {
+    return parseFloat(val) || 0;
+  }
+
+  isCustomizationValid = computed(() => {
+    const prod = this.product();
+    if (!prod || !prod.customizations) return true;
+    const selection = this.selectedOptions();
+    for (const slot of prod.customizations) {
+      const slotSelections = selection[slot.id] || {};
+      const totalQty = Object.values(slotSelections).reduce((sum, qty) => sum + qty, 0);
+      if (totalQty < slot.minSelect || totalQty > slot.maxSelect) {
+        return false;
+      }
+    }
+    return true;
+  });
+
+  private mapProduct(backendProduct: any): Product {
     return {
       id: backendProduct.id,
       name: backendProduct.name,
       description: backendProduct.description || '',
       price: parseFloat(backendProduct.price),
       image: backendProduct.pictureUrl || '',
-      ingredients,
-      extras
+      customizations: backendProduct.customizations || [],
+      ingredients: [],
+      extras: [],
+      categoryIds: (backendProduct.categories || []).map((c: any) => c.id)
     };
-  }
-
-  toggleIngredient(id: number) {
-    this.ingredients.update(list =>
-      list.map(i => i.id === id ? { ...i, included: !i.included } : i)
-    );
-  }
-
-  toggleSize(id: number) {
-    this.extras.update(list =>
-      list.map(e => e.type === 'size' ? { ...e, selected: e.id === id } : e)
-    );
-  }
-
-  toggleExtra(id: number) {
-    this.extras.update(list =>
-      list.map(e => e.id === id ? { ...e, selected: !e.selected } : e)
-    );
   }
 
   addToCart() {
     const prod = this.product();
-    if (!prod) return;
-    this.cartService.addProduct(prod, this.ingredients(), this.extras());
+    if (!prod || !this.isCustomizationValid()) return;
+
+    const ingredients: Ingredient[] = [];
+    const extras: Extra[] = [];
+
+    if (prod.customizations) {
+      for (const slot of prod.customizations) {
+        const isIng = this.isIngredientSlot(slot);
+        const slotSelections = this.selectedOptions()[slot.id] || {};
+
+        for (const opt of slot.options) {
+          const qty = slotSelections[opt.productId] || 0;
+          const isSelected = qty > 0;
+          if (isIng) {
+            ingredients.push({
+              id: opt.productId,
+              name: opt.name,
+              included: isSelected,
+              quantity: qty
+            });
+          } else {
+            let type: 'supplement' | 'size' | 'sauce' = 'supplement';
+            const catName = (slot.categoryName || '').toLowerCase();
+            if (catName.includes('taille') || catName.includes('size')) {
+              type = 'size';
+            } else if (catName.includes('sauce')) {
+              type = 'sauce';
+            }
+            extras.push({
+              id: opt.productId,
+              name: opt.name,
+              price: parseFloat(opt.priceDelta),
+              selected: isSelected,
+              type: type,
+              categoryName: slot.categoryName,
+              quantity: qty
+            });
+          }
+        }
+      }
+    }
+
+    this.cartService.addProduct(prod, ingredients, extras);
     this.addedFeedback.set(true);
     setTimeout(() => {
       this.addedFeedback.set(false);
