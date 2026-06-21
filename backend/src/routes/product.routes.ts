@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { body, param } from 'express-validator';
 
-import { authMiddleware } from '../middlewares/auth.middleware';
+import { adminMiddleware, authMiddleware } from '../middlewares/auth.middleware';
 import { validateRequest } from '../middlewares/validation.middleware';
 
 import { productController } from '../container';
@@ -35,8 +35,8 @@ router.get('/:id/detail', idValidation, validateRequest, productController.getFu
 
 // Protected routes
 router.use(authMiddleware);
-router.post('/', productValidation.CREATE, validateRequest, productController.create);
-router.put('/:id', idValidation, productValidation.UPDATE, validateRequest, productController.update);
-router.delete('/:id', idValidation, productController.delete);
+router.post('/', adminMiddleware, productValidation.CREATE, validateRequest, productController.create);
+router.put('/:id', adminMiddleware, idValidation, productValidation.UPDATE, validateRequest, productController.update);
+router.delete('/:id', adminMiddleware, idValidation, productController.delete);
 
 export default router;

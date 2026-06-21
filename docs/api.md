@@ -1,7 +1,5 @@
 # API
-blah blah blah
-
-## Main
+Any route is prefixed by `/api/v1/`.
 Any request to the backend should be formed as such:
 ```json
 req: {
@@ -60,6 +58,7 @@ res: {
             phone?: String,
             createdAt: Date,
             updatedAt: Date,
+            lastLogin: Date,
             loyaltyPoints: Number,
             role: String
         },
@@ -94,6 +93,7 @@ res: {
             phone?: String,
             createdAt: Date,
             updatedAt: Date,
+            lastLogin: Date,
             loyaltyPoints: Number,
             role: String
         },
@@ -129,6 +129,7 @@ res: {
         phone?: String,
         createdAt: Date,
         updatedAt: Date,
+        lastLogin: Date,
         loyaltyPoints: Number,
         role: String
     }
@@ -171,6 +172,7 @@ res: {
         phone?: String,
         createdAt: Date,
         updatedAt: Date,
+        lastLogin: Date,
         loyaltyPoints: Number,
         role: String
     }

@@ -19,19 +19,21 @@ export interface Account extends BaseEntity {
     email: string;
     phone?: string;
     passwordHash: string;
-    // TODO Add createdAt and updatedAt
+    createdAt: Date,
+    updatedAt: Date,
+    lastLogin: Date,
     loyaltyPoints: number;
     role: Role;
 }
 
 export type CreateAccountDTO = Pick<
   Account, 
-  'firstName' | 'lastName' | 'email' | 'phone'
+  'firstName' | 'lastName' | 'email' | 'phone' | 'createdAt' | 'updatedAt' | 'lastLogin'
 > & { 
   password: string 
 };
 
-export type UpdateAccountDTO = Partial<Omit<Account, keyof BaseEntity | 'passwordHash' | 'loyaltyPoints'>> & {
+export type UpdateAccountDTO = Partial<Omit<Account, keyof BaseEntity | 'passwordHash' | 'loyaltyPoints' | 'createdAt' | 'updatedAt' | 'lastLogin' >> & {
     password?: string; // Add back password as an optional field for updates
 };
 
