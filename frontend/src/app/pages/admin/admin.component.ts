@@ -10,7 +10,7 @@ import { ProductService } from '../../services/product.service';
 import { AccountService } from '../../services/account.service';
 import { OrderService } from '../../services/order.service';
 
-export type AdminTab = 'products' | 'menus' | 'categories' | 'users' | 'orders';
+export type AdminTab = 'products' | 'categories' | 'users' | 'orders';
 
 export interface AdminProduct {
   id: number;
@@ -20,14 +20,6 @@ export interface AdminProduct {
   image: string;
   categoryIds?: number[];
   categories?: any[];
-}
-
-export interface AdminMenu {
-  id: number;
-  name: string;
-  description: string;
-  price: number;
-  productIds: number[];
 }
 
 export interface AdminUser {
@@ -40,7 +32,7 @@ export interface AdminUser {
 }
 
 export interface AdminOrderItem {
-  type: 'product' | 'menu';
+  type: 'product';
   name: string;
   quantity: number;
   unitPrice: number;
@@ -81,7 +73,6 @@ export class AdminComponent implements OnInit {
   activeTab = signal<AdminTab>('products');
 
   products = signal<AdminProduct[]>([]);
-  menus = signal<AdminMenu[]>([]);
   categories = signal<any[]>([]);
   users = signal<AdminUser[]>([]);
   orders = signal<AdminOrder[]>([]);
@@ -99,7 +90,6 @@ export class AdminComponent implements OnInit {
 
   refreshAll() {
     this.loadProducts();
-    this.loadMenus();
     this.loadCategories();
     this.loadUsers();
     this.loadOrders();
@@ -119,21 +109,6 @@ export class AdminComponent implements OnInit {
         })));
       },
       error: (err) => console.error('Failed to load products:', err)
-    });
-  }
-
-  loadMenus() {
-    this.productService.getMenus(true).subscribe({
-      next: (res) => {
-        this.menus.set((res.data || []).map((m: any) => ({
-          id: m.id,
-          name: m.name,
-          description: m.description || '',
-          price: parseFloat(m.price),
-          productIds: (m.products || []).map((p: any) => p.id)
-        })));
-      },
-      error: (err) => console.error('Failed to load menus:', err)
     });
   }
 
@@ -163,49 +138,11 @@ export class AdminComponent implements OnInit {
   }
 
   loadOrders() {
-    this.orderService.getOrders().subscribe({
-      next: (res) => {
-        this.orders.set((res.data || []).map((o: any) => {
-          const items = (o.items || []).map((item: any) => {
-            let customizationSummary = '';
-            if (item.type === 'product' && item.options) {
-              customizationSummary = item.options.map((opt: any) => opt.item.name).join(' · ');
-            } else if (item.type === 'menu' && item.slots) {
-              customizationSummary = item.slots.map((s: any) => {
-                const sub = (s.item.options && s.item.options.length) 
-                  ? ' (' + s.item.options.map((opt: any) => opt.item.name).join(', ') + ')' 
-                  : '';
-                return s.item.name + sub;
-              }).join(' — ');
-            }
-            return {
-              type: item.type,
-              name: item.name,
-              quantity: item.quantity,
-              unitPrice: parseFloat(item.price),
-              customizationSummary
-            };
-          });
+    this.orders.set([]);
+  }
 
-          return {
-            id: o.id.toString(),
-            createdAt: new Date(o.createdAt).toLocaleString('fr-FR'),
-            customer: {
-              firstName: o.billingAddress?.firstName || 'Client',
-              lastName: o.billingAddress?.lastName || `#${o.customerId}`,
-              email: o.billingAddress?.email || '',
-              address: o.billingAddress?.street || '',
-              city: o.billingAddress?.city || '',
-              zip: o.billingAddress?.zip || ''
-            },
-            items,
-            total: parseFloat(o.amount),
-            status: this.mapBackendStatusToFrontend(o.status)
-          };
-        }));
-      },
-      error: (err) => console.error('Failed to load orders:', err)
-    });
+  loadOrders() {
+    this.orders.set([]);
   }
 
   toggleOrder(id: string) {
@@ -228,9 +165,13 @@ export class AdminComponent implements OnInit {
     return 'pending';
   }
 
+  loadOrders() {
+    this.orders.set([]);
+  }
+
   updateOrderStatus(id: string, status: AdminOrder['status']) {
     const backendStatus = this.mapFrontendStatusToBackend(status);
-    this.orderService.updateOrderStatus(parseInt(id), backendStatus).subscribe({
+    this.orderService.updateInvoiceStatus(parseInt(id), backendStatus).subscribe({
       next: () => {
         this.loadOrders();
       },
@@ -264,14 +205,11 @@ export class AdminComponent implements OnInit {
   editingProduct = signal<AdminProduct | null>(null);
   productCategorySelection = signal<Set<number>>(new Set());
 
-  showMenuForm = signal(false);
-  editingMenu = signal<AdminMenu | null>(null);
-
   showCategoryForm = signal(false);
   editingCategory = signal<any | null>(null);
 
   deleteConfirmId = signal<number | null>(null);
-  deleteConfirmType = signal<'product' | 'menu' | 'user' | 'category' | null>(null);
+  deleteConfirmType = signal<'product' | 'user' | 'category' | null>(null);
 
 
   productForm = this.fb.group({
@@ -337,78 +275,6 @@ export class AdminComponent implements OnInit {
   }
 
   cancelProductForm() { this.showProductForm.set(false); }
-
-
-  menuForm = this.fb.group({
-    name:        ['', Validators.required],
-    description: ['', Validators.required],
-    price:       [0, [Validators.required, Validators.min(0.01)]],
-  });
-
-  menuProductSelection = signal<Set<number>>(new Set());
-
-  toggleMenuProduct(id: number) {
-    this.menuProductSelection.update(set => {
-      const next = new Set(set);
-      next.has(id) ? next.delete(id) : next.add(id);
-      return next;
-    });
-  }
-
-  openCreateMenu() {
-    this.editingMenu.set(null);
-    this.menuForm.reset({ name: '', description: '', price: 0 });
-    this.menuProductSelection.set(new Set());
-    this.showMenuForm.set(true);
-  }
-
-  openEditMenu(m: AdminMenu) {
-    this.editingMenu.set(m);
-    this.menuForm.setValue({ name: m.name, description: m.description, price: m.price });
-    this.menuProductSelection.set(new Set(m.productIds));
-    this.showMenuForm.set(true);
-  }
-
-  submitMenu() {
-    if (this.menuForm.invalid) { this.menuForm.markAllAsTouched(); return; }
-    const v = this.menuForm.value;
-    const productIds = Array.from(this.menuProductSelection());
-    const editing = this.editingMenu();
-
-    const payload = {
-      name: v.name!,
-      description: v.description!,
-      price: v.price!,
-      hidden: false,
-      productIds
-    };
-
-    if (editing) {
-      this.productService.updateMenu(editing.id, payload).subscribe({
-        next: () => {
-          this.loadMenus();
-          this.showMenuForm.set(false);
-        },
-        error: (err) => alert(err.error?.message || 'Failed to update menu')
-      });
-    } else {
-      this.productService.createMenu(payload).subscribe({
-        next: () => {
-          this.loadMenus();
-          this.showMenuForm.set(false);
-        },
-        error: (err) => alert(err.error?.message || 'Failed to create menu')
-      });
-    }
-  }
-
-  cancelMenuForm() { this.showMenuForm.set(false); }
-
-  productNamesForMenu(productIds: number[]): string {
-    return productIds
-      .map(id => this.products().find(p => p.id === id)?.name ?? `#${id}`)
-      .join(', ');
-  }
 
 
   // Categories Form
@@ -642,7 +508,7 @@ export class AdminComponent implements OnInit {
   }
 
 
-  askDelete(id: number, type: 'product' | 'menu' | 'user' | 'category') {
+  askDelete(id: number, type: 'product' | 'user' | 'category') {
     this.deleteConfirmId.set(id);
     this.deleteConfirmType.set(type);
   }
@@ -660,15 +526,6 @@ export class AdminComponent implements OnInit {
           this.deleteConfirmType.set(null);
         },
         error: (err) => alert(err.error?.message || 'Failed to delete product')
-      });
-    } else if (type === 'menu') {
-      this.productService.deleteMenu(id).subscribe({
-        next: () => {
-          this.loadMenus();
-          this.deleteConfirmId.set(null);
-          this.deleteConfirmType.set(null);
-        },
-        error: (err) => alert(err.error?.message || 'Failed to delete menu')
       });
     } else if (type === 'user') {
       this.accountService.deleteAccount(id).subscribe({

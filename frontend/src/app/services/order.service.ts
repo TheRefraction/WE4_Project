@@ -1,7 +1,3 @@
-/**
- * order.service.ts
- */
-
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
@@ -29,29 +25,10 @@ export class OrderService {
     );
   }
 
-  getOrders(): Observable<{ success: boolean; message?: string; data: any[] }> {
-    return this.http.get<{ success: boolean; message?: string; data: any[] }>(
-      `${this.apiUrl}/invoices`,
-      { headers: this.authHeaders }
-    );
-  }
-
-  updateOrderStatus(id: number, status: string): Observable<{ success: boolean; message: string }> {
-    return this.http.patch<{ success: boolean; message: string }>(
-      `${this.apiUrl}/invoices/${id}/status`,
+  updateInvoiceStatus(id: number, status: string): Observable<{ success: boolean; message: string }> {
+    return this.http.put<{ success: boolean; message: string }>(
+      `${this.apiUrl}/invoices/${id}`,
       { status },
-      { headers: this.authHeaders }
-    );
-  }
-
-  makePayment(invoiceId: number, mode: string): Observable<{ success: boolean; message: string }> {
-    return this.http.post<{ success: boolean; message: string }>(
-      `${this.apiUrl}/payments`,
-      {
-        invoiceId,
-        mode,
-        date: new Date().toISOString()
-      },
       { headers: this.authHeaders }
     );
   }

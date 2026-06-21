@@ -4,7 +4,6 @@
     <h1 class="admin-logo">Dashboard <span class="admin-logo-accent">Admin</span></h1>
     <nav class="admin-nav">
       <button class="nav-btn" [class.active]="activeTab() === 'products'" (click)="activeTab.set('products')">Produits</button>
-      <button class="nav-btn" [class.active]="activeTab() === 'menus'" (click)="activeTab.set('menus')">Menus</button>
       <button class="nav-btn" [class.active]="activeTab() === 'categories'" (click)="activeTab.set('categories')">Catégories</button>
       <button class="nav-btn" [class.active]="activeTab() === 'users'" (click)="activeTab.set('users')">Utilisateurs</button>
       <button class="nav-btn" [class.active]="activeTab() === 'orders'" (click)="activeTab.set('orders')">Factures</button>
@@ -48,39 +47,6 @@
                   <button class="action-btn customize" (click)="openSlotManager(product)">Personnaliser</button>
                   <button class="action-btn edit" (click)="openEditProduct(product)">Modifier</button>
                   <button class="action-btn delete" (click)="askDelete(product.id, 'product')">Supprimer</button>
-                </td>
-              </tr>
-            }
-          </tbody>
-        </table>
-      </section>
-    }
-
-    @if (activeTab() === 'menus') {
-      <section class="admin-section">
-        <div class="section-header">
-          <h2 class="section-title">Menus <span class="count-badge">{{ menus().length }}</span></h2>
-          <button class="btn-fire" (click)="openCreateMenu()">+ Nouveau menu</button>
-        </div>
-
-        <table class="admin-table">
-          <thead>
-            <tr>
-              <th>Nom</th>
-              <th>Produits inclus</th>
-              <th class="col-price">Prix</th>
-              <th class="col-actions"></th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (menu of menus(); track menu.id) {
-              <tr>
-                <td class="td-name">{{ menu.name }}</td>
-                <td class="td-desc">{{ productNamesForMenu(menu.productIds) }}</td>
-                <td class="td-price">{{ menu.price.toFixed(2) }}€</td>
-                <td class="td-actions">
-                  <button class="action-btn edit" (click)="openEditMenu(menu)">Modifier</button>
-                  <button class="action-btn delete" (click)="askDelete(menu.id, 'menu')">Supprimer</button>
                 </td>
               </tr>
             }
@@ -240,8 +206,8 @@
                         @for (item of order.items; track $index) {
                           <tr>
                             <td>
-                              <span class="item-type-badge" [class.badge-menu]="item.type === 'menu'">
-                                {{ item.type === 'menu' ? 'Menu' : 'Produit' }}
+                              <span class="item-type-badge badge-product">
+                                Produit
                               </span>
                             </td>
                             <td class="td-name">{{ item.name }}</td>
@@ -322,56 +288,6 @@
         <div class="modal-actions">
           <button type="button" class="btn-ghost" (click)="cancelProductForm()">Annuler</button>
           <button type="submit" class="btn-fire">{{ editingProduct() ? 'Enregistrer' : 'Créer' }}</button>
-        </div>
-      </form>
-    </div>
-  </div>
-}
-
-@if (showMenuForm()) {
-  <div class="modal-overlay" (click)="cancelMenuForm()">
-    <div class="modal" (click)="$event.stopPropagation()">
-      <h3 class="modal-title">{{ editingMenu() ? 'Modifier le menu' : 'Nouveau menu' }}</h3>
-
-      <form [formGroup]="menuForm" (ngSubmit)="submitMenu()" class="modal-form">
-        <div class="form-field" [class.error]="fieldInvalid(menuForm, 'name')">
-          <label>Nom</label>
-          <input type="text" formControlName="name" placeholder="Menu Kebab" />
-          @if (fieldInvalid(menuForm, 'name')) { <span class="error-msg">Requis</span> }
-        </div>
-
-        <div class="form-field" [class.error]="fieldInvalid(menuForm, 'description')">
-          <label>Description</label>
-          <input type="text" formControlName="description" placeholder="..." />
-          @if (fieldInvalid(menuForm, 'description')) { <span class="error-msg">Requis</span> }
-        </div>
-
-        <div class="form-field" [class.error]="fieldInvalid(menuForm, 'price')">
-          <label>Prix (€)</label>
-          <input type="number" formControlName="price" placeholder="10.00" step="0.50" min="0" />
-          @if (fieldInvalid(menuForm, 'price')) { <span class="error-msg">Prix invalide</span> }
-        </div>
-
-        <div class="form-field">
-          <label>Produits inclus</label>
-          <div class="product-checkboxes">
-            @for (product of products(); track product.id) {
-              <label class="checkbox-label" [class.checked]="menuProductSelection().has(product.id)">
-                <input
-                  type="checkbox"
-                  [checked]="menuProductSelection().has(product.id)"
-                  (change)="toggleMenuProduct(product.id)"
-                />
-                {{ product.name }}
-                <span class="checkbox-price">{{ product.price.toFixed(2) }}€</span>
-              </label>
-            }
-          </div>
-        </div>
-
-        <div class="modal-actions">
-          <button type="button" class="btn-ghost" (click)="cancelMenuForm()">Annuler</button>
-          <button type="submit" class="btn-fire">{{ editingMenu() ? 'Enregistrer' : 'Créer' }}</button>
         </div>
       </form>
     </div>
