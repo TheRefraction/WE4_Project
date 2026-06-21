@@ -12,6 +12,9 @@ req: {
         id: Number, 
         ...
     },
+    query: {
+        ...
+    },
     body: {
         ...
     }
@@ -35,6 +38,7 @@ res: {
 ```json
 req: {
     params: {},
+    query: {},
     body: {
         firstName: String,
         lastName: String,
@@ -73,6 +77,7 @@ res: {
 ```json
 req: {
     params: {},
+    query: {},
     body: {
         email: String,
         password: String
@@ -113,6 +118,7 @@ req: {
         role: String
     },
     params: {},
+    query: {},
     body: {}
 }
 ```
@@ -149,6 +155,7 @@ req: {
     params: {
         id: Number
     },
+    query: {},
     body: {
         firstName?: String,
         lastName?: String,
@@ -192,6 +199,7 @@ req: {
     params: {
         id: Number
     },
+    query: {},
     body: {}
 }
 ```
@@ -216,6 +224,7 @@ req: {
         role: String
     },
     params: {},
+    query: {},
     body: {}
 }
 ```
@@ -248,6 +257,7 @@ req: {
     params: {
         id: Number
     },
+    query: {},
     body: {}
 }
 ```
@@ -278,6 +288,7 @@ res: {
 ```json
 req: {
     params: {},
+    query: {},
     body: {}
 }
 ```
@@ -304,6 +315,7 @@ req: {
     params: {
         id: Number
     },
+    query: {},
     body: {}
 }
 ```
@@ -326,6 +338,7 @@ res: {
 ```json
 req: {
     params: {},
+    query: {},
     body: {
         name: String
     }
@@ -352,6 +365,7 @@ req: {
     params: {
         id: Number
     },
+    query: {},
     body: {
         name?: String
     }
@@ -378,6 +392,7 @@ req: {
     params: {
         id: Number
     },
+    query: {},
     body: {}
 }
 ```
@@ -399,6 +414,7 @@ res: {
 ```json
 req: {
     params: {},
+    query: {},
     body: {}
 }
 ```
@@ -430,6 +446,7 @@ req: {
     params: {
         id: Number
     },
+    query: {},
     body: {}
 }
 ```
@@ -457,6 +474,7 @@ res: {
 ```json
 req: {
     params: {},
+    query: {},
     body: {
         name: String,
         contactInfo: {
@@ -492,6 +510,7 @@ req: {
     params: {
         id: Number
     },
+    query: {},
     body: {
         name?: String,
         contactInfo?: {
@@ -527,6 +546,7 @@ req: {
     params: {
         id: Number
     },
+    query: {},
     body: {}
 }
 ```
@@ -548,6 +568,7 @@ res: {
 ```json
 req: {
     params: {},
+    query: {},
     body: {}
 }
 ```
@@ -578,6 +599,7 @@ req: {
     params: {
         id: Number
     },
+    query: {},
     body: {}
 }
 ```
@@ -608,6 +630,7 @@ req: {
     params: {
         id: Number
     },
+    query: {},
     body: {}
 }
 ```
@@ -646,6 +669,7 @@ res: {
 ```json
 req: {
     params: {},
+    query: {},
     body: {
         productId: Number,
         categoryId: Number,
@@ -680,6 +704,7 @@ req: {
     params: {
         id: Number
     },
+    query: {},
     body: {
         productId?: Number,
         categoryId?: Number,
@@ -714,6 +739,7 @@ req: {
     params: {
         id: Number
     },
+    query: {},
     body: {}
 }
 ```
@@ -735,6 +761,7 @@ req: {
     params: {
         id: Number
     },
+    query: {},
     body: {
         productId: Number,
         priceDelta: Number,
@@ -767,6 +794,7 @@ req: {
     params: {
         id: Number
     },
+    query: {},
     body: {
         productId: Number,
         priceDelta?: Number,
@@ -799,6 +827,7 @@ req: {
     params: {
         id: Number
     },
+    query: {},
     body: {
         productId: Number
     }
@@ -822,6 +851,9 @@ res: {
 ```json
 req: {
     params: {},
+    query: {
+        showHidden: Boolean
+    },
     body: {}
 }
 ```
@@ -852,6 +884,7 @@ req: {
     params: {
         id: Number
     },
+    query: {},
     body: {}
 }
 ```
@@ -880,6 +913,7 @@ req: {
     params: {
         id: Number
     },
+    query: {},
     body: {}
 }
 ```
@@ -940,6 +974,7 @@ res: {
 ```json
 req: {
     params: {},
+    query: {},
     body: {
         name: String,
         description?: String,
@@ -975,6 +1010,7 @@ req: {
     params: {
         id: Number
     },
+    query: {},
     body: {
         name?: String,
         description?: String,
@@ -1011,6 +1047,7 @@ req: {
     params: {
         id: Number
     },
+    query: {},
     body: {}
 }
 ```
@@ -1032,6 +1069,7 @@ res: {
 ```json
 req: {
     params: {},
+    query: {},
     body: {}
 }
 ```
@@ -1060,6 +1098,7 @@ res: {
 ```json
 req: {
     params: {},
+    query: {},
     body: {}
 }
 ```
@@ -1086,6 +1125,7 @@ res: {
 ```json
 req: {
     params: {},
+    query: {},
     body: {
         mode: String,
         status?: String,
@@ -1118,6 +1158,7 @@ req: {
     params: {
         id: Number
     },
+    query: {},
     body: {
         mode?: String,
         status?: String,
@@ -1150,6 +1191,7 @@ res: {
 ```json
 req: {
     params: {},
+    query: {},
     body: {}
 }
 ```
@@ -1213,6 +1255,7 @@ req: {
     params: {
         id: Number
     },
+    query: {},
     body: {}
 }
 ```
@@ -1272,6 +1315,7 @@ res: {
 ```json
 req: {
     params: {},
+    query: {},
     body: {
         accountId: Number,
         amount: Number,
@@ -1360,6 +1404,7 @@ req: {
     params: {
         id: Number
     },
+    query: {},
     body: {
         amount?: Number,
         billingAddress?: {
@@ -1447,6 +1492,7 @@ req: {
     params: {
         id: Number
     },
+    query: {},
     body: {}
 }
 ```

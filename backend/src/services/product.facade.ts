@@ -37,8 +37,8 @@ export class ProductFacade {
         return fullProduct;
     }
 
-    async getAllFullProducts(): Promise<ProductResponse[]> {
-        const products = await this.productSvc.getAll();
+    async getAllFullProducts(showHidden = true): Promise<ProductResponse[]> {
+        const products = await this.productSvc.getAll(showHidden);
         return Promise.all(products.map(prod => this.getFullProduct(prod.id)));
     }
 }
