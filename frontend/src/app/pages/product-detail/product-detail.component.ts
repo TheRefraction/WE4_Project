@@ -51,7 +51,7 @@ export class ProductDetailComponent implements OnInit {
   }
 
   loadProductDetails(id: number) {
-    this.productService.getProductFull(id).subscribe({
+    this.productService.getProductDetail(id).subscribe({
       next: (res) => {
         if (res.data) {
           const mapped = this.mapProduct(res.data);

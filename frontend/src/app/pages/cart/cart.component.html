@@ -22,11 +22,11 @@
 
               <div class="item-header">
                 <div class="item-meta">
-                  <span class="item-badge" [class.badge-menu]="item.type === 'menu'">
-                    {{ item.type === 'menu' ? 'Menu' : 'Produit' }}
+                  <span class="item-badge badge-product">
+                    Produit
                   </span>
                   <strong class="item-name">
-                    {{ item.type === 'product' ? item.product!.name : item.menu!.name }}
+                    {{ item.product.name }}
                   </strong>
                 </div>
                 <div class="item-right">
@@ -36,38 +36,20 @@
                     <button class="qty-btn" (click)="cartService.incrementItem(item.cartItemId)">+</button>
                   </div>
                   <span class="item-price">
-                    {{ ((item.type === 'product' ? item.product!.price : item.menu!.price) * item.quantity).toFixed(2) }}€
+                    {{ (item.product.price * item.quantity).toFixed(2) }}€
                   </span>
                   <button class="remove-btn" (click)="cartService.removeItem(item.cartItemId)">✕</button>
                 </div>
               </div>
 
-              @if (item.type === 'product') {
-                <div class="item-summary">
-                  @if (summaryIngredients(item.product!.customization.ingredients)) {
-                    <span class="summary-tag removed">{{ summaryIngredients(item.product!.customization.ingredients) }}</span>
-                  }
-                  @if (summaryExtras(item.product!.customization.extras)) {
-                    <span class="summary-tag">{{ summaryExtras(item.product!.customization.extras) }}</span>
-                  }
-                </div>
-              }
-
-              @if (item.type === 'menu') {
-                <div class="item-summary">
-                  @for (cust of item.menu!.customizations; track cust.productId) {
-                    <div class="menu-product-summary">
-                      <span class="menu-product-label">{{ cust.productName }}</span>
-                      @if (summaryIngredients(cust.ingredients)) {
-                        <span class="summary-tag removed">{{ summaryIngredients(cust.ingredients) }}</span>
-                      }
-                      @if (summaryExtras(cust.extras)) {
-                        <span class="summary-tag">{{ summaryExtras(cust.extras) }}</span>
-                      }
-                    </div>
-                  }
-                </div>
-              }
+              <div class="item-summary">
+                @if (summaryIngredients(item.product.customization.ingredients)) {
+                  <span class="summary-tag removed">{{ summaryIngredients(item.product.customization.ingredients) }}</span>
+                }
+                @if (summaryExtras(item.product.customization.extras)) {
+                  <span class="summary-tag">{{ summaryExtras(item.product.customization.extras) }}</span>
+                }
+              </div>
 
             </li>
           }

@@ -26,9 +26,10 @@ export class CustomizationOptionRepository {
         const query = `
             SELECT 
                 ${OPTION_FIELDS},
-                p.name AS "name"
+                c.name AS "name"
             FROM customization_slot_option cso
-            LEFT JOIN product p ON cso.product_id = p.id
+            LEFT JOIN customization_slot cs ON cso.customization_slot_id = cs.id
+            LEFT JOIN category c ON cs.category_id = c.id
             WHERE cso.customization_slot_id = $1
             ORDER BY cso.display_order ASC
         `;
@@ -41,9 +42,10 @@ export class CustomizationOptionRepository {
         const query = `
             SELECT 
                 ${OPTION_FIELDS},
-                p.name AS "name"
+                c.name AS "name"
             FROM customization_slot_option cso
-            LEFT JOIN product p ON cso.product_id = p.id
+            LEFT JOIN customization_slot cs ON cso.customization_slot_id = cs.id
+            LEFT JOIN category c ON cs.category_id = c.id
             WHERE cso.customization_slot_id = $1 AND cso.product_id = $2
         `;
 

@@ -1,43 +1,33 @@
-<article class="product-card" [class.expanded]="expanded()" [class.in-menu]="inMenu">
+<article class="product-card" [class.expanded]="expanded()">
 
-  @if (!inMenu) {
-    <div class="product-image" (click)="viewDetails()" style="cursor: pointer;">
-      <img [src]="product.image" [alt]="product.name" (error)="fallbackImage($event)" />
+  <div class="product-image" (click)="viewDetails()" style="cursor: pointer;">
+    <img [src]="product.image" [alt]="product.name" (error)="fallbackImage($event)" />
+  </div>
+  <div class="product-header">
+    <div>
+      <h3 class="product-name" (click)="viewDetails()" style="cursor: pointer;">{{ product.name }}</h3>
+      <p class="product-description">{{ product.description }}</p>
     </div>
-    <div class="product-header">
-      <div>
-        <h3 class="product-name" (click)="viewDetails()" style="cursor: pointer;">{{ product.name }}</h3>
-        <p class="product-description">{{ product.description }}</p>
-      </div>
-      <span class="product-price">{{ totalPrice() }}€</span>
-    </div>
-    <button class="toggle-btn" (click)="expanded.set(!expanded())">
-      {{ expanded() ? 'Fermer' : 'Personnaliser' }}
-      <span class="arrow" [class.open]="expanded()">▾</span>
-    </button>
-  }
+    <span class="product-price">{{ totalPrice() }}€</span>
+  </div>
+  <button class="toggle-btn" (click)="expanded.set(!expanded())">
+    {{ expanded() ? 'Fermer' : 'Personnaliser' }}
+    <span class="arrow" [class.open]="expanded()">▾</span>
+  </button>
 
-  @if (!inMenu && expanded()) {
+  @if (expanded()) {
     <div class="customisation">
       <ng-container *ngTemplateOutlet="chipsContent" />
     </div>
   }
 
-  @if (inMenu) {
-    <div class="customisation-inline">
-      <ng-container *ngTemplateOutlet="chipsContent" />
-    </div>
-  }
-
-  @if (!inMenu) {
-    <button
-      class="btn-fire"
-      [class.added]="addedFeedback()"
-      (click)="addToCart()"
-    >
-      {{ addedFeedback() ? '✓ Ajouté !' : 'Ajouter au panier — ' + totalPrice() + '€' }}
-    </button>
-  }
+  <button
+    class="btn-fire"
+    [class.added]="addedFeedback()"
+    (click)="addToCart()"
+  >
+    {{ addedFeedback() ? '✓ Ajouté !' : 'Ajouter au panier — ' + totalPrice() + '€' }}
+  </button>
 
 </article>
 
