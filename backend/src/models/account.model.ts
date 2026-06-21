@@ -19,6 +19,7 @@ export interface Account extends BaseEntity {
     email: string;
     phone?: string;
     passwordHash: string;
+    // TODO Add createdAt and updatedAt
     loyaltyPoints: number;
     role: Role;
 }
