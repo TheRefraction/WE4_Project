@@ -12,6 +12,9 @@
       <li><a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Accueil</a></li>
 
       @if (accountService.isLoggedIn()) {
+        @if (accountService.currentUser?.role === 'admin') {
+          <li><a routerLink="/admin" routerLinkActive="active">Admin</a></li>
+        }
         <li><a routerLink="/shop" routerLinkActive="active">Commander</a></li>
         <li><a routerLink="/cart" routerLinkActive="active">Panier</a></li>
         <li><a routerLink="/account" routerLinkActive="active">Mon Compte</a></li>

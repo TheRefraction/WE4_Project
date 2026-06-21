@@ -219,3 +219,70 @@ $success: #4caf7d;
   color: $muted;
   font-size: 1.1rem;
 }
+
+.counters-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  width: 100%;
+}
+
+.counter-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.4rem 0.6rem;
+  background: lighten($coal, 3%);
+  border: 1px solid $ash;
+  border-radius: 4px;
+}
+
+.counter-name {
+  font-size: 0.8rem;
+  color: $cream;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.counter-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: $ash;
+  border-radius: 4px;
+  padding: 0.15rem;
+}
+
+.control-btn {
+  background: transparent;
+  border: none;
+  color: $cream;
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  cursor: pointer;
+  border-radius: 3px;
+  transition: background 0.15s, color 0.15s;
+
+  &:hover:not(:disabled) {
+    background: $fire;
+    color: $cream;
+  }
+
+  &:disabled {
+    color: darken($muted, 20%);
+    cursor: not-allowed;
+  }
+}
+
+.control-qty {
+  font-size: 0.8rem;
+  font-weight: 500;
+  min-width: 14px;
+  text-align: center;
+  color: $cream;
+}

@@ -52,13 +52,13 @@ export class CartService {
   private productCartId(productId: number, ingredients: Ingredient[], extras: Extra[]): string {
     return `p_${this.hash({
       productId,
-      ing: ingredients.map(i => ({ id: i.id, on: i.included })),
-      ext: extras.map(e => ({ id: e.id, on: e.selected })),
+      ing: ingredients.map(i => ({ id: i.id, on: i.included, qty: i.quantity })),
+      ext: extras.map(e => ({ id: e.id, on: e.selected, qty: e.quantity })),
     })}`;
   }
 
   computeProductPrice(product: Product, extras: Extra[]): number {
-    return product.price + extras.filter(e => e.selected).reduce((s, e) => s + e.price, 0);
+    return product.price + extras.filter(e => e.selected).reduce((s, e) => s + e.price * (e.quantity || 1), 0);
   }
 
   addProduct(product: Product, ingredients: Ingredient[], extras: Extra[]): void {
@@ -99,7 +99,7 @@ export class CartService {
     if (!item?.product) return;
 
     const newId = this.productCartId(item.product.id, ingredients, extras);
-    const price = basePrice + extras.filter(e => e.selected).reduce((s, e) => s + e.price, 0);
+    const price = basePrice + extras.filter(e => e.selected).reduce((s, e) => s + e.price * (e.quantity || 1), 0);
 
     this._items.update(items => {
       const collision = items.find(i => i.cartItemId === newId);

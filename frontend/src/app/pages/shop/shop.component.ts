@@ -93,52 +93,15 @@ export class ShopComponent implements OnInit {
   }
 
   private mapProduct(backendProduct: any): Product {
-    const ingredients: Ingredient[] = [];
-    const extras: Extra[] = [];
-
-    if (backendProduct.customizations && Array.isArray(backendProduct.customizations)) {
-      for (const slot of backendProduct.customizations) {
-        const catName = (slot.categoryName || '').toLowerCase();
-        if (catName === 'ingrédients' || catName === 'ingredients') {
-          if (slot.options && Array.isArray(slot.options)) {
-            for (const opt of slot.options) {
-              ingredients.push({
-                id: opt.productId,
-                name: opt.name,
-                included: opt.isDefault
-              });
-            }
-          }
-        } else {
-          if (slot.options && Array.isArray(slot.options)) {
-            for (const opt of slot.options) {
-              let type: 'supplement' | 'size' | 'sauce' = 'supplement';
-              if (catName === 'taille' || catName === 'size') {
-                type = 'size';
-              } else if (catName === 'sauces' || catName === 'sauce') {
-                type = 'sauce';
-              }
-              extras.push({
-                id: opt.productId,
-                name: opt.name,
-                price: parseFloat(opt.priceDelta),
-                selected: opt.isDefault,
-                type: type
-              });
-            }
-          }
-        }
-      }
-    }
-
     return {
       id: backendProduct.id,
       name: backendProduct.name,
       description: backendProduct.description || '',
       price: parseFloat(backendProduct.price),
       image: backendProduct.pictureUrl || '',
-      ingredients,
-      extras,
+      customizations: backendProduct.customizations || [],
+      ingredients: [],
+      extras: [],
       categoryIds: (backendProduct.categories || []).map((c: any) => c.id)
     };
   }

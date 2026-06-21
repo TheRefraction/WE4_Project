@@ -44,9 +44,11 @@ export class CartComponent {
     return removed.length ? `Sans ${removed.join(', ')}` : '';
   }
 
-  summaryExtras(extras: { name: string; selected: boolean; type: string }[]): string {
+  summaryExtras(extras: { name: string; selected: boolean; type: string; quantity?: number }[]): string {
     const size = extras.find(e => e.type === 'size' && e.selected);
-    const active = extras.filter(e => e.type !== 'size' && e.selected).map(e => e.name);
+    const active = extras.filter(e => e.type !== 'size' && e.selected).map(e => {
+      return e.quantity && e.quantity > 1 ? `${e.name} (x${e.quantity})` : e.name;
+    });
     return [size?.name, ...active].filter(Boolean).join(' · ');
   }
 
@@ -93,11 +95,11 @@ export class CartComponent {
       prod.customization.extras.forEach((ext: any) => {
         if (ext.selected) {
           options.push({
-            name: ext.type === 'size' ? 'Taille' : ext.type === 'sauce' ? 'Sauce' : 'Supplément',
+            name: ext.categoryName || (ext.type === 'size' ? 'Taille' : ext.type === 'sauce' ? 'Sauce' : 'Supplément'),
             item: {
               name: ext.name,
               delta: ext.price,
-              quantity: 1
+              quantity: ext.quantity || 1
             }
           });
         }

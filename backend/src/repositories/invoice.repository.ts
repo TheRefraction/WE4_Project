@@ -6,14 +6,13 @@ import { InvoiceResponse, InvoiceItem, OptionItem, CreateInvoiceDTO, UpdateInvoi
 
 const RETURN_FIELDS = `
     id,
-    account_id AS accountId, 
+    account_id AS "accountId", 
     amount,
-    billing_address AS billingAddress,
-    items,
+    billing_address AS "billingAddress",
     status,
-    payment_id AS paymentId 
-    created_at AS createdAt
-    updated_at AS updatedAt
+    payment_id AS "paymentId",
+    created_at AS "createdAt",
+    updated_at AS "updatedAt"
 `;
 
 export class InvoiceRepository {

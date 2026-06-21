@@ -10,7 +10,7 @@ import { NavbarComponent } from './components/navbar/navbar.component';
   styleUrl: './app.scss'
 })
 export class App implements OnInit {
-  protected readonly title = signal('frontend');
+  readonly title = signal('frontend');
   protected readonly health = signal('loading...');
   protected readonly error = signal('');
   currentUserId: string | null = "user-123";
