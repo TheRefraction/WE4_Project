@@ -1,15 +1,18 @@
 import app from './app';
 import { env } from './config/env';
+import { initAccountCleaner } from './jobs/accountCleaner';
 
 const PORT = 3000;
 
 (async () => {
   await app.init();
 
+  initAccountCleaner();
+
   const server = app.getApp().listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
     console.log(`Environment: ${env.NODE_ENV}`);
-    console.log(`Health check: http://localhost:${PORT}/health`);
+    console.log(`Health check: http://localhost:${PORT}/api/health`);
   });
 
   const gracefulShutdown = () => {

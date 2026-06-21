@@ -5,6 +5,7 @@ import morgan from 'morgan';
 import routes from './routes';
 
 import { errorMiddleware, AppError } from './middlewares/error.middleware';
+import { requestLogger } from './middlewares/logger.middleware';
 import { connectMongoDB } from './config/mongo';
 import { pgPool } from './config/postgres';
 import { env } from './config/env';
@@ -45,6 +46,7 @@ class App {
     this.app.use(express.json());
     this.app.use(express.urlencoded({ extended: true }));
     this.app.use(morgan('combined'));
+    this.app.use(requestLogger);
   }
 
   private initializeRoutes(): void {

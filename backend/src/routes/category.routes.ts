@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { body, param } from 'express-validator';
 
-import { authMiddleware } from '../middlewares/auth.middleware';
+import { adminMiddleware, authMiddleware } from '../middlewares/auth.middleware';
 import { validateRequest } from '../middlewares/validation.middleware';
 
 import { categoryController } from '../container';
@@ -25,8 +25,8 @@ router.get('/:id', idValidation, validateRequest, categoryController.getById);
 
 // Protected
 router.use(authMiddleware);
-router.post('/', categoryValidation.CREATE, validateRequest, categoryController.create);
-router.put('/:id', idValidation, categoryValidation.UPDATE, validateRequest, categoryController.update);
-router.delete('/:id', idValidation, validateRequest, categoryController.delete);
+router.post('/', adminMiddleware, categoryValidation.CREATE, validateRequest, categoryController.create);
+router.put('/:id', adminMiddleware, idValidation, categoryValidation.UPDATE, validateRequest, categoryController.update);
+router.delete('/:id', adminMiddleware, idValidation, validateRequest, categoryController.delete);
 
 export default router;

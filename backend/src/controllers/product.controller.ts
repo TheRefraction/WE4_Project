@@ -14,7 +14,9 @@ export class ProductController extends BaseController {
 
     getAll = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         try {
-            const products = await this.productFcd.getAllFullProducts();
+            const showHidden = req.query.showHidden !== 'false';
+            
+            const products = await this.productFcd.getAllFullProducts(showHidden);
 
             this.sendResponse(res, HttpStatus.OK, 'Products retrieved successfully', products);
         } catch (error) {

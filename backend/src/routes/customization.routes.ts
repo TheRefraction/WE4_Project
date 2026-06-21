@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { body, param } from 'express-validator';
 
-import { authMiddleware } from '../middlewares/auth.middleware';
+import { adminMiddleware, authMiddleware } from '../middlewares/auth.middleware';
 import { validateRequest } from '../middlewares/validation.middleware';
 
 import { customizationController, optionController } from '../container';
@@ -49,12 +49,12 @@ router.get('/product/:id/detail', idValidation, validateRequest, customizationCo
 
 // Protected
 router.use(authMiddleware);
-router.post('/', slotValidation.CREATE, validateRequest, customizationController.create);
-router.put('/:id', idValidation, slotValidation.UPDATE, validateRequest, customizationController.update);
-router.delete('/:id', idValidation, validateRequest, customizationController.delete);
+router.post('/', adminMiddleware, slotValidation.CREATE, validateRequest, customizationController.create);
+router.put('/:id', adminMiddleware, idValidation, slotValidation.UPDATE, validateRequest, customizationController.update);
+router.delete('/:id', adminMiddleware, idValidation, validateRequest, customizationController.delete);
 // Options (admin)
-router.post('/:id/options', idValidation, optionValidation.CREATE, validateRequest, optionController.create);
-router.put('/:id/options', idValidation, optionValidation.UPDATE, validateRequest, optionController.update);
-router.delete('/:id/options', idValidation, validateRequest, optionController.delete);
+router.post('/:id/options', adminMiddleware, idValidation, optionValidation.CREATE, validateRequest, optionController.create);
+router.put('/:id/options', adminMiddleware, idValidation, optionValidation.UPDATE, validateRequest, optionController.update);
+router.delete('/:id/options', adminMiddleware, idValidation, validateRequest, optionController.delete);
 
 export default router;

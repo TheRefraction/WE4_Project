@@ -1,7 +1,5 @@
 # API
-blah blah blah
-
-## Main
+Any route is prefixed by `/api/v1/`.
 Any request to the backend should be formed as such:
 ```json
 req: {
@@ -12,6 +10,9 @@ req: {
     },
     params: {
         id: Number, 
+        ...
+    },
+    query: {
         ...
     },
     body: {
@@ -37,6 +38,7 @@ res: {
 ```json
 req: {
     params: {},
+    query: {},
     body: {
         firstName: String,
         lastName: String,
@@ -60,6 +62,7 @@ res: {
             phone?: String,
             createdAt: Date,
             updatedAt: Date,
+            lastLogin: Date,
             loyaltyPoints: Number,
             role: String
         },
@@ -74,6 +77,7 @@ res: {
 ```json
 req: {
     params: {},
+    query: {},
     body: {
         email: String,
         password: String
@@ -94,6 +98,7 @@ res: {
             phone?: String,
             createdAt: Date,
             updatedAt: Date,
+            lastLogin: Date,
             loyaltyPoints: Number,
             role: String
         },
@@ -113,6 +118,7 @@ req: {
         role: String
     },
     params: {},
+    query: {},
     body: {}
 }
 ```
@@ -129,6 +135,7 @@ res: {
         phone?: String,
         createdAt: Date,
         updatedAt: Date,
+        lastLogin: Date,
         loyaltyPoints: Number,
         role: String
     }
@@ -148,6 +155,7 @@ req: {
     params: {
         id: Number
     },
+    query: {},
     body: {
         firstName?: String,
         lastName?: String,
@@ -171,6 +179,7 @@ res: {
         phone?: String,
         createdAt: Date,
         updatedAt: Date,
+        lastLogin: Date,
         loyaltyPoints: Number,
         role: String
     }
@@ -190,6 +199,7 @@ req: {
     params: {
         id: Number
     },
+    query: {},
     body: {}
 }
 ```
@@ -214,6 +224,7 @@ req: {
         role: String
     },
     params: {},
+    query: {},
     body: {}
 }
 ```
@@ -246,6 +257,7 @@ req: {
     params: {
         id: Number
     },
+    query: {},
     body: {}
 }
 ```
@@ -276,6 +288,7 @@ res: {
 ```json
 req: {
     params: {},
+    query: {},
     body: {}
 }
 ```
@@ -302,6 +315,7 @@ req: {
     params: {
         id: Number
     },
+    query: {},
     body: {}
 }
 ```
@@ -324,6 +338,7 @@ res: {
 ```json
 req: {
     params: {},
+    query: {},
     body: {
         name: String
     }
@@ -350,6 +365,7 @@ req: {
     params: {
         id: Number
     },
+    query: {},
     body: {
         name?: String
     }
@@ -376,6 +392,7 @@ req: {
     params: {
         id: Number
     },
+    query: {},
     body: {}
 }
 ```
@@ -397,6 +414,7 @@ res: {
 ```json
 req: {
     params: {},
+    query: {},
     body: {}
 }
 ```
@@ -428,6 +446,7 @@ req: {
     params: {
         id: Number
     },
+    query: {},
     body: {}
 }
 ```
@@ -455,6 +474,7 @@ res: {
 ```json
 req: {
     params: {},
+    query: {},
     body: {
         name: String,
         contactInfo: {
@@ -490,6 +510,7 @@ req: {
     params: {
         id: Number
     },
+    query: {},
     body: {
         name?: String,
         contactInfo?: {
@@ -525,6 +546,7 @@ req: {
     params: {
         id: Number
     },
+    query: {},
     body: {}
 }
 ```
@@ -546,6 +568,7 @@ res: {
 ```json
 req: {
     params: {},
+    query: {},
     body: {}
 }
 ```
@@ -576,6 +599,7 @@ req: {
     params: {
         id: Number
     },
+    query: {},
     body: {}
 }
 ```
@@ -606,6 +630,7 @@ req: {
     params: {
         id: Number
     },
+    query: {},
     body: {}
 }
 ```
@@ -644,6 +669,7 @@ res: {
 ```json
 req: {
     params: {},
+    query: {},
     body: {
         productId: Number,
         categoryId: Number,
@@ -678,6 +704,7 @@ req: {
     params: {
         id: Number
     },
+    query: {},
     body: {
         productId?: Number,
         categoryId?: Number,
@@ -712,6 +739,7 @@ req: {
     params: {
         id: Number
     },
+    query: {},
     body: {}
 }
 ```
@@ -733,6 +761,7 @@ req: {
     params: {
         id: Number
     },
+    query: {},
     body: {
         productId: Number,
         priceDelta: Number,
@@ -765,6 +794,7 @@ req: {
     params: {
         id: Number
     },
+    query: {},
     body: {
         productId: Number,
         priceDelta?: Number,
@@ -797,6 +827,7 @@ req: {
     params: {
         id: Number
     },
+    query: {},
     body: {
         productId: Number
     }
@@ -820,6 +851,9 @@ res: {
 ```json
 req: {
     params: {},
+    query: {
+        showHidden: Boolean
+    },
     body: {}
 }
 ```
@@ -850,6 +884,7 @@ req: {
     params: {
         id: Number
     },
+    query: {},
     body: {}
 }
 ```
@@ -878,6 +913,7 @@ req: {
     params: {
         id: Number
     },
+    query: {},
     body: {}
 }
 ```
@@ -938,6 +974,7 @@ res: {
 ```json
 req: {
     params: {},
+    query: {},
     body: {
         name: String,
         description?: String,
@@ -973,6 +1010,7 @@ req: {
     params: {
         id: Number
     },
+    query: {},
     body: {
         name?: String,
         description?: String,
@@ -1009,6 +1047,7 @@ req: {
     params: {
         id: Number
     },
+    query: {},
     body: {}
 }
 ```
@@ -1030,6 +1069,7 @@ res: {
 ```json
 req: {
     params: {},
+    query: {},
     body: {}
 }
 ```
@@ -1058,6 +1098,7 @@ res: {
 ```json
 req: {
     params: {},
+    query: {},
     body: {}
 }
 ```
@@ -1084,6 +1125,7 @@ res: {
 ```json
 req: {
     params: {},
+    query: {},
     body: {
         mode: String,
         status?: String,
@@ -1116,6 +1158,7 @@ req: {
     params: {
         id: Number
     },
+    query: {},
     body: {
         mode?: String,
         status?: String,
@@ -1142,6 +1185,68 @@ res: {
 
 ## Invoices
 
+### `/invoices` (GET)
+
+#### Requête
+```json
+req: {
+    params: {},
+    query: {},
+    body: {}
+}
+```
+
+#### Sortie
+```json
+res: {
+    success: Boolean,
+    message: String,
+    data: [
+        {
+            id: Number,
+            accountId: Number,
+            amount: Number,
+            billingAddress: {
+                street: String,
+                city: String,
+                zip: String,
+                country: String
+            },
+            items: [
+                {
+                    type: 'product',
+                    name: String,
+                    price: Number,
+                    quantity: Number,
+                    options?: [
+                        {
+                            name: String,
+                            item: {
+                                name: String,
+                                delta: Number,
+                                quantity: Number
+                            }
+                        }
+                    ]
+                }
+            ],
+            status: String
+            paymentId?: Number,
+            payment?: {
+                id: Number,
+                mode: String,
+                status: String,
+                paymentDate: Date,
+                createdAt: Date,
+                updatedAt: Date
+            },
+            createdAt: Date,
+            updatedAt: Date
+        }
+    ]
+}
+```
+
 ### `/invoices/:id` (GET, Protected)
 
 #### Requête
@@ -1150,6 +1255,7 @@ req: {
     params: {
         id: Number
     },
+    query: {},
     body: {}
 }
 ```
@@ -1209,6 +1315,7 @@ res: {
 ```json
 req: {
     params: {},
+    query: {},
     body: {
         accountId: Number,
         amount: Number,
@@ -1297,6 +1404,7 @@ req: {
     params: {
         id: Number
     },
+    query: {},
     body: {
         amount?: Number,
         billingAddress?: {
@@ -1384,6 +1492,7 @@ req: {
     params: {
         id: Number
     },
+    query: {},
     body: {}
 }
 ```

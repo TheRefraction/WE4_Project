@@ -14,6 +14,7 @@ const SELECT_FIELDS = `
     password_hash AS "passwordHash",
     created_at AS "createdAt",
     updated_at AS "updatedAt", 
+    last_login AS "lastLogin",
     loyalty_points AS "loyaltyPoints", 
     role
 `;
@@ -26,6 +27,7 @@ const RETURN_FIELDS = `
     phone,
     created_at AS "createdAt",
     updated_at AS "updatedAt", 
+    last_login AS "lastLogin",
     loyalty_points AS "loyaltyPoints",
     role
 `;
@@ -82,7 +84,7 @@ export class AccountRepository {
         return res.rows[0];
     }
 
-    async create(data: Omit<Account, 'id' | 'createdAt' | 'updatedAt' | 'loyaltyPoints' | 'role'>): Promise<Account> {
+    async create(data: Omit<Account, 'id' | 'createdAt' | 'updatedAt' | 'lastLogin'| 'loyaltyPoints' | 'role'>): Promise<Account> {
         const {
             firstName,
             lastName,
@@ -155,6 +157,18 @@ export class AccountRepository {
         }
 
         return res.rows[0];
+    }
+
+    async updateLastLogin(id: number): Promise<boolean> {
+        const res = await pgPool.query(
+        `
+            UPDATE account 
+            SET last_login = NOW()
+            WHERE id = $1
+            RETURNING *
+        `, [id]);
+
+        return (res.rowCount ?? 0) > 0;
     }
 
     async delete(id: number): Promise<boolean> {

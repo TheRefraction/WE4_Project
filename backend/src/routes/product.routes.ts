@@ -1,7 +1,7 @@
 import { Router } from 'express';
-import { body, param } from 'express-validator';
+import { body, param, query } from 'express-validator';
 
-import { authMiddleware } from '../middlewares/auth.middleware';
+import { adminMiddleware, authMiddleware } from '../middlewares/auth.middleware';
 import { validateRequest } from '../middlewares/validation.middleware';
 
 import { productController } from '../container';
@@ -9,6 +9,7 @@ import { productController } from '../container';
 const router = Router();
 
 const idValidation = [param('id').isInt().withMessage('Invalid ID')];
+const showHiddenValidation = [query('showHidden').isBoolean().withMessage('showHidden should be a boolean')];
 
 //.custom((value) => value === null || typeof value === 'number').withMessage('Supplier ID must be a number or null')
 const productValidation = {
@@ -29,14 +30,14 @@ const productValidation = {
 };
 
 // Public routes
-router.get('/', productController.getAll);
+router.get('/', showHiddenValidation, validateRequest, productController.getAll);
 router.get('/:id', idValidation, validateRequest, productController.getById);
 router.get('/:id/detail', idValidation, validateRequest, productController.getFullProduct);
 
 // Protected routes
 router.use(authMiddleware);
-router.post('/', productValidation.CREATE, validateRequest, productController.create);
-router.put('/:id', idValidation, productValidation.UPDATE, validateRequest, productController.update);
-router.delete('/:id', idValidation, productController.delete);
+router.post('/', adminMiddleware, productValidation.CREATE, validateRequest, productController.create);
+router.put('/:id', adminMiddleware, idValidation, productValidation.UPDATE, validateRequest, productController.update);
+router.delete('/:id', adminMiddleware, idValidation, productController.delete);
 
 export default router;

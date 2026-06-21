@@ -74,6 +74,29 @@ export class InvoiceRepository {
         return invoiceRaw;
     }
 
+    async findAll(): Promise<InvoiceResponse[]> {
+        const pgQuery = `SELECT ${RETURN_FIELDS} FROM invoice`;
+        const pgResult = await pgPool.query(pgQuery);
+        
+        const invoices: InvoiceResponse[] = pgResult.rows;
+        if (invoices.length === 0) return [];
+
+        const ids = invoices.map(inv => new Int32(inv.id));
+
+        const invoiceCollection = getCollection<any>('invoices');
+        const mongoItems = await invoiceCollection
+            .find({ _id: { $in: ids } })
+            .toArray();
+
+        return invoices.map(inv => {
+            const itemsData = mongoItems.find(m => m._id === inv.id);
+            return {
+                ...inv,
+                items: itemsData?.items || []
+            };
+        });
+    }
+
     async findById(id: number): Promise<InvoiceResponse | null> {
         // Postgres
         const pgQuery = `SELECT ${RETURN_FIELDS} FROM invoice WHERE id = $1`;

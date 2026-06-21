@@ -89,6 +89,10 @@ export class AccountService {
         const accountResponse = await this.mapToResponse(account);
         const token = this.generateToken(accountResponse);
 
+        if (!this.repo.updateLastLogin(account.id)) {
+            throw new AppError('Unknown error!', HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
         return { 
             account: accountResponse,
             token 
@@ -198,6 +202,7 @@ export class AccountService {
             phone: account.phone ?? null,
             createdAt: account.createdAt,
             updatedAt: account.updatedAt,
+            lastLogin: account.lastLogin,
             loyaltyPoints: account.loyaltyPoints,
             role: account.role
         };

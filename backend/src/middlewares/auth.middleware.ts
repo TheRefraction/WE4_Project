@@ -50,3 +50,15 @@ export const adminMiddleware = async (
     }
     next();
 };
+
+/*
+UNUSED
+export const authorize = (roles: Role[]) => {
+    return (req: AuthRequest, res: Response, next: NextFunction) => {
+        if (!req.user || !roles.includes(req.user.role)) {
+            res.status(HttpStatus.FORBIDDEN).json({ success: false, message: 'Forbidden' });
+            return;
+        }
+        next();
+    };
+};*/

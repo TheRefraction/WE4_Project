@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { body, param } from 'express-validator';
 
-import { authMiddleware } from '../middlewares/auth.middleware';
+import { adminMiddleware, authMiddleware } from '../middlewares/auth.middleware';
 import { validateRequest } from '../middlewares/validation.middleware';
 
 import { invoiceController } from '../container';
@@ -33,9 +33,10 @@ const invoiceValidation = {
 };
 
 router.use(authMiddleware);
+router.get('/', invoiceController.getAll);
 router.get('/:id', idValidation, validateRequest, invoiceController.getById);
 router.post('/', invoiceValidation.CREATE, validateRequest, invoiceController.create);
 router.put('/:id', idValidation, invoiceValidation.UPDATE, validateRequest, invoiceController.update);
-router.delete('/:id', idValidation, validateRequest, invoiceController.delete);
+router.delete('/:id', adminMiddleware, idValidation, validateRequest, invoiceController.delete);
 
 export default router;

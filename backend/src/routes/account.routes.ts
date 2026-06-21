@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { body, param } from 'express-validator';
 
 import { Role } from '../models/account.model';
-import { authMiddleware } from '../middlewares/auth.middleware';
+import { adminMiddleware, authMiddleware } from '../middlewares/auth.middleware';
 import { validateRequest } from '../middlewares/validation.middleware';
 
 import { accountController } from '../container';
@@ -40,12 +40,13 @@ router.post('/login', loginValidation, validateRequest, accountController.login)
 
 // Protected routes
 router.use(authMiddleware);
+
 router.get('/profile', accountController.getProfile);
 router.put('/profile/:id', idValidation, updateValidation, validateRequest, accountController.updateAccount);
 router.delete('/profile/:id', idValidation, validateRequest, accountController.deleteAccount);
 
 // Admin routes
-router.get('/admin/accounts', accountController.getAllAccounts);
-router.get('/admin/accounts/:id', idValidation, validateRequest, accountController.getAccountById);
+router.get('/admin/accounts', adminMiddleware, accountController.getAllAccounts);
+router.get('/admin/accounts/:id', adminMiddleware, idValidation, validateRequest, accountController.getAccountById);
 
 export default router;

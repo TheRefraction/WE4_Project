@@ -6,6 +6,12 @@ import { HttpStatus } from "../utils/httpStatus";
 export class InvoiceService {
     constructor(private repository: InvoiceRepository) {}
 
+    async getAll(): Promise<InvoiceResponse[]> {
+        const invoices = await this.repository.findAll();
+
+        return Promise.all(invoices.map((invoice) => this.mapToResponse(invoice)));
+    }
+
     async getById(id: number): Promise<InvoiceResponse | null> {
         const invoice = await this.repository.findById(id);
         if (!invoice) throw new AppError('Invoice not found', HttpStatus.NOT_FOUND);
