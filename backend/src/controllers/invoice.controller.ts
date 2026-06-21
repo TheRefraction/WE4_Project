@@ -9,6 +9,16 @@ import { InvoiceStatus } from '../models/invoice.model';
 export class InvoiceController extends BaseController {
     constructor(private invoiceSvc: InvoiceService, private paymentSvc: PaymentService) { super(); }
 
+    getAll = async(req: Request, res: Response, next: NextFunction): Promise<void> => {
+        try {
+            const fullInvoice = await this.invoiceSvc.getAll();
+
+            this.sendResponse(res, HttpStatus.OK, 'Invoices retrieved', fullInvoice);
+        } catch (error) {
+            next(error);
+        }
+    }
+
     getById = async(req: Request, res: Response, next: NextFunction): Promise<void>  => {
         try {
             const invoiceId = parseInt(req.params.id);

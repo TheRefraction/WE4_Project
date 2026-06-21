@@ -1144,6 +1144,67 @@ res: {
 
 ## Invoices
 
+### `/invoices` (GET)
+
+#### Requête
+```json
+req: {
+    params: {},
+    body: {}
+}
+```
+
+#### Sortie
+```json
+res: {
+    success: Boolean,
+    message: String,
+    data: [
+        {
+            id: Number,
+            accountId: Number,
+            amount: Number,
+            billingAddress: {
+                street: String,
+                city: String,
+                zip: String,
+                country: String
+            },
+            items: [
+                {
+                    type: 'product',
+                    name: String,
+                    price: Number,
+                    quantity: Number,
+                    options?: [
+                        {
+                            name: String,
+                            item: {
+                                name: String,
+                                delta: Number,
+                                quantity: Number
+                            }
+                        }
+                    ]
+                }
+            ],
+            status: String
+            paymentId?: Number,
+            payment?: {
+                id: Number,
+                mode: String,
+                status: String,
+                paymentDate: Date,
+                createdAt: Date,
+                updatedAt: Date
+            },
+            createdAt: Date,
+            updatedAt: Date
+        }
+    ]
+}
+```
+
 ### `/invoices/:id` (GET, Protected)
 
 #### Requête

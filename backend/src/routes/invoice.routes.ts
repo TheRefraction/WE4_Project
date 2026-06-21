@@ -33,6 +33,7 @@ const invoiceValidation = {
 };
 
 router.use(authMiddleware);
+router.get('/', invoiceController.getAll);
 router.get('/:id', idValidation, validateRequest, invoiceController.getById);
 router.post('/', invoiceValidation.CREATE, validateRequest, invoiceController.create);
 router.put('/:id', idValidation, invoiceValidation.UPDATE, validateRequest, invoiceController.update);
