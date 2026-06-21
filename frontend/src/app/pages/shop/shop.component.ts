@@ -41,7 +41,9 @@ export class ShopComponent implements OnInit {
     this.productService.getProducts().subscribe({
       next: (res) => {
         if (res.success) {
-          const mappedProducts = (res.data || []).map(p => this.mapProduct(p));
+          const mappedProducts = (res.data || [])
+            .filter(p => !p.hidden)
+            .map(p => this.mapProduct(p));
           this.allProducts.set(mappedProducts);
         }
       },

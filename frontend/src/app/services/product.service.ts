@@ -22,6 +22,10 @@ export class ProductService {
     return this.http.get<{ success: boolean; message: string; data: any[] }>(`${this.apiUrl}/products`);
   }
 
+  getAllProducts(): Observable<{ success: boolean; message: string; data: any[] }> {
+    return this.http.get<{ success: boolean; message: string; data: any[] }>(`${this.apiUrl}/products?showHidden=true`);
+  }
+
   getProductDetail(id: number): Observable<{ success: boolean; message: string; data: any }> {
     return this.http.get<{ success: boolean; message: string; data: any }>(`${this.apiUrl}/products/${id}/detail`);
   }
