@@ -97,7 +97,7 @@ export class AdminComponent implements OnInit {
   }
 
   loadProducts() {
-    this.productService.getProducts().subscribe({
+    this.productService.getAllProducts().subscribe({
       next: (res) => {
         this.products.set((res.data || []).map((p: any) => ({
           id: p.id,
@@ -141,7 +141,32 @@ export class AdminComponent implements OnInit {
 
 
   loadOrders() {
-    this.orders.set([]);
+    this.orderService.getInvoices().subscribe({
+      next: (res) => {
+        this.orders.set((res.data || []).map((i: any) => ({
+          id: String(i.id),
+          createdAt: i.createdAt,
+          customer: {
+            firstName: i.billingAddress?.firstName || '',
+            lastName: i.billingAddress?.lastName || '',
+            email: i.billingAddress?.email || '',
+            address: i.billingAddress?.address || '',
+            city: i.billingAddress?.city || '',
+            zip: i.billingAddress?.zip || ''
+          },
+          items: (i.items || []).map((it: any) => ({
+            type: 'product' as const,
+            name: it.name,
+            quantity: it.quantity,
+            unitPrice: parseFloat(it.price),
+            customizationSummary: it.customizationSummary
+          })),
+          total: parseFloat(i.amount),
+          status: this.mapBackendStatusToFrontend(i.status)
+        })));
+      },
+      error: (err) => console.error('Failed to load orders:', err)
+    });
   }
 
   toggleOrder(id: string) {

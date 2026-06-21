@@ -9,7 +9,7 @@ import { productController } from '../container';
 const router = Router();
 
 const idValidation = [param('id').isInt().withMessage('Invalid ID')];
-const showHiddenValidation = [query('showHidden').isBoolean().withMessage('showHidden should be a boolean')];
+const showHiddenValidation = [query('showHidden').optional().isBoolean().withMessage('showHidden should be a boolean')];
 
 //.custom((value) => value === null || typeof value === 'number').withMessage('Supplier ID must be a number or null')
 const productValidation = {

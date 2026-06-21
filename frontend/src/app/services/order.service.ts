@@ -32,4 +32,11 @@ export class OrderService {
       { headers: this.authHeaders }
     );
   }
+
+  getInvoices(): Observable<{ success: boolean; message: string; data: any[] }> {
+    return this.http.get<{ success: boolean; message: string; data: any[] }>(
+      `${this.apiUrl}/invoices`,
+      { headers: this.authHeaders }
+    );
+  }
 }
