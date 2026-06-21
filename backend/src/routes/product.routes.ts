@@ -31,7 +31,7 @@ const productValidation = {
 // Public routes
 router.get('/', productController.getAll);
 router.get('/:id', idValidation, validateRequest, productController.getById);
-router.get('/:id/full', idValidation, validateRequest, productController.getFullProduct);
+router.get('/:id/detail', idValidation, validateRequest, productController.getFullProduct);
 
 // Protected routes
 router.use(authMiddleware);

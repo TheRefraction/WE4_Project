@@ -1,67 +1,71 @@
 import { Request, Response, NextFunction } from 'express';
 import { InvoiceService } from '../services/invoice.service';
+import { BaseController } from './base.controller';
+import { PaymentService } from '../services/payment.service';
+import { HttpStatus } from '../utils/httpStatus';
+import { PaymentResponse, CreatePaymentDTO, PaymentMode, PaymentStatus} from '../models/payment.model';
+import { InvoiceStatus } from '../models/invoice.model';
 
-const invoiceService = new InvoiceService();
+export class InvoiceController extends BaseController {
+    constructor(private invoiceSvc: InvoiceService, private paymentSvc: PaymentService) { super(); }
 
-export class InvoiceController {
-
-
-    create = async (req: Request, res: Response, next: NextFunction) => {
-        try {
-            const invoiceData = req.body;
-            const createdInvoice = await invoiceService.createInvoice(invoiceData);
-
-            res.status(201).json({
-                success: true,
-                message: "Invoice created successfully",
-                data: {
-                    id: createdInvoice.id
-                }
-            });
-        } catch (error) {
-            next(error);
-        }
-    }
-
-
-    getById = async(req: Request, res: Response, next: NextFunction) => {
+    getById = async(req: Request, res: Response, next: NextFunction): Promise<void>  => {
         try {
             const invoiceId = parseInt(req.params.id);
-            const fullInvoice = await invoiceService.getInvoiceData(invoiceId);
+            const fullInvoice = await this.invoiceSvc.getById(invoiceId);
 
-            res.status(200).json({
-                success: true,
-                data: fullInvoice
-            });
+            this.sendResponse(res, HttpStatus.OK, 'Invoice retrieved', fullInvoice);
         } catch (error) {
             next(error);
         }
     }
 
-    getAll = async(req: Request, res: Response, next: NextFunction) => {
+    create = async (req: Request, res: Response, next: NextFunction): Promise<void>  => {
         try {
-            const invoices = await invoiceService.getAllInvoices();
-            res.status(200).json({
-                success: true,
-                message: "Invoices retrieved successfully",
-                data: invoices
-            });
+            const invoiceData = {
+                ...req.body,
+                status: InvoiceStatus.Paid // SIMULATING
+            };
+            const invoiceRaw = await this.invoiceSvc.create(invoiceData);
+
+            // SIMULATING PAYMENT HERE
+            const paymentData : CreatePaymentDTO = {
+                mode: PaymentMode.CreditCard,
+                status: PaymentStatus.Paid,
+                paymentDate: new Date()
+            };
+            const payment : PaymentResponse = await this.paymentSvc.create(paymentData);
+
+            invoiceRaw.paymentId = payment.id;
+            invoiceRaw.payment = payment;
+
+            this.sendResponse(res, HttpStatus.CREATED, 'Invoice created successfully', invoiceRaw);
         } catch (error) {
             next(error);
         }
     }
 
-    updateStatus = async(req: Request, res: Response, next: NextFunction) => {
+    update = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         try {
             const id = parseInt(req.params.id);
-            const { status } = req.body;
-            await invoiceService.updateInvoiceStatus(id, status);
-            res.status(200).json({
-                success: true,
-                message: "Invoice status updated successfully"
-            });
+
+            const result = await this.invoiceSvc.update(id, req.body);
+
+            this.sendResponse(res, HttpStatus.OK, 'Invoice updated successfully', result);
         } catch (error) {
             next(error);
         }
-    }
+    } 
+
+    delete = async (req: Request, res: Response, next: NextFunction): Promise<void>  => {
+        try {
+            const id = parseInt(req.params.id);
+
+            await this.invoiceSvc.delete(id);
+
+            this.sendResponse(res, HttpStatus.OK, 'Invoice deleted successfully');
+        } catch (error) {
+            next(error);
+        }
+    } 
 }

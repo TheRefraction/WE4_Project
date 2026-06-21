@@ -43,18 +43,18 @@ const optionValidation = {
 };
 
 // Public
-router.get('/slots', customizationController.getAll);
-router.get('/slots/product/:id', idValidation, validateRequest, customizationController.getAllByProductId);
-router.get('/slots/product/:id/detail', idValidation, validateRequest, customizationController.getFullSlotsByProductId);
+router.get('/', customizationController.getAll);
+router.get('/product/:id', idValidation, validateRequest, customizationController.getAllByProductId);
+router.get('/product/:id/detail', idValidation, validateRequest, customizationController.getFullSlotsByProductId);
 
 // Protected
 router.use(authMiddleware);
-router.post('/slots', slotValidation.CREATE, validateRequest, customizationController.create);
-router.put('/slots/:id', idValidation, slotValidation.UPDATE, validateRequest, customizationController.update);
-router.delete('/slots/:id', idValidation, validateRequest, customizationController.delete);
+router.post('/', slotValidation.CREATE, validateRequest, customizationController.create);
+router.put('/:id', idValidation, slotValidation.UPDATE, validateRequest, customizationController.update);
+router.delete('/:id', idValidation, validateRequest, customizationController.delete);
 // Options (admin)
-router.post('/slots/:id/options', idValidation, optionValidation.CREATE, validateRequest, optionController.create);
-router.put('/slots/:id/options', idValidation, optionValidation.UPDATE, validateRequest, optionController.update);
-router.delete('/slots/:id/options', idValidation, validateRequest, optionController.delete);
+router.post('/:id/options', idValidation, optionValidation.CREATE, validateRequest, optionController.create);
+router.put('/:id/options', idValidation, optionValidation.UPDATE, validateRequest, optionController.update);
+router.delete('/:id/options', idValidation, validateRequest, optionController.delete);
 
 export default router;

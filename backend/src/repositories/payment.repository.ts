@@ -1,16 +1,28 @@
 import { pgPool } from '../config/postgres';
-import { Payment, UpdatePaymentDTO } from '../models/payment.model'
+import { PaymentResponse, CreatePaymentDTO, UpdatePaymentDTO } from '../models/payment.model'
+
+const SELECT_FIELDS = `
+    id, 
+    payment_date AS "PaymentDate",
+    mode, 
+    status,
+    created_at AS "CreatedAt",
+    updated_at AS "UpdatedAt"   
+`;
+
+const RETURN_FIELDS = `
+    id, 
+    payment_date AS "PaymentDate",
+    mode, 
+    status,
+    created_at AS "CreatedAt",
+    updated_at AS "UpdatedAt"   
+`;
 
 export class PaymentRepository {
-    async findAll(): Promise<Payment[]> {
+    async findAll(): Promise<PaymentResponse[]> {
         let query = `
-            SELECT  
-                id, 
-                payment_date AS "PaymentDate",
-                mode, 
-                status,
-                created_at AS "CreatedAt",
-                updated_at AS "UpdatedAt"
+            SELECT ${SELECT_FIELDS}
             FROM payment
         `;
 
@@ -18,24 +30,23 @@ export class PaymentRepository {
         return res.rows || [];
     }
 
-    async findById(id: number): Promise<Payment | null> {
+    async findById(id: number): Promise<PaymentResponse | null> {
         const query = `
-            SELECT 
-                id, 
-                payment_date AS "PaymentDate",
-                mode, 
-                status,
-                created_at AS "CreatedAt",
-                updated_at AS "UpdatedAt"
+            SELECT ${SELECT_FIELDS}
             FROM payment 
             WHERE id = $1
         `;
 
         const res = await pgPool.query(query, [id]);
-        return res.rows[0] || null;
+        const pay: PaymentResponse = res.rows[0];
+        if (!pay) {
+            return null;
+        }
+
+        return pay;
     }
 
-    async create(data: { mode: string; status?: string; paymentDate?: Date }): Promise<Payment> {
+    async create(data: CreatePaymentDTO): Promise<PaymentResponse> {
         const mode = data.mode;
         const status = data.status || 'paid';
         const paymentDate = data.paymentDate || new Date();
@@ -44,7 +55,7 @@ export class PaymentRepository {
             `
                 INSERT INTO payment (mode, status, payment_date)
                 VALUES ($1, $2, $3)
-                RETURNING *;
+                RETURNING ${RETURN_FIELDS};
             `, 
             [mode, status, paymentDate]
         );
@@ -52,16 +63,7 @@ export class PaymentRepository {
         return res.rows[0];
     }
 
-    async linkInvoice(invoiceId: number, paymentId: number, status: string = 'paid'): Promise<void> {
-        const query = `
-            UPDATE invoice
-            SET payment_id = $1, status = $2, updated_at = NOW()
-            WHERE id = $3;
-        `;
-        await pgPool.query(query, [paymentId, status, invoiceId]);
-    }
-
-    async update(id: number, data: UpdatePaymentDTO): Promise<Payment | null> {
+    async update(id: number, data: UpdatePaymentDTO): Promise<PaymentResponse | null> {
         const fields = [];
         const values = [];
         let paramCount = 1;
@@ -89,11 +91,19 @@ export class PaymentRepository {
             `
                 UPDATE payment SET ${fields.join(', ')} 
                 WHERE id = $${paramCount} 
-                RETURNING *
+                RETURNING ${RETURN_FIELDS}
             `, 
                 values
         );
 
-        return res.rows[0] || null;
+        if (!res.rows[0]) {
+            return null;
+        }
+        
+        const pay : PaymentResponse = res.rows[0];
+
+        return pay;
     }
+
+    // No delete operation
 }

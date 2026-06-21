@@ -14,7 +14,7 @@ const API_VERSION = 'v1';
 const router = Router();
 
 // Version 1
-router.use(`/${API_VERSION}/customizations`, customizationRoutes);
+router.use(`/${API_VERSION}/slots`, customizationRoutes);
 router.use(`/${API_VERSION}/suppliers`, supplierRoutes);
 router.use(`/${API_VERSION}/products`, productRoutes);
 router.use(`/${API_VERSION}/categories`, categoryRoutes);

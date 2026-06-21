@@ -24,23 +24,17 @@ export const PaymentStatus = {
 export type PaymentStatus = typeof PaymentStatus[keyof typeof PaymentStatus];
 
 export interface Payment {
-    id: number;
-    paymentDate: Date;
+    readonly id: number;
     mode: PaymentMode;
     status: PaymentStatus;
+    paymentDate: Date;
     createdAt: Date;
     updatedAt: Date;
 }
 
-export interface CreatePaymentDTO {
-    invoiceId: number;
-    mode: PaymentMode;
-    paymentDate?: Date;
-    status?: PaymentStatus;
-}
+export type CreatePaymentDTO = Omit<Payment, 'id' | 'createdAt' | 'updatedAt' | 'status' | 'paymentDate'> 
+                                & Partial<Omit<Payment, 'id' | 'createdAt' | 'updatedAt' | 'mode'>>;
 
-export interface UpdatePaymentDTO {
-    paymentDate?: Date;
-    mode?: PaymentMode;
-    status?: PaymentStatus;
-}
+export type UpdatePaymentDTO = Partial<Omit<Payment, 'id' | 'createdAt' | 'updatedAt'>>;
+
+export type PaymentResponse = Payment;

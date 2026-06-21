@@ -25,8 +25,8 @@ router.get('/:id', idValidation, validateRequest, categoryController.getById);
 
 // Protected
 router.use(authMiddleware);
-router.post('/admin', categoryValidation.CREATE, validateRequest, categoryController.create);
-router.put('/admin/:id', idValidation, categoryValidation.UPDATE, validateRequest, categoryController.update);
-router.delete('/admin/:id', idValidation, validateRequest, categoryController.delete);
+router.post('/', categoryValidation.CREATE, validateRequest, categoryController.create);
+router.put('/:id', idValidation, categoryValidation.UPDATE, validateRequest, categoryController.update);
+router.delete('/:id', idValidation, validateRequest, categoryController.delete);
 
 export default router;
