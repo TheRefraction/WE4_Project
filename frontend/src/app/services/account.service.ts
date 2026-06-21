@@ -47,12 +47,12 @@ export class AccountService {
     }
   }
 
-  register(data: RegisterData): Observable<{ message: string; data: Account }> {
-    return this.http.post<{ message: string; data: Account }>(`${this.apiUrl}/register`, data);
+  register(data: RegisterData): Observable<{ success: boolean; message: string; data: Account }> {
+    return this.http.post<{ success: boolean; message: string; data: Account }>(`${this.apiUrl}/register`, data);
   }
 
-  login(email: string, password: string): Observable<{ message: string; data: LoginResponse }> {
-    return this.http.post<{ message: string; data: LoginResponse }>(`${this.apiUrl}/login`, { email, password })
+  login(email: string, password: string): Observable<{ success: boolean; message: string; data: LoginResponse }> {
+    return this.http.post<{ success: boolean; message: string; data: LoginResponse }>(`${this.apiUrl}/login`, { email, password })
       .pipe(
         tap(response => {
           const loginData = response.data;
@@ -63,33 +63,33 @@ export class AccountService {
       );
   }
 
-  getProfile(): Observable<{ message: string; data: Account }> {
-    return this.http.get<{ message: string; data: Account }>(`${this.apiUrl}/profile`, {
+  getProfile(): Observable<{ success: boolean; message: string; data: Account }> {
+    return this.http.get<{ success: boolean; message: string; data: Account }>(`${this.apiUrl}/profile`, {
       headers: this.authHeaders()
     });
   }
 
-  updateProfile(id: number, data: Partial<Account> & { password?: string }): Observable<{ message: string; data: Account }> {
-    return this.http.put<{ message: string; data: Account }>(`${this.apiUrl}/profile/${id}`, data, {
+  updateProfile(id: number, data: Partial<Account> & { password?: string }): Observable<{ success: boolean; message: string; data: Account }> {
+    return this.http.put<{ success: boolean; message: string; data: Account }>(`${this.apiUrl}/profile/${id}`, data, {
       headers: this.authHeaders()
     });
   }
 
-  deleteAccount(id: number): Observable<{ message: string }> {
-    return this.http.delete<{ message: string }>(`${this.apiUrl}/profile/${id}`, {
+  deleteAccount(id: number): Observable<{ success: boolean; message: string }> {
+    return this.http.delete<{ success: boolean; message: string }>(`${this.apiUrl}/profile/${id}`, {
       headers: this.authHeaders()
     });
   }
 
-  getAllAccounts(role?: string): Observable<{ message: string; data: Account[] }> {
+  getAllAccounts(role?: string): Observable<{ success: boolean; message: string; data: Account[] }> {
     const params = role ? `?role=${role}` : '';
-    return this.http.get<{ message: string; data: Account[] }>(`${this.apiUrl}/admin/accounts${params}`, {
+    return this.http.get<{ success: boolean; message: string; data: Account[] }>(`${this.apiUrl}/admin/accounts${params}`, {
       headers: this.authHeaders()
     });
   }
 
-  getAccountById(id: number): Observable<{ message: string; data: Account }> {
-    return this.http.get<{ message: string; data: Account }>(`${this.apiUrl}/admin/accounts/${id}`, {
+  getAccountById(id: number): Observable<{ success: boolean; message: string; data: Account }> {
+    return this.http.get<{ success: boolean; message: string; data: Account }>(`${this.apiUrl}/admin/accounts/${id}`, {
       headers: this.authHeaders()
     });
   }

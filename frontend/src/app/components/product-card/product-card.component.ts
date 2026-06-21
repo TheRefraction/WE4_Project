@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, signal, computed, inject } from '@angular/core';
+import { Component, Input, signal, computed, inject } from '@angular/core';
 import { CommonModule, NgTemplateOutlet } from '@angular/common';
 import { Router } from '@angular/router';
 import { CartService } from '../../services/cart.service';
@@ -40,9 +40,6 @@ export class ProductCardComponent {
   private router = inject(Router);
 
   @Input() product!: Product;
-  @Input() inMenu: boolean = false;
-
-  @Output() customizationChange = new EventEmitter<{ ingredients: Ingredient[]; extras: Extra[] }>();
 
   expanded = signal(false);
   ingredients = signal<Ingredient[]>([]);
@@ -73,30 +70,18 @@ export class ProductCardComponent {
     this.ingredients.update(list =>
       list.map(i => i.id === id ? { ...i, included: !i.included } : i)
     );
-    this.emitChange();
   }
 
   toggleSize(id: number) {
     this.extras.update(list =>
       list.map(e => e.type === 'size' ? { ...e, selected: e.id === id } : e)
     );
-    this.emitChange();
   }
 
   toggleExtra(id: number) {
     this.extras.update(list =>
       list.map(e => e.id === id ? { ...e, selected: !e.selected } : e)
     );
-    this.emitChange();
-  }
-
-  private emitChange() {
-    if (this.inMenu) {
-      this.customizationChange.emit({
-        ingredients: this.ingredients(),
-        extras: this.extras(),
-      });
-    }
   }
 
   addToCart() {
@@ -112,9 +97,7 @@ export class ProductCardComponent {
   }
 
   viewDetails() {
-    if (!this.inMenu) {
-      this.router.navigate(['/product', this.product.id]);
-    }
+    this.router.navigate(['/product', this.product.id]);
   }
 
   fallbackImage(event: Event) {

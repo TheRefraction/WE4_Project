@@ -47,38 +47,19 @@
 
   <!-- Standalone Products Section -->
   <section class="items-subsection products-title">
-    <h1>Produits simples</h1>
+    <h1>Produits</h1>
   </section>
 
   @if (anyExpanded()) {
     <div class="backdrop" (click)="closeAll()"></div>
   }
-  
+
   @if (filteredProducts().length === 0) {
     <div class="no-items-found">Aucun produit ne correspond à vos critères.</div>
   } @else {
     <div class="items-grid">
       @for (product of filteredProducts(); track product.id) {
         <app-product-card [product]="product" />
-      }
-    </div>
-  }
-
-  <!-- Menus Section -->
-  <section class="items-subsection menus-title">
-    <h1>Menus</h1>
-  </section>
-
-  @if (anyExpanded()) {
-    <div class="backdrop" (click)="closeAll()"></div>
-  }
-  
-  @if (filteredMenus().length === 0) {
-    <div class="no-items-found">Aucun menu ne correspond à vos critères.</div>
-  } @else {
-    <div class="items-grid">
-      @for (menu of filteredMenus(); track menu.id) {
-        <app-menu-card [menu]="menu" />
       }
     </div>
   }

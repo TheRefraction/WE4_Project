@@ -50,10 +50,6 @@ export class CartComponent {
     return [size?.name, ...active].filter(Boolean).join(' · ');
   }
 
-  productNameInMenu(item: CartItem, productId: number): string {
-    return `Produit ${productId}`;
-  }
-
   goToCheckout() {
     if (this.items().length > 0) this.step.set('checkout');
   }
@@ -78,97 +74,46 @@ export class CartComponent {
     const customerId = this.accountService.currentUser?.id || 1;
 
     const itemsMapped = this.items().map((item: any) => {
-      if (item.type === 'product') {
-        const prod = item.product;
-        const options: any[] = [];
-        
-        prod.customization.ingredients.forEach((ing: any) => {
-          if (!ing.included) {
-            options.push({
-              name: 'Ingrédient',
-              item: {
-                name: `Sans ${ing.name}`,
-                delta: 0,
-                quantity: 1
-              }
-            });
-          }
-        });
-
-        prod.customization.extras.forEach((ext: any) => {
-          if (ext.selected) {
-            options.push({
-              name: ext.type === 'size' ? 'Taille' : ext.type === 'sauce' ? 'Sauce' : 'Supplément',
-              item: {
-                name: ext.name,
-                delta: ext.price,
-                quantity: 1
-              }
-            });
-          }
-        });
-
-        return {
-          type: 'product',
-          name: prod.name,
-          price: prod.basePrice || prod.price,
-          quantity: item.quantity,
-          options
-        };
-      } else {
-        const menu = item.menu;
-        const slots = menu.customizations.map((cust: any) => {
-          const options: any[] = [];
-          
-          cust.ingredients.forEach((ing: any) => {
-            if (!ing.included) {
-              options.push({
-                name: 'Ingrédient',
-                item: {
-                  name: `Sans ${ing.name}`,
-                  delta: 0,
-                  quantity: 1
-                }
-              });
-            }
-          });
-
-          cust.extras.forEach((ext: any) => {
-            if (ext.selected) {
-              options.push({
-                name: ext.type === 'size' ? 'Taille' : ext.type === 'sauce' ? 'Sauce' : 'Supplément',
-                item: {
-                  name: ext.name,
-                  delta: ext.price,
-                  quantity: 1
-                }
-              });
-            }
-          });
-
-          return {
-            name: cust.slotName,
+      const prod = item.product;
+      const options: any[] = [];
+      
+      prod.customization.ingredients.forEach((ing: any) => {
+        if (!ing.included) {
+          options.push({
+            name: 'Ingrédient',
             item: {
-              name: cust.productName,
-              delta: cust.priceDelta,
-              quantity: 1,
-              options
+              name: `Sans ${ing.name}`,
+              delta: 0,
+              quantity: 1
             }
-          };
-        });
+          });
+        }
+      });
 
-        return {
-          type: 'menu',
-          name: menu.name,
-          price: menu.price,
-          quantity: item.quantity,
-          slots
-        };
-      }
+      prod.customization.extras.forEach((ext: any) => {
+        if (ext.selected) {
+          options.push({
+            name: ext.type === 'size' ? 'Taille' : ext.type === 'sauce' ? 'Sauce' : 'Supplément',
+            item: {
+              name: ext.name,
+              delta: ext.price,
+              quantity: 1
+            }
+          });
+        }
+      });
+
+      return {
+        type: 'product',
+        name: prod.name,
+        price: prod.basePrice || prod.price,
+        quantity: item.quantity,
+        options
+      };
     });
 
     const backendOrder = {
-      customerId,
+      accountId: customerId,
       amount: this.total(),
       billingAddress: {
         street: this.checkoutForm.value.address || '',
@@ -184,18 +129,9 @@ export class CartComponent {
         const invoiceId = res.data.id;
         console.log('[Order] Commande soumise avec succès, ID:', invoiceId);
 
-        this.orderService.makePayment(invoiceId, 'card').subscribe({
-          next: () => {
-            console.log('[Order] Paiement établi avec succès pour invoice:', invoiceId);
-            this.cartService.clearCart();
-            this.checkoutForm.reset();
-            this.step.set('confirm');
-          },
-          error: (payErr) => {
-            console.error('[Order] Erreur de paiement:', payErr);
-            alert("Une erreur s'est produite lors du paiement. Veuillez réessayer.");
-          }
-        });
+        this.cartService.clearCart();
+        this.checkoutForm.reset();
+        this.step.set('confirm');
       },
       error: (err) => {
         console.error('[Order] Erreur de commande:', err);
