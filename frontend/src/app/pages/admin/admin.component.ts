@@ -18,6 +18,7 @@ export interface AdminProduct {
   description: string;
   price: number;
   image: string;
+  hidden: boolean;
   categoryIds?: number[];
   categories?: any[];
 }
@@ -96,7 +97,7 @@ export class AdminComponent implements OnInit {
   }
 
   loadProducts() {
-    this.productService.getProducts(true).subscribe({
+    this.productService.getProducts().subscribe({
       next: (res) => {
         this.products.set((res.data || []).map((p: any) => ({
           id: p.id,
@@ -104,6 +105,7 @@ export class AdminComponent implements OnInit {
           description: p.description || '',
           price: parseFloat(p.price),
           image: p.pictureUrl || '',
+          hidden: !!p.hidden,
           categoryIds: (p.categories || []).map((c: any) => c.id),
           categories: p.categories || []
         })));
@@ -137,9 +139,6 @@ export class AdminComponent implements OnInit {
     });
   }
 
-  loadOrders() {
-    this.orders.set([]);
-  }
 
   loadOrders() {
     this.orders.set([]);
@@ -163,10 +162,6 @@ export class AdminComponent implements OnInit {
     if (status === 'ready') return 'unknown';
     if (status === 'delivered') return 'paid';
     return 'pending';
-  }
-
-  loadOrders() {
-    this.orders.set([]);
   }
 
   updateOrderStatus(id: string, status: AdminOrder['status']) {
@@ -217,6 +212,7 @@ export class AdminComponent implements OnInit {
     description: ['', Validators.required],
     price:       [0, [Validators.required, Validators.min(0.01)]],
     image:       [''],
+    hidden:      [false]
   });
 
   toggleProductCategory(id: number) {
@@ -229,14 +225,14 @@ export class AdminComponent implements OnInit {
 
   openCreateProduct() {
     this.editingProduct.set(null);
-    this.productForm.reset({ name: '', description: '', price: 0, image: '' });
+    this.productForm.reset({ name: '', description: '', price: 0, image: '', hidden: false });
     this.productCategorySelection.set(new Set());
     this.showProductForm.set(true);
   }
 
   openEditProduct(p: AdminProduct) {
     this.editingProduct.set(p);
-    this.productForm.setValue({ name: p.name, description: p.description, price: p.price, image: p.image });
+    this.productForm.setValue({ name: p.name, description: p.description, price: p.price, image: p.image, hidden: p.hidden });
     this.productCategorySelection.set(new Set(p.categoryIds || []));
     this.showProductForm.set(true);
   }
@@ -250,7 +246,7 @@ export class AdminComponent implements OnInit {
       name: v.name!,
       description: v.description!,
       price: v.price!,
-      hidden: false,
+      hidden: v.hidden,
       pictureUrl: v.image || '',
       categoryIds: Array.from(this.productCategorySelection())
     };

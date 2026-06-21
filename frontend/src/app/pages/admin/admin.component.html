@@ -285,6 +285,13 @@
           </div>
         </div>
 
+        <div class="form-field checkbox-field">
+          <label class="checkbox-label flex-row">
+            <input type="checkbox" formControlName="hidden" />
+            Masquer ce produit
+          </label>
+        </div>
+
         <div class="modal-actions">
           <button type="button" class="btn-ghost" (click)="cancelProductForm()">Annuler</button>
           <button type="submit" class="btn-fire">{{ editingProduct() ? 'Enregistrer' : 'Créer' }}</button>

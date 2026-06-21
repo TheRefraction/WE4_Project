@@ -53,7 +53,7 @@
   @if (anyExpanded()) {
     <div class="backdrop" (click)="closeAll()"></div>
   }
-  
+
   @if (filteredProducts().length === 0) {
     <div class="no-items-found">Aucun produit ne correspond à vos critères.</div>
   } @else {
